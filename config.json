@@ -1,0 +1,64 @@
+{
+  "unitTypes": {
+    "infantry": {
+      "name": "Піхотинець",
+      "cost": 100,
+      "hitpoints": 2,
+      "strength": 2,
+      "movement": 1,
+      "description": "Базовий бойовий підрозділ",
+      "model": "cube"
+    },
+    "armor": {
+      "name": "Танк",
+      "cost": 250,
+      "hitpoints": 4,
+      "strength": 4,
+      "movement": 1,
+      "description": "Важка бронетехніка з вогневою міццю",
+      "model": "pyramid"
+    },
+    "artillery": {
+      "name": "Артилерія",
+      "cost": 200,
+      "hitpoints": 3,
+      "strength": 3,
+      "movement": 1,
+      "description": "Дальнобійна зброя для підтримки",
+      "model": "cylinder"
+    },
+    "command": {
+      "name": "Командир",
+      "cost": 300,
+      "hitpoints": 2,
+      "strength": 2,
+      "movement": 1,
+      "description": "Командний склад для координації бойових дій",
+      "model": "octahedron"
+    },
+    "scout": {
+      "name": "Розвідник",
+      "cost": 150,
+      "hitpoints": 2,
+      "strength": 1,
+      "movement": 2,
+      "description": "Швидкий підрозділ для розвідки",
+      "model": "sphere"
+    },
+    "sniper": {
+      "name": "Снайпер",
+      "cost": 280,
+      "hitpoints": 1,
+      "strength": 3,
+      "movement": 1,
+      "description": "Спеціаліст з далекобійної зброї",
+      "model": "tetrahedron"
+    }
+  },
+  "gameSettings": {
+    "startingMoney": 1000,
+    "maxUnitCost": 300,
+    "gridSize": 10,
+    "placementRows": 2
+  }
+}

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admiral Game - Тактична Симуляція</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #gameCanvas {
+            display: block;
+        }
+
+        #ui {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            min-width: 180px;
+            max-width: 200px;
+        }
+
+        #ui2 {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            min-width: 180px;
+            max-width: 200px;
+        }
+
+        .player-info {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 2px solid transparent;
+        }
+
+        .player1 {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .player2 {
+            border-color: #FF9800;
+            background: rgba(255, 152, 0, 0.1);
+        }
+
+        .active-player {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .unit-info {
+            font-size: 12px;
+            margin: 3px 0;
+        }
+
+        .loss-info {
+            font-size: 11px;
+            color: #ff6b6b;
+            margin: 2px 0;
+        }
+
+        #centerInfo {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            min-width: 200px;
+        }
+
+        .turn-info {
+            margin-bottom: 15px;
+        }
+
+        #controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #ui3 {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            min-width: 180px;
+            max-width: 200px;
+        }
+
+        .camera-controls {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            max-width: 300px;
+            justify-content: center;
+        }
+
+        button {
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .player1-btn {
+            background: #4CAF50;
+        }
+
+        .player1-btn:hover {
+            background: #45a049;
+        }
+
+        .player2-btn {
+            background: #FF9800;
+        }
+
+        .player2-btn:hover {
+            background: #e68900;
+        }
+
+        .neutral-btn {
+            background: #2196F3;
+        }
+
+        .neutral-btn:hover {
+            background: #1976D2;
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+
+        #gameLog {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+            color: white;
+            max-width: 250px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 11px;
+        }
+
+        .log-entry {
+            margin: 3px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .combat-log {
+            color: #ff6b6b;
+        }
+
+        .move-log {
+            color: #4ecdc4;
+        }
+
+        .place-log {
+            color: #95e77e;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="ui">
+            <div id="logoContainer" style="text-align: center; margin-bottom: 15px;">
+                <img src="logo-test.jpg" alt="Units CPX Logo" style="width: 80px; height: auto; margin-bottom: 5px;">
+                <h1 style="color: #FFD700; margin: 0; font-size: 18px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                    UNITS CPX
+                </h1>
+            </div>
+
+            <div id="player1Info" class="player-info player1">
+                <h4 style="margin: 0 0 5px 0;">Гравець 1</h4>
+                <div class="unit-info">Грошей: <span id="player1Money">1000</span> монет</div>
+                <div class="unit-info">Фішок: <span id="player1Units">0</span></div>
+                <div class="unit-info">Рухів: <span id="player1Moves">3</span></div>
+                <div class="loss-info" id="player1Losses">Втрати: 0</div>
+            </div>
+        </div>
+
+        <div id="centerInfo">
+            <div id="turnInfo" class="turn-info">
+                <div id="currentTurn" style="color: #4CAF50; font-weight: bold; font-size: 16px;">Ваш хід - Гравець 1
+                </div>
+                <div id="turnCount" style="color: #666; font-size: 12px;">Хід №1</div>
+            </div>
+            <div id="controls">
+                <button id="endTurnBtn">Завершити розміщення</button>
+                <button id="resetBtn">Почати знову</button>
+            </div>
+        </div>
+
+        <div id="ui2">
+            <div id="player2Info" class="player-info player2">
+                <h4 style="margin: 0 0 5px 0;">Гравець 2</h4>
+                <div class="unit-info">Грошей: <span id="player2Money">1000</span> монет</div>
+                <div class="unit-info">Фішок: <span id="player2Units">0</span></div>
+                <div class="unit-info">Рухів: <span id="player2Moves">3</span></div>
+                <div class="loss-info" id="player2Losses">Втрати: 0</div>
+            </div>
+        </div>
+
+        <div id="ui3">
+            <div id="gameStatus">
+                <h4 style="margin: 0 0 5px 0;">Стан гри:</h4>
+                <div class="unit-info" id="currentPhase">Розміщення фішок</div>
+            </div>
+        </div>
+
+        <div id="gameLog">
+            <h4>Журнал гри:</h4>
+            <div id="logContent"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>
