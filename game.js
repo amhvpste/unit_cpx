@@ -36,9 +36,9 @@ class AdmiralGame {
         this.movementAnimations = [];
         
         // Керування камерою
-        this.cameraDistance = 15;
-        this.cameraAngle = 0;
-        this.cameraHeight = 20;
+        this.cameraDistance = 17;
+        this.cameraAngle = -0.6;
+        this.cameraHeight = 14;
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
         this.isDragging = false;
@@ -844,6 +844,7 @@ class AdmiralGame {
         
         this.camera.position.set(x, this.cameraHeight, z);
         this.camera.lookAt(0, 0, 0);
+        this.updateUnitPlacards();
     }
     
     showUnitInfo(unit) {
@@ -1172,7 +1173,8 @@ class AdmiralGame {
                 base: 0x5b7f34,
                 dark: 0x2f4717,
                 accent: '#b7d56c',
-                frame: 0xd8ccb2
+                frame: 0xd8ccb2,
+                metal: 0x626d57
             };
         }
 
@@ -1180,8 +1182,180 @@ class AdmiralGame {
             base: 0x7f4634,
             dark: 0x4c2419,
             accent: '#e5a578',
-            frame: 0xd9c4b0
+            frame: 0xd9c4b0,
+            metal: 0x6f6259
         };
+    }
+
+    getUnitSymbolProfile(type) {
+        const profiles = {
+            infantry: { branch: 'infantry', echelon: 'III', frame: 'line', accent: '#6d8f3c' },
+            armor: { branch: 'armor', echelon: 'II', frame: 'armor', accent: '#927348' },
+            artillery: { branch: 'artillery', echelon: '|', frame: 'support', accent: '#8d5a45' },
+            command: { branch: 'command', echelon: 'X', frame: 'command', accent: '#556b8d' },
+            scout: { branch: 'recon', echelon: '..', frame: 'recon', accent: '#558060' },
+            sniper: { branch: 'sniper', echelon: '.', frame: 'precision', accent: '#7b5a72' }
+        };
+
+        return profiles[type] || profiles.infantry;
+    }
+
+    drawUnitFrame(ctx, frame) {
+        ctx.beginPath();
+
+        switch (frame) {
+            case 'armor':
+                ctx.moveTo(34, 58);
+                ctx.lineTo(222, 58);
+                ctx.lineTo(230, 102);
+                ctx.lineTo(230, 176);
+                ctx.lineTo(26, 176);
+                ctx.lineTo(26, 102);
+                ctx.closePath();
+                break;
+            case 'support':
+                ctx.moveTo(42, 58);
+                ctx.lineTo(214, 58);
+                ctx.lineTo(230, 82);
+                ctx.lineTo(230, 176);
+                ctx.lineTo(26, 176);
+                ctx.lineTo(26, 82);
+                ctx.closePath();
+                break;
+            case 'recon':
+                ctx.moveTo(44, 58);
+                ctx.lineTo(212, 58);
+                ctx.lineTo(230, 86);
+                ctx.lineTo(212, 176);
+                ctx.lineTo(44, 176);
+                ctx.lineTo(26, 86);
+                ctx.closePath();
+                break;
+            case 'command':
+                ctx.moveTo(26, 58);
+                ctx.lineTo(230, 58);
+                ctx.lineTo(230, 176);
+                ctx.lineTo(144, 176);
+                ctx.lineTo(128, 196);
+                ctx.lineTo(112, 176);
+                ctx.lineTo(26, 176);
+                ctx.closePath();
+                break;
+            case 'precision':
+                ctx.moveTo(34, 58);
+                ctx.lineTo(222, 58);
+                ctx.lineTo(230, 176);
+                ctx.lineTo(26, 176);
+                ctx.closePath();
+                break;
+            case 'line':
+            default:
+                ctx.rect(26, 58, 204, 118);
+                break;
+        }
+
+        ctx.stroke();
+    }
+
+    drawUnitEchelon(ctx, echelon) {
+        ctx.save();
+        ctx.translate(128, 34);
+        ctx.strokeStyle = '#141414';
+        ctx.fillStyle = '#141414';
+        ctx.lineWidth = 8;
+
+        if (echelon.includes('|')) {
+            const count = echelon.length;
+            for (let i = 0; i < count; i++) {
+                const x = (i - (count - 1) / 2) * 18;
+                ctx.beginPath();
+                ctx.moveTo(x, -10);
+                ctx.lineTo(x, 10);
+                ctx.stroke();
+            }
+        } else if (echelon.includes('I')) {
+            const count = echelon.length;
+            for (let i = 0; i < count; i++) {
+                const x = (i - (count - 1) / 2) * 18;
+                ctx.beginPath();
+                ctx.moveTo(x, -10);
+                ctx.lineTo(x, 10);
+                ctx.stroke();
+            }
+        } else if (echelon.includes('.')) {
+            const count = echelon.length;
+            for (let i = 0; i < count; i++) {
+                const x = (i - (count - 1) / 2) * 18;
+                ctx.beginPath();
+                ctx.arc(x, 0, 5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        } else if (echelon === 'X') {
+            ctx.beginPath();
+            ctx.moveTo(-12, -10);
+            ctx.lineTo(12, 10);
+            ctx.moveTo(12, -10);
+            ctx.lineTo(-12, 10);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    drawUnitBranchSymbol(ctx, branch) {
+        const centerX = 128;
+        const centerY = 118;
+        const left = 56;
+        const right = 200;
+        const top = 76;
+        const bottom = 160;
+
+        switch (branch) {
+            case 'armor':
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY, 52, 28, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                break;
+            case 'artillery':
+                ctx.fillStyle = '#171717';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+            case 'command':
+                ctx.beginPath();
+                ctx.moveTo(centerX, 70);
+                ctx.lineTo(centerX, 164);
+                ctx.lineTo(176, 142);
+                ctx.moveTo(centerX, 84);
+                ctx.lineTo(176, 84);
+                ctx.stroke();
+                break;
+            case 'recon':
+                ctx.beginPath();
+                ctx.moveTo(72, 152);
+                ctx.lineTo(184, 84);
+                ctx.stroke();
+                break;
+            case 'sniper':
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, 34, 0, Math.PI * 2);
+                ctx.moveTo(centerX - 50, centerY);
+                ctx.lineTo(centerX + 50, centerY);
+                ctx.moveTo(centerX, centerY - 50);
+                ctx.lineTo(centerX, centerY + 50);
+                ctx.stroke();
+                break;
+            case 'infantry':
+            default:
+                ctx.beginPath();
+                ctx.moveTo(left, top);
+                ctx.lineTo(right, bottom);
+                ctx.moveTo(right, top);
+                ctx.lineTo(left, bottom);
+                ctx.stroke();
+                break;
+        }
     }
 
     createUnitSymbolTexture(type, player) {
@@ -1190,103 +1364,25 @@ class AdmiralGame {
         canvas.height = 256;
         const ctx = canvas.getContext('2d');
         const palette = this.getUnitPalette(player);
+        const profile = this.getUnitSymbolProfile(type);
 
         ctx.fillStyle = '#f8f5ea';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
-        ctx.strokeStyle = '#191919';
-        ctx.lineWidth = 10;
-        ctx.strokeRect(24, 46, 208, 148);
+        ctx.strokeStyle = '#171717';
+        ctx.lineWidth = 9;
+
+        ctx.fillStyle = profile.accent;
+        ctx.fillRect(38, 214, 180, 12);
+
+        this.drawUnitEchelon(ctx, profile.echelon);
+        this.drawUnitFrame(ctx, profile.frame);
+        this.drawUnitBranchSymbol(ctx, profile.branch);
 
         ctx.fillStyle = palette.accent;
-        ctx.fillRect(24, 24, 208, 14);
-        ctx.fillRect(24, 202, 208, 18);
-
-        const centerX = 128;
-        const centerY = 120;
-        const left = 54;
-        const right = 202;
-        const top = 66;
-        const bottom = 174;
-
-        const drawInfantry = () => {
-            ctx.beginPath();
-            ctx.moveTo(left, top);
-            ctx.lineTo(right, bottom);
-            ctx.moveTo(right, top);
-            ctx.lineTo(left, bottom);
-            ctx.stroke();
-        };
-
-        const drawArmor = () => {
-            ctx.beginPath();
-            ctx.ellipse(centerX, centerY, 54, 30, 0, 0, Math.PI * 2);
-            ctx.stroke();
-        };
-
-        const drawArtillery = () => {
-            ctx.fillStyle = '#191919';
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
-            ctx.fill();
-        };
-
-        const drawRecon = () => {
-            ctx.beginPath();
-            ctx.moveTo(72, 166);
-            ctx.lineTo(184, 74);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(98, 96, 14, 0, Math.PI * 2);
-            ctx.arc(156, 144, 14, 0, Math.PI * 2);
-            ctx.stroke();
-        };
-
-        const drawCommand = () => {
-            ctx.beginPath();
-            ctx.moveTo(centerX, 62);
-            ctx.lineTo(centerX, 178);
-            ctx.lineTo(178, 150);
-            ctx.moveTo(centerX, 78);
-            ctx.lineTo(176, 78);
-            ctx.stroke();
-            ctx.fillStyle = '#191919';
-            ctx.fillRect(108, 28, 40, 10);
-        };
-
-        const drawSniper = () => {
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
-            ctx.moveTo(centerX - 56, centerY);
-            ctx.lineTo(centerX + 56, centerY);
-            ctx.moveTo(centerX, centerY - 56);
-            ctx.lineTo(centerX, centerY + 56);
-            ctx.stroke();
-        };
-
-        switch (type) {
-            case 'armor':
-                drawArmor();
-                break;
-            case 'artillery':
-                drawArtillery();
-                break;
-            case 'command':
-                drawCommand();
-                break;
-            case 'scout':
-                drawRecon();
-                break;
-            case 'sniper':
-                drawSniper();
-                break;
-            case 'infantry':
-            default:
-                drawInfantry();
-                break;
-        }
+        ctx.fillRect(38, 214, 116, 12);
 
         const texture = new THREE.CanvasTexture(canvas);
         texture.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
@@ -1294,10 +1390,136 @@ class AdmiralGame {
         return texture;
     }
 
+    createUnitPlacard(type, player) {
+        const placard = new THREE.Group();
+        const palette = this.getUnitPalette(player);
+        const symbolTexture = this.createUnitSymbolTexture(type, player);
+
+        const post = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.03, 0.04, 0.8, 10),
+            new THREE.MeshPhongMaterial({ color: palette.metal, shininess: 20 })
+        );
+        post.position.y = 0.4;
+        post.castShadow = true;
+        placard.add(post);
+
+        const boardFrame = new THREE.Mesh(
+            new THREE.BoxGeometry(0.92, 0.58, 0.08),
+            new THREE.MeshPhongMaterial({ color: palette.frame, shininess: 12 })
+        );
+        boardFrame.position.y = 0.88;
+        boardFrame.castShadow = true;
+        boardFrame.receiveShadow = true;
+        placard.add(boardFrame);
+
+        const boardMaterial = new THREE.MeshPhongMaterial({
+            color: 0xf8f5ea,
+            map: symbolTexture,
+            shininess: 8
+        });
+
+        const boardFace = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.48), boardMaterial);
+        boardFace.position.set(0, 0.88, 0.045);
+        placard.add(boardFace);
+
+        const boardBack = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.48), boardMaterial.clone());
+        boardBack.position.set(0, 0.88, -0.045);
+        boardBack.rotation.y = Math.PI;
+        placard.add(boardBack);
+
+        placard.userData.isPlacard = true;
+
+        return placard;
+    }
+
+    createUnitMiniature(type, player) {
+        const miniature = new THREE.Group();
+        const palette = this.getUnitPalette(player);
+        const baseMaterial = new THREE.MeshPhongMaterial({ color: palette.base, shininess: 30 });
+        const darkMaterial = new THREE.MeshPhongMaterial({ color: palette.dark, shininess: 18 });
+        const metalMaterial = new THREE.MeshPhongMaterial({ color: palette.metal, shininess: 32 });
+
+        switch (type) {
+            case 'armor': {
+                const hull = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.22, 0.46), baseMaterial);
+                hull.position.y = 0.21;
+                const turret = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 0.14, 18), darkMaterial);
+                turret.rotation.x = Math.PI / 2;
+                turret.position.set(0, 0.37, 0.02);
+                const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.52, 10), metalMaterial);
+                barrel.rotation.z = Math.PI / 2;
+                barrel.position.set(0.38, 0.37, 0.02);
+                miniature.add(hull, turret, barrel);
+                break;
+            }
+            case 'artillery': {
+                const carriage = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.14, 0.32), baseMaterial);
+                carriage.position.y = 0.18;
+                const shield = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.04), darkMaterial);
+                shield.position.set(-0.04, 0.32, 0);
+                const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.72, 10), metalMaterial);
+                barrel.rotation.z = -Math.PI / 2.7;
+                barrel.position.set(0.18, 0.4, 0);
+                miniature.add(carriage, shield, barrel);
+                break;
+            }
+            case 'command': {
+                const table = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.2, 14), baseMaterial);
+                table.position.y = 0.16;
+                const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.7, 10), metalMaterial);
+                mast.position.set(0.04, 0.52, 0);
+                const flag = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.12, 0.02), darkMaterial);
+                flag.position.set(0.16, 0.72, 0);
+                miniature.add(table, mast, flag);
+                break;
+            }
+            case 'scout': {
+                const body = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.16, 0.26), baseMaterial);
+                body.position.y = 0.16;
+                const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.22), darkMaterial);
+                cabin.position.set(-0.04, 0.29, 0);
+                const sensor = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), metalMaterial);
+                sensor.position.set(0.14, 0.34, 0);
+                miniature.add(body, cabin, sensor);
+                break;
+            }
+            case 'sniper': {
+                const body = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.12, 0.16), baseMaterial);
+                body.position.set(-0.05, 0.16, 0);
+                body.rotation.z = -0.24;
+                const rifle = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.66, 10), metalMaterial);
+                rifle.rotation.z = Math.PI / 2;
+                rifle.position.set(0.17, 0.24, 0);
+                const head = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 10), darkMaterial);
+                head.position.set(-0.18, 0.24, 0);
+                miniature.add(body, rifle, head);
+                break;
+            }
+            case 'infantry':
+            default: {
+                const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 0.3, 12), baseMaterial);
+                torso.position.y = 0.24;
+                const head = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), darkMaterial);
+                head.position.y = 0.46;
+                const rifle = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.42, 10), metalMaterial);
+                rifle.rotation.z = -0.85;
+                rifle.position.set(0.13, 0.26, 0);
+                miniature.add(torso, head, rifle);
+                break;
+            }
+        }
+
+        miniature.children.forEach((mesh) => {
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+        });
+
+        return miniature;
+    }
+
     createUnit(type, x, z, player) {
         const unitConfig = this.config.unitTypes[type];
         const palette = this.getUnitPalette(player);
-        const symbolTexture = this.createUnitSymbolTexture(type, player);
         const unit = new THREE.Group();
 
         unit.position.set(this.toWorldCoord(x), 0.42, this.toWorldCoord(z));
@@ -1313,80 +1535,58 @@ class AdmiralGame {
             strength: unitConfig.strength
         };
 
-        const pedestal = new THREE.Mesh(
-            new THREE.BoxGeometry(1.18, 0.26, 1.18),
+        const base = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.42, 0.48, 0.18, 24),
             new THREE.MeshPhongMaterial({
                 color: palette.dark,
-                shininess: 18
+                shininess: 20
             })
         );
-        pedestal.position.y = 0.13;
-        pedestal.castShadow = true;
-        pedestal.receiveShadow = true;
-        unit.add(pedestal);
+        base.position.y = 0.09;
+        base.castShadow = true;
+        base.receiveShadow = true;
+        unit.add(base);
 
-        const body = new THREE.Mesh(
-            new THREE.BoxGeometry(1.02, 0.34, 1.02),
+        const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(0.34, 0.045, 12, 32),
             new THREE.MeshPhongMaterial({
-                color: palette.base,
-                shininess: 34
+                color: palette.accent,
+                shininess: 24
             })
         );
-        body.position.y = 0.34;
-        body.castShadow = true;
-        body.receiveShadow = true;
-        unit.add(body);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = 0.18;
+        ring.castShadow = true;
+        unit.add(ring);
 
-        const plateFrame = new THREE.Mesh(
-            new THREE.BoxGeometry(0.92, 0.08, 0.76),
-            new THREE.MeshPhongMaterial({
-                color: palette.frame,
-                shininess: 12
-            })
-        );
-        plateFrame.position.y = 0.57;
-        plateFrame.castShadow = true;
-        plateFrame.receiveShadow = true;
-        unit.add(plateFrame);
+        const miniature = this.createUnitMiniature(type, player);
+        miniature.position.set(-0.04, 0.18, 0);
+        unit.add(miniature);
 
-        const plate = new THREE.Mesh(
-            new THREE.BoxGeometry(0.84, 0.03, 0.68),
-            new THREE.MeshPhongMaterial({
-                color: 0xf7f2e3,
-                map: symbolTexture,
-                shininess: 6
-            })
-        );
-        plate.position.y = 0.63;
-        plate.castShadow = true;
-        unit.add(plate);
-
-        const frontPlate = new THREE.Mesh(
-            new THREE.BoxGeometry(0.74, 0.38, 0.04),
-            new THREE.MeshPhongMaterial({
-                color: 0xf7f2e3,
-                map: symbolTexture,
-                shininess: 10
-            })
-        );
-        frontPlate.position.set(0, 0.48, 0.53);
-        frontPlate.castShadow = true;
-        unit.add(frontPlate);
-
-        const gloss = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.58, 0.18),
-            new THREE.MeshBasicMaterial({
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.12
-            })
-        );
-        gloss.position.set(0, 0.64, 0);
-        gloss.rotation.x = -Math.PI / 2;
-        unit.add(gloss);
+        const placard = this.createUnitPlacard(type, player);
+        placard.position.set(0.23, 0.14, -0.18);
+        unit.add(placard);
+        unit.userData.placard = placard;
 
         this.scene.add(unit);
+        this.updatePlacardFacing(placard);
         return unit;
+    }
+
+    updatePlacardFacing(placard) {
+        if (!placard || !placard.parent) {
+            return;
+        }
+
+        const cameraPosition = this.camera.position.clone();
+        placard.parent.worldToLocal(cameraPosition);
+        placard.lookAt(cameraPosition);
+    }
+
+    updateUnitPlacards() {
+        this.units.forEach((unit) => {
+            this.updatePlacardFacing(unit.userData.placard);
+        });
     }
 
     moveUnit(unit, targetX, targetZ) {
@@ -1803,6 +2003,7 @@ class AdmiralGame {
     
     animate() {
         requestAnimationFrame(() => this.animate());
+        this.updateUnitPlacards();
         if (this.movementAnimations.length > 0) {
             const now = performance.now();
             this.movementAnimations = this.movementAnimations.filter((animation) => {
