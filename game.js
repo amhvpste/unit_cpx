@@ -2,8 +2,8 @@
 class AdmiralGame {
     constructor() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0xb4d1df);
-        this.scene.fog = new THREE.FogExp2(0x9ec4d7, 0.022);
+        this.scene.background = new THREE.Color(0x718ea1);
+        this.scene.fog = new THREE.FogExp2(0x7f9eb1, 0.03);
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -30,6 +30,7 @@ class AdmiralGame {
         this.losses = { 1: 0, 2: 0 };
         this.turnNumber = 1;
         this.battleAnimations = [];
+        this.battleEffects = [];
         this.isAnimatingBattles = false;
         this.purchasedUnits = { 1: [], 2: [] };
         this.movementAnimations = [];
@@ -102,10 +103,10 @@ class AdmiralGame {
     }
     
     setupLighting() {
-        const ambientLight = new THREE.AmbientLight(0xe9f6ff, 0.9);
+        const ambientLight = new THREE.AmbientLight(0xdcebf5, 0.72);
         this.scene.add(ambientLight);
         
-        const directionalLight = new THREE.DirectionalLight(0xf6fbff, 1.05);
+        const directionalLight = new THREE.DirectionalLight(0xf3f8fb, 0.92);
         directionalLight.position.set(10, 20, 8);
         directionalLight.castShadow = true;
         directionalLight.shadow.mapSize.width = 2048;
@@ -114,7 +115,7 @@ class AdmiralGame {
         directionalLight.shadow.camera.far = 50;
         this.scene.add(directionalLight);
 
-        const fillLight = new THREE.DirectionalLight(0x9fd0ee, 0.45);
+        const fillLight = new THREE.DirectionalLight(0x8bb3ca, 0.28);
         fillLight.position.set(-12, 10, -6);
         this.scene.add(fillLight);
     }
@@ -1236,8 +1237,7 @@ class AdmiralGame {
         unit.userData.z = targetZ;
         unit.userData.moved = true;
 
-        this.clearMovementHighlights();
-        this.selectedUnit = unit;
+        this.deselectUnit(false);
     }
 
     endTurn() {
@@ -1321,6 +1321,295 @@ class AdmiralGame {
         });
     }
 
+    updateMouseFromEvent(event) {
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    }
+
+    getCellMeshes() {
+        return this.grid.flat().map((cell) => cell.mesh);
+    }
+
+    getPointerTarget() {
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+
+        const unitHits = this.raycaster.intersectObjects(this.units, false);
+        if (unitHits.length > 0) {
+            return { kind: 'unit', object: unitHits[0].object };
+        }
+
+        const cellHits = this.raycaster.intersectObjects(this.getCellMeshes(), false);
+        if (cellHits.length > 0) {
+            return { kind: 'cell', object: cellHits[0].object };
+        }
+
+        return null;
+    }
+
+    resetCellAppearance(cell) {
+        const x = cell.userData.x;
+        const z = cell.userData.z;
+        cell.material.color.setHex((x + z) % 2 === 0 ? 0x4A5F4A : 0x5A6F5A);
+        cell.material.opacity = 0.18;
+    }
+
+    clearMovementHighlights() {
+        for (let x = 0; x < this.gridSize; x++) {
+            for (let z = 0; z < this.gridSize; z++) {
+                this.resetCellAppearance(this.grid[x][z].mesh);
+            }
+        }
+    }
+
+    deselectUnit(shouldLog = false) {
+        this.selectedUnit = null;
+        this.selectedCell = null;
+        this.clearMovementHighlights();
+        this.hideUnitInfo();
+        if (shouldLog) {
+            this.addLog('Вибір фішки знято', 'move-log');
+        }
+    }
+
+    selectUnit(unit) {
+        this.selectedUnit = unit;
+        this.selectedCell = this.grid[unit.userData.x][unit.userData.z].mesh;
+        this.showMovementHighlights(unit);
+        this.addLog(`Вибрано: ${this.config.unitTypes[unit.userData.type].name}`, 'move-log');
+    }
+
+    showMovementHighlights(unit) {
+        this.clearMovementHighlights();
+
+        const originCell = this.grid[unit.userData.x][unit.userData.z].mesh;
+        originCell.material.color.setHex(0xFF6B35);
+        originCell.material.opacity = 0.45;
+
+        const unitX = unit.userData.x;
+        const unitZ = unit.userData.z;
+        const maxDistance = this.config.unitTypes[unit.userData.type].movement;
+
+        for (let x = 0; x < this.gridSize; x++) {
+            for (let z = 0; z < this.gridSize; z++) {
+                const distance = Math.abs(x - unitX) + Math.abs(z - unitZ);
+                if (distance > 0 && distance <= maxDistance && this.grid[x][z].unit === null) {
+                    const cell = this.grid[x][z].mesh;
+                    cell.material.color.setHex(0x52d273);
+                    cell.material.opacity = 0.38;
+                }
+            }
+        }
+    }
+
+    onMouseMove(event) {
+        this.updateMouseFromEvent(event);
+
+        if (this.isDragging) {
+            const deltaX = event.clientX - this.previousMousePosition.x;
+            const deltaY = event.clientY - this.previousMousePosition.y;
+
+            this.cameraAngle += deltaX * 0.01;
+            this.cameraHeight = Math.max(5, Math.min(40, this.cameraHeight - deltaY * 0.1));
+            this.updateCameraPosition();
+
+            this.previousMousePosition = { x: event.clientX, y: event.clientY };
+        }
+    }
+
+    onMouseClick(event) {
+        if (this.isAnimatingBattles) {
+            return;
+        }
+
+        this.updateMouseFromEvent(event);
+        const target = this.getPointerTarget();
+
+        if (!target) {
+            this.deselectUnit(true);
+            return;
+        }
+
+        if (target.kind === 'unit') {
+            this.handleUnitClick(target.object);
+            return;
+        }
+
+        if (target.kind === 'cell') {
+            this.handleCellClick(target.object.userData.x, target.object.userData.z);
+        }
+    }
+
+    handleUnitClick(unit) {
+        if (this.phase === 'placement') {
+            this.addLog('Під час розміщення потрібно клікати по клітинці.', 'combat-log');
+            return;
+        }
+
+        if (unit.userData.player !== this.currentPlayer) {
+            this.showUnitInfo(unit);
+            this.addLog('Ця фішка належить іншому гравцю!', 'combat-log');
+            return;
+        }
+
+        if (unit.userData.moved) {
+            this.addLog('Ця фішка вже рухалась у цьому раунді.', 'combat-log');
+            return;
+        }
+
+        if (this.selectedUnit === unit) {
+            this.deselectUnit(true);
+            return;
+        }
+
+        this.selectUnit(unit);
+    }
+
+    handleCellClick(x, z) {
+        if (this.phase === 'placement') {
+            this.placeUnit(x, z);
+            return;
+        }
+
+        if (this.phase !== 'battle' || !this.selectedUnit) {
+            return;
+        }
+
+        const unitX = this.selectedUnit.userData.x;
+        const unitZ = this.selectedUnit.userData.z;
+        const distance = Math.abs(x - unitX) + Math.abs(z - unitZ);
+        const maxDistance = this.config.unitTypes[this.selectedUnit.userData.type].movement;
+
+        if (distance === 0) {
+            this.deselectUnit(true);
+            return;
+        }
+
+        if (distance > maxDistance) {
+            this.addLog('Занадто далеко для цієї фішки!', 'combat-log');
+            return;
+        }
+
+        if (this.grid[x][z].unit !== null) {
+            this.addLog('Клітинка зайнята!', 'combat-log');
+            return;
+        }
+
+        this.moveUnit(this.selectedUnit, x, z);
+    }
+
+    startBattleAnimations() {
+        if (this.isAnimatingBattles) {
+            return;
+        }
+
+        this.isAnimatingBattles = true;
+        this.selectedUnit = null;
+        this.selectedCell = null;
+        this.clearMovementHighlights();
+        document.getElementById('endTurnBtn').disabled = true;
+        this.addLog('Аналіз бойових зіткнень...', 'combat-log');
+        this.findBattles();
+        this.animateBattles();
+    }
+
+    animateBattles() {
+        if (this.battleAnimations.length === 0) {
+            this.isAnimatingBattles = false;
+            this.currentPlayer = 1;
+            this.units.forEach((unit) => {
+                unit.userData.moved = false;
+            });
+            document.getElementById('endTurnBtn').disabled = false;
+            this.updateUI();
+            return;
+        }
+
+        const battle = this.battleAnimations[0];
+        const elapsed = Date.now() - battle.startTime;
+
+        if (!battle.effectStarted) {
+            battle.effectStarted = true;
+            this.createExplosionAt(battle.attacker.position.clone(), 0xff7b54);
+            this.createExplosionAt(battle.defender.position.clone(), 0xffc857);
+        }
+
+        if (elapsed > 900) {
+            this.resolveBattle(battle);
+            this.battleAnimations.shift();
+        }
+
+        requestAnimationFrame(() => this.animateBattles());
+    }
+
+    resolveBattle(battle) {
+        const attacker = battle.attacker;
+        const defender = battle.defender;
+        if (!this.units.includes(attacker) || !this.units.includes(defender)) {
+            return;
+        }
+
+        const attackerPower = attacker.userData.strength;
+        const defenderPower = defender.userData.strength;
+
+        if (attackerPower === defenderPower) {
+            this.removeUnit(attacker);
+            this.removeUnit(defender);
+            this.losses[attacker.userData.player] += 1;
+            this.losses[defender.userData.player] += 1;
+            this.addLog('Бій завершився внічию: обидві фішки знищено.', 'combat-log');
+            this.checkVictory();
+            return;
+        }
+
+        const winner = attackerPower > defenderPower ? attacker : defender;
+        const loser = winner === attacker ? defender : attacker;
+
+        loser.userData.hitpoints -= winner.userData.strength;
+        if (loser.userData.hitpoints <= 0) {
+            this.removeUnit(loser);
+            this.losses[loser.userData.player] += 1;
+        }
+
+        this.addLog(`${winner.userData.player === 1 ? 'Гравець 1' : 'Гравець 2'} переміг у бою!`, 'combat-log');
+        this.checkVictory();
+    }
+
+    removeUnit(unit) {
+        if (this.selectedUnit === unit) {
+            this.selectedUnit = null;
+            this.selectedCell = null;
+        }
+
+        const index = this.units.indexOf(unit);
+        if (index > -1) {
+            this.units.splice(index, 1);
+        }
+
+        if (this.grid[unit.userData.x] && this.grid[unit.userData.x][unit.userData.z]) {
+            this.grid[unit.userData.x][unit.userData.z].unit = null;
+        }
+        this.scene.remove(unit);
+        this.clearMovementHighlights();
+    }
+
+    createExplosionAt(position, color) {
+        const geometry = new THREE.SphereGeometry(0.35, 12, 12);
+        const material = new THREE.MeshBasicMaterial({
+            color,
+            transparent: true,
+            opacity: 0.85
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.copy(position);
+        mesh.position.y += 0.6;
+        this.scene.add(mesh);
+        this.battleEffects.push({
+            mesh,
+            startTime: performance.now(),
+            duration: 420
+        });
+    }
+
     addLog(message, type = 'info-log') {
         const logContent = document.getElementById('logContent');
         const logEntry = document.createElement('div');
@@ -1343,6 +1632,19 @@ class AdmiralGame {
                     animation.startZ + (animation.endZ - animation.startZ) * eased
                 );
                 return progress < 1;
+            });
+        }
+        if (this.battleEffects.length > 0) {
+            const now = performance.now();
+            this.battleEffects = this.battleEffects.filter((effect) => {
+                const progress = Math.min(1, (now - effect.startTime) / effect.duration);
+                effect.mesh.scale.setScalar(1 + progress * 2.2);
+                effect.mesh.material.opacity = 0.85 * (1 - progress);
+                if (progress >= 1) {
+                    this.scene.remove(effect.mesh);
+                    return false;
+                }
+                return true;
             });
         }
         this.renderer.render(this.scene, this.camera);
