@@ -10,7 +10,11 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background:
+                radial-gradient(circle at 20% 20%, rgba(185, 228, 255, 0.45), transparent 28%),
+                radial-gradient(circle at 80% 18%, rgba(129, 201, 255, 0.3), transparent 24%),
+                radial-gradient(circle at 50% 78%, rgba(155, 214, 255, 0.22), transparent 30%),
+                linear-gradient(180deg, #9fc7df 0%, #79abc9 38%, #5d90b3 68%, #4a7f9f 100%);
             overflow: hidden;
         }
 
@@ -20,18 +24,49 @@
             height: 100vh;
         }
 
+        #gameContainer::before {
+            position: absolute;
+            inset: 0;
+            content: "";
+            z-index: 0;
+            background:
+                radial-gradient(circle at 50% 12%, rgba(238, 248, 255, 0.5), transparent 24%),
+                linear-gradient(180deg, rgba(220, 241, 255, 0.42), rgba(111, 164, 196, 0.16) 46%, rgba(72, 120, 152, 0.22) 100%);
+            pointer-events: none;
+        }
+
+        #gameContainer::after {
+            position: absolute;
+            inset: 0;
+            content: "";
+            z-index: 0;
+            background:
+                radial-gradient(circle at 18% 74%, rgba(255, 255, 255, 0.18), transparent 22%),
+                radial-gradient(circle at 72% 68%, rgba(219, 242, 255, 0.14), transparent 26%);
+            filter: blur(16px);
+            opacity: 0.95;
+            pointer-events: none;
+        }
+
         #gameCanvas {
             display: block;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 1;
         }
 
         #ui {
             position: absolute;
             left: 20px;
             top: 20px;
-            background: rgba(0, 0, 0, 0.8);
+            z-index: 3;
+            background: linear-gradient(180deg, rgba(197, 228, 246, 0.68), rgba(122, 171, 199, 0.58));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(237, 248, 255, 0.4);
             padding: 15px;
             border-radius: 10px;
-            color: white;
+            color: #f7fbff;
             min-width: 180px;
             max-width: 200px;
         }
@@ -40,10 +75,13 @@
             position: absolute;
             right: 20px;
             top: 20px;
-            background: rgba(0, 0, 0, 0.8);
+            z-index: 3;
+            background: linear-gradient(180deg, rgba(197, 228, 246, 0.68), rgba(122, 171, 199, 0.58));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(237, 248, 255, 0.4);
             padding: 15px;
             border-radius: 10px;
-            color: white;
+            color: #f7fbff;
             min-width: 180px;
             max-width: 200px;
         }
@@ -99,11 +137,14 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
+            z-index: 3;
             text-align: center;
-            background: rgba(0, 0, 0, 0.8);
+            background: linear-gradient(180deg, rgba(207, 232, 247, 0.78), rgba(122, 171, 199, 0.62));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(237, 248, 255, 0.42);
             padding: 15px 20px;
             border-radius: 10px;
-            color: white;
+            color: #f7fbff;
             min-width: 200px;
         }
 
@@ -120,11 +161,14 @@
         #ui3 {
             position: absolute;
             right: 20px;
-            top: 20px;
-            background: rgba(0, 0, 0, 0.8);
+            top: 220px;
+            z-index: 3;
+            background: linear-gradient(180deg, rgba(197, 228, 246, 0.68), rgba(122, 171, 199, 0.58));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(237, 248, 255, 0.4);
             padding: 15px;
             border-radius: 10px;
-            color: white;
+            color: #f7fbff;
             min-width: 180px;
             max-width: 200px;
         }
@@ -189,10 +233,13 @@
             position: absolute;
             bottom: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.7);
+            z-index: 3;
+            background: linear-gradient(180deg, rgba(198, 229, 246, 0.72), rgba(121, 170, 198, 0.62));
+            border: 1px solid rgba(239, 249, 255, 0.35);
+            backdrop-filter: blur(8px);
             padding: 10px;
             border-radius: 10px;
-            color: white;
+            color: #f8fbff;
             max-width: 250px;
             max-height: 150px;
             overflow-y: auto;
@@ -216,12 +263,150 @@
         .place-log {
             color: #95e77e;
         }
+
+        #unitShop {
+            position: absolute;
+            left: 50%;
+            top: 20px;
+            transform: translateX(-50%);
+            z-index: 4;
+            width: min(760px, calc(100vw - 280px));
+            max-height: min(320px, calc(100vh - 180px));
+            overflow-y: auto;
+            background: linear-gradient(180deg, rgba(205, 233, 248, 0.76), rgba(114, 167, 197, 0.66));
+            border: 1px solid rgba(239, 249, 255, 0.42);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-radius: 14px;
+            color: #f8fbff;
+            box-sizing: border-box;
+            display: none;
+        }
+
+        #shopHeader {
+            margin-bottom: 12px;
+        }
+
+        #shopHeader h3 {
+            margin: 0 0 6px 0;
+            color: #FFD700;
+        }
+
+        #shopContent {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+        }
+
+        .shop-item {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .shop-item:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 215, 0, 0.45);
+        }
+
+        .shop-item h5 {
+            margin: 0 0 8px 0;
+            color: #FFD700;
+            font-size: 15px;
+        }
+
+        .shop-item .details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 12px;
+            color: #e8e8e8;
+        }
+
+        .units-list {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 12px;
+        }
+
+        .units-list-title {
+            color: #FFD700;
+            margin-bottom: 6px;
+        }
+
+        .units-list-empty {
+            color: #aaa;
+            font-style: italic;
+        }
+
+        .unit-badge {
+            display: inline-block;
+            margin: 2px 4px 2px 0;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .shop-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .shop-item.disabled:hover {
+            transform: none;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.14);
+        }
+
+        .cost {
+            color: #95e77e;
+            font-weight: bold;
+        }
+
+        .cant-afford {
+            color: #ff8a80;
+            font-weight: bold;
+        }
+
+        @media (max-width: 900px) {
+            #unitShop {
+                width: calc(100vw - 40px);
+                max-height: 260px;
+            }
+
+            #ui,
+            #ui2,
+            #ui3 {
+                min-width: 150px;
+                max-width: 160px;
+                padding: 10px;
+            }
+
+            #ui3 {
+                top: 190px;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div id="gameContainer">
-        <canvas id="gameCanvas"></canvas>
+        <div id="gameCanvas"></div>
+
+        <div id="unitShop">
+            <div id="shopHeader">
+                <h3>Магазин фішок</h3>
+                <div class="unit-info" id="shopCurrentPlayer">Гравець 1 купує фішки</div>
+                <div class="unit-info" id="shopMoneyInfo">Бюджет: 1000 монет</div>
+                <div class="unit-info">Клікни по картці, щоб купити підрозділ</div>
+            </div>
+            <div id="shopContent"></div>
+        </div>
 
         <div id="ui">
             <div id="logoContainer" style="text-align: center; margin-bottom: 15px;">
@@ -237,6 +422,10 @@
                 <div class="unit-info">Фішок: <span id="player1Units">0</span></div>
                 <div class="unit-info">Рухів: <span id="player1Moves">3</span></div>
                 <div class="loss-info" id="player1Losses">Втрати: 0</div>
+                <div class="units-list">
+                    <div class="units-list-title">Purchased Units</div>
+                    <div id="player1PurchasedList" class="units-list-empty">Nothing bought yet</div>
+                </div>
             </div>
         </div>
 
@@ -259,6 +448,10 @@
                 <div class="unit-info">Фішок: <span id="player2Units">0</span></div>
                 <div class="unit-info">Рухів: <span id="player2Moves">3</span></div>
                 <div class="loss-info" id="player2Losses">Втрати: 0</div>
+                <div class="units-list">
+                    <div class="units-list-title">Purchased Units</div>
+                    <div id="player2PurchasedList" class="units-list-empty">Nothing bought yet</div>
+                </div>
             </div>
         </div>
 
@@ -276,7 +469,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js"></script>
+    <script src="game.js?v=20260318-5"></script>
 </body>
 
 </html>
