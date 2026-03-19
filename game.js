@@ -17,9 +17,14 @@ class AdmiralGame {
         this.gridSize = 10;
         this.cellSize = 2;
         this.grid = [];
+        this.airGrid = [];
         this.units = [];
+        this.airUnits = [];
         this.selectedUnit = null;
         this.selectedCell = null;
+        this.activeLayer = 'ground';
+        this.airLayerHeight = 2.35;
+        this.gridHelpers = {};
         
         // Стани гри
         this.currentPlayer = 1;
@@ -71,7 +76,7 @@ class AdmiralGame {
     
     loadConfig() {
         // Завантаження конфігурації з файлу
-        const configRequest = fetch('config.json');
+        const configRequest = fetch('config.json?v=20260319-1', { cache: 'no-store' });
         configRequest.then((response) => response.json()).then((config) => {
                 this.config = config;
                 this.gridSize = config.gameSettings.gridSize;
@@ -250,6 +255,13 @@ class AdmiralGame {
         document.getElementById('resetBtn').addEventListener('click', () => {
             this.resetGame();
         });
+
+        const toggleLayerBtn = document.getElementById('toggleLayerBtn');
+        if (toggleLayerBtn) {
+            toggleLayerBtn.addEventListener('click', () => {
+                this.toggleActiveLayer();
+            });
+        }
     }
     
     onMouseMove(event) {
@@ -500,9 +512,13 @@ class AdmiralGame {
     
     placeUnit(x, z) {
         if (this.phase !== 'placement') return;
+
+        const unplacedUnit = this.getNextPlacementUnit();
+        const domain = unplacedUnit ? this.getDomainForType(unplacedUnit.type) : 'ground';
+        const grid = this.getGridByLayer(domain);
         
         // Перевірка чи клітинка вільна
-        if (this.grid[x][z].unit !== null) {
+        if (grid[x][z].unit !== null) {
             this.addLog('Клітинка зайнята!', 'combat-log');
             return;
         }
@@ -515,7 +531,6 @@ class AdmiralGame {
         }
         
         // Перевірка чи є куплена фішка для розміщення
-        const unplacedUnit = this.purchasedUnits[this.currentPlayer].find(u => !u.placed);
         if (!unplacedUnit) {
             this.addLog('Спочатку купіть фішку в магазині!', 'combat-log');
             return;
@@ -525,14 +540,16 @@ class AdmiralGame {
         const unit = this.createUnit(unplacedUnit.type, x, z, this.currentPlayer);
         
         // Оновлення сітки
-        this.grid[x][z].unit = unit;
-        this.units.push(unit);
+        grid[x][z].unit = unit;
+        this.getUnitsByLayer(domain).push(unit);
         
         // Маркуємо фішку як розміщену
         unplacedUnit.placed = true;
         
-        this.addLog(`Гравець ${this.currentPlayer} розмістив ${unplacedUnit.config.name} на (${x}, ${z})`, 'place-log');
-        
+        const layerLabel = domain === 'air' ? 'повітряному' : 'земному';
+        this.addLog(`Гравець ${this.currentPlayer} розмістив ${unplacedUnit.config.name} на (${x}, ${z}) у ${layerLabel} шарі`, 'place-log');
+
+        this.refreshLayerVisualState();
         this.updateUI();
     }
     
@@ -704,9 +721,10 @@ class AdmiralGame {
             } else {
                 this.phase = 'battle';
                 this.currentPlayer = 1;
-                this.units.forEach((unit) => {
+                [...this.units, ...this.airUnits].forEach((unit) => {
                     unit.userData.moved = false;
                 });
+                this.activeLayer = 'ground';
                 this.addLog('Placement is over. Battle begins.', 'place-log');
             }
 
@@ -781,8 +799,9 @@ class AdmiralGame {
     }
     
     checkVictory() {
-        const player1Units = this.units.filter(u => u.userData.player === 1).length;
-        const player2Units = this.units.filter(u => u.userData.player === 2).length;
+        const allUnits = [...this.units, ...this.airUnits];
+        const player1Units = allUnits.filter(u => u.userData.player === 1).length;
+        const player2Units = allUnits.filter(u => u.userData.player === 2).length;
         
         if (player1Units === 0) {
             this.phase = 'gameOver';
@@ -797,15 +816,17 @@ class AdmiralGame {
     
     resetGame() {
         // Видалення всіх фішок
-        this.units.forEach(unit => {
+        [...this.units, ...this.airUnits].forEach(unit => {
             this.scene.remove(unit);
         });
         this.units = [];
+        this.airUnits = [];
         
         // Очищення сітки
         for (let x = 0; x < this.gridSize; x++) {
             for (let z = 0; z < this.gridSize; z++) {
                 this.grid[x][z].unit = null;
+                this.airGrid[x][z].unit = null;
             }
         }
         
@@ -822,9 +843,11 @@ class AdmiralGame {
         this.purchasedUnits = { 1: [], 2: [] };
         this.selectedUnit = null;
         this.selectedCell = null;
+        this.activeLayer = 'ground';
         
         // Очищення журналу
         document.getElementById('logContent').innerHTML = '';
+        this.refreshLayerVisualState();
         
         this.addLog('Гру скинуто! Гравець 1 купує фішки.', 'place-log');
         this.updateUI();
@@ -891,8 +914,9 @@ class AdmiralGame {
     
     updateUI() {
         // Оновлення інформації про гравців
-        const player1Units = this.units.filter(u => u.userData.player === 1).length;
-        const player2Units = this.units.filter(u => u.userData.player === 2).length;
+        const allUnits = [...this.units, ...this.airUnits];
+        const player1Units = allUnits.filter(u => u.userData.player === 1).length;
+        const player2Units = allUnits.filter(u => u.userData.player === 2).length;
         
         document.getElementById('player1Units').textContent = player1Units;
         document.getElementById('player2Units').textContent = player2Units;
@@ -940,6 +964,10 @@ class AdmiralGame {
                          this.phase === 'battle' ? 'Битва' : 
                          this.phase === 'gameOver' ? 'Гру завершено' : 'Невідомий стан';
         document.getElementById('currentPhase').textContent = phaseText;
+        const activeLayerLabel = document.getElementById('activeLayerLabel');
+        if (activeLayerLabel) {
+            activeLayerLabel.textContent = this.getLayerLabel(this.getInteractionLayer());
+        }
         
         // Оновлення центрової інформації про хід
         const currentTurnElement = document.getElementById('currentTurn');
@@ -975,6 +1003,7 @@ class AdmiralGame {
         
         // Кнопки - активні тільки в правильний час
         const endTurnBtn = document.getElementById('endTurnBtn');
+        const toggleLayerBtn = document.getElementById('toggleLayerBtn');
         if (this.phase === 'shop') {
             endTurnBtn.disabled = false;
             endTurnBtn.textContent = 'Почати розміщення';
@@ -995,9 +1024,16 @@ class AdmiralGame {
             endTurnBtn.textContent = 'Завершити хід';
         }
         
+        if (toggleLayerBtn) {
+            toggleLayerBtn.style.display = this.phase === 'battle' ? 'block' : 'none';
+            toggleLayerBtn.textContent = this.getLayerButtonLabel();
+            toggleLayerBtn.disabled = this.phase !== 'battle';
+        }
+
         // Відновлюємо підсвітку якщо є вибрана фішка
         if (this.selectedUnit) {
-            const cell = this.grid[this.selectedUnit.userData.x][this.selectedUnit.userData.z].mesh;
+            const selectedGrid = this.getGridByLayer(this.selectedUnit.userData.domain);
+            const cell = selectedGrid[this.selectedUnit.userData.x][this.selectedUnit.userData.z].mesh;
             cell.material.color.setHex(0xFF6B35);
             cell.material.opacity = 0.5;
             this.showMovementHighlights(this.selectedUnit);
@@ -1110,6 +1146,21 @@ class AdmiralGame {
                 }
             }
         }
+
+        for (let i = 0; i < this.airUnits.length; i++) {
+            for (let j = i + 1; j < this.airUnits.length; j++) {
+                const unit1 = this.airUnits[i];
+                const unit2 = this.airUnits[j];
+
+                if (unit1.userData.player !== unit2.userData.player) {
+                    const distance = Math.abs(unit1.userData.x - unit2.userData.x) + Math.abs(unit1.userData.z - unit2.userData.z);
+
+                    if (distance === 1) {
+                        this.startBattle(unit1, unit2);
+                    }
+                }
+            }
+        }
     }
     
     createGround() {
@@ -1144,27 +1195,109 @@ class AdmiralGame {
     }
 
     createGrid() {
+        this.grid = this.createGridLayer('ground');
+        this.airGrid = this.createGridLayer('air');
+        this.refreshLayerVisualState();
+    }
+
+    createGridLayer(layer) {
+        const grid = [];
+        const isAir = layer === 'air';
+        const y = isAir ? this.airLayerHeight : 0;
+        const evenColor = isAir ? 0x4b768b : 0x4A5F4A;
+        const oddColor = isAir ? 0x5a8ea6 : 0x5A6F5A;
+        const helperColors = isAir ? [0x9fd8f1, 0x75b8d6] : [0xd7d7d7, 0xa5a5a5];
+
         for (let x = 0; x < this.gridSize; x++) {
-            this.grid[x] = [];
+            grid[x] = [];
             for (let z = 0; z < this.gridSize; z++) {
-                const cellGeometry = new THREE.BoxGeometry(this.cellSize, 0.1, this.cellSize);
+                const cellGeometry = new THREE.BoxGeometry(this.cellSize, 0.08, this.cellSize);
                 const cellMaterial = new THREE.MeshLambertMaterial({
-                    color: (x + z) % 2 === 0 ? 0x4A5F4A : 0x5A6F5A,
+                    color: (x + z) % 2 === 0 ? evenColor : oddColor,
                     transparent: true,
-                    opacity: 0.18
+                    opacity: isAir ? 0.12 : 0.18
                 });
                 const cell = new THREE.Mesh(cellGeometry, cellMaterial);
-                cell.position.set(this.toWorldCoord(x), 0, this.toWorldCoord(z));
-                cell.receiveShadow = true;
-                cell.userData = { type: 'cell', x, z };
+                cell.position.set(this.toWorldCoord(x), y, this.toWorldCoord(z));
+                cell.receiveShadow = !isAir;
+                cell.userData = { type: 'cell', x, z, layer };
                 this.scene.add(cell);
-                this.grid[x][z] = { mesh: cell, unit: null };
+                grid[x][z] = { mesh: cell, unit: null };
             }
         }
 
-        const gridHelper = new THREE.GridHelper(this.gridSize * this.cellSize, this.gridSize, 0xd7d7d7, 0xa5a5a5);
-        gridHelper.position.set(this.getBoardCenterOffset(), 0.05, this.getBoardCenterOffset());
+        const gridHelper = new THREE.GridHelper(this.gridSize * this.cellSize, this.gridSize, helperColors[0], helperColors[1]);
+        gridHelper.position.set(this.getBoardCenterOffset(), y + 0.05, this.getBoardCenterOffset());
         this.scene.add(gridHelper);
+        this.gridHelpers[layer] = gridHelper;
+
+        return grid;
+    }
+
+    getDomainForType(type) {
+        return this.config?.unitTypes?.[type]?.domain || 'ground';
+    }
+
+    getGridByLayer(layer = 'ground') {
+        return layer === 'air' ? this.airGrid : this.grid;
+    }
+
+    getUnitsByLayer(layer = 'ground') {
+        return layer === 'air' ? this.airUnits : this.units;
+    }
+
+    getLayerLabel(layer = this.activeLayer) {
+        return layer === 'air' ? 'повітряний' : 'земний';
+    }
+
+    getLayerButtonLabel(layer = this.activeLayer) {
+        return layer === 'air' ? 'Шар: повітря' : 'Шар: земля';
+    }
+
+    getNextPlacementUnit() {
+        return this.purchasedUnits[this.currentPlayer].find((unit) => !unit.placed) || null;
+    }
+
+    getInteractionLayer() {
+        if (this.phase === 'placement') {
+            const nextUnit = this.getNextPlacementUnit();
+            return nextUnit ? this.getDomainForType(nextUnit.type) : this.activeLayer;
+        }
+
+        return this.activeLayer;
+    }
+
+    toggleActiveLayer() {
+        if (this.phase !== 'battle') {
+            return;
+        }
+
+        this.activeLayer = this.activeLayer === 'ground' ? 'air' : 'ground';
+        if (this.selectedUnit && this.selectedUnit.userData.domain !== this.activeLayer) {
+            this.deselectUnit(false);
+        }
+        this.addLog(`Активний шар: ${this.getLayerLabel()}.`, 'move-log');
+        this.refreshLayerVisualState();
+        this.updateUI();
+    }
+
+    refreshLayerVisualState() {
+        ['ground', 'air'].forEach((layer) => {
+            const grid = this.getGridByLayer(layer);
+            if (!grid || grid.length === 0) {
+                return;
+            }
+
+            for (let x = 0; x < this.gridSize; x++) {
+                for (let z = 0; z < this.gridSize; z++) {
+                    this.resetCellAppearance(grid[x][z].mesh);
+                }
+            }
+
+            if (this.gridHelpers[layer]) {
+                this.gridHelpers[layer].visible = true;
+            }
+        });
     }
 
     getUnitPalette(player) {
@@ -1194,7 +1327,9 @@ class AdmiralGame {
             artillery: { branch: 'artillery', echelon: '|', frame: 'support', accent: '#8d5a45' },
             command: { branch: 'command', echelon: 'X', frame: 'command', accent: '#556b8d' },
             scout: { branch: 'recon', echelon: '..', frame: 'recon', accent: '#558060' },
-            sniper: { branch: 'sniper', echelon: '.', frame: 'precision', accent: '#7b5a72' }
+            sniper: { branch: 'sniper', echelon: '.', frame: 'precision', accent: '#7b5a72' },
+            droneScout: { branch: 'recon', echelon: '..', frame: 'recon', accent: '#4b8db2' },
+            droneKamikaze: { branch: 'sniper', echelon: '.', frame: 'precision', accent: '#b26a4b' }
         };
 
         return profiles[type] || profiles.infantry;
@@ -1495,6 +1630,32 @@ class AdmiralGame {
                 miniature.add(body, rifle, head);
                 break;
             }
+            case 'droneScout': {
+                const body = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.2), baseMaterial);
+                body.position.y = 0.26;
+                const wing = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.03, 0.12), darkMaterial);
+                wing.position.y = 0.28;
+                const tail = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 0.03), metalMaterial);
+                tail.position.set(-0.2, 0.34, 0);
+                const sensor = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 10), metalMaterial);
+                sensor.position.set(0.18, 0.23, 0);
+                miniature.add(body, wing, tail, sensor);
+                break;
+            }
+            case 'droneKamikaze': {
+                const fuselage = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, 0.56, 12), baseMaterial);
+                fuselage.rotation.z = Math.PI / 2;
+                fuselage.position.set(0.02, 0.28, 0);
+                const wing = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.02, 0.58), darkMaterial);
+                wing.position.set(0, 0.29, 0);
+                const tail = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 0.02), metalMaterial);
+                tail.position.set(-0.2, 0.36, 0);
+                const nose = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 10), metalMaterial);
+                nose.rotation.z = -Math.PI / 2;
+                nose.position.set(0.33, 0.28, 0);
+                miniature.add(fuselage, wing, tail, nose);
+                break;
+            }
             case 'infantry':
             default: {
                 const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 0.3, 12), baseMaterial);
@@ -1521,12 +1682,15 @@ class AdmiralGame {
         const unitConfig = this.config.unitTypes[type];
         const palette = this.getUnitPalette(player);
         const unit = new THREE.Group();
+        const domain = this.getDomainForType(type);
+        const baseY = domain === 'air' ? this.airLayerHeight + 0.42 : 0.42;
 
-        unit.position.set(this.toWorldCoord(x), 0.42, this.toWorldCoord(z));
+        unit.position.set(this.toWorldCoord(x), baseY, this.toWorldCoord(z));
         unit.userData = {
             isUnitRoot: true,
             type,
             player,
+            domain,
             x,
             z,
             moved: false,
@@ -1545,6 +1709,9 @@ class AdmiralGame {
         base.position.y = 0.09;
         base.castShadow = true;
         base.receiveShadow = true;
+        if (domain === 'air') {
+            base.scale.set(0.86, 0.8, 0.86);
+        }
         unit.add(base);
 
         const ring = new THREE.Mesh(
@@ -1557,6 +1724,9 @@ class AdmiralGame {
         ring.rotation.x = Math.PI / 2;
         ring.position.y = 0.18;
         ring.castShadow = true;
+        if (domain === 'air') {
+            ring.material.color.set(0x8cd4f5);
+        }
         unit.add(ring);
 
         const miniature = this.createUnitMiniature(type, player);
@@ -1584,17 +1754,19 @@ class AdmiralGame {
     }
 
     updateUnitPlacards() {
-        this.units.forEach((unit) => {
+        [...this.units, ...this.airUnits].forEach((unit) => {
             this.updatePlacardFacing(unit.userData.placard);
         });
     }
 
     moveUnit(unit, targetX, targetZ) {
+        const domain = unit.userData.domain || 'ground';
+        const grid = this.getGridByLayer(domain);
         const oldX = unit.userData.x;
         const oldZ = unit.userData.z;
 
-        this.grid[oldX][oldZ].unit = null;
-        this.grid[targetX][targetZ].unit = unit;
+        grid[oldX][oldZ].unit = null;
+        grid[targetX][targetZ].unit = unit;
         this.movementAnimations = this.movementAnimations.filter((animation) => animation.unit !== unit);
         this.movementAnimations.push({
             unit,
@@ -1602,7 +1774,7 @@ class AdmiralGame {
             startY: unit.position.y,
             startZ: unit.position.z,
             endX: this.toWorldCoord(targetX),
-            endY: 0.42,
+            endY: domain === 'air' ? this.airLayerHeight + 0.42 : 0.42,
             endZ: this.toWorldCoord(targetZ),
             startTime: performance.now(),
             duration: 350
@@ -1631,9 +1803,10 @@ class AdmiralGame {
             } else {
                 this.phase = 'battle';
                 this.currentPlayer = 1;
-                this.units.forEach((unit) => {
+                [...this.units, ...this.airUnits].forEach((unit) => {
                     unit.userData.moved = false;
                 });
+                this.activeLayer = 'ground';
                 this.addLog('Placement is over. Battle begins.', 'place-log');
             }
 
@@ -1646,7 +1819,7 @@ class AdmiralGame {
             this.addLog(`Player ${finishedPlayer} finished the turn.`, 'move-log');
             if (finishedPlayer === 1) {
                 this.currentPlayer = 2;
-                this.units
+                [...this.units, ...this.airUnits]
                     .filter((unit) => unit.userData.player === 2)
                     .forEach((unit) => {
                         unit.userData.moved = false;
@@ -1654,6 +1827,12 @@ class AdmiralGame {
             } else {
                 this.turnNumber += 1;
                 this.currentPlayer = 1;
+                [...this.units, ...this.airUnits]
+                    .filter((unit) => unit.userData.player === 1)
+                    .forEach((unit) => {
+                        unit.userData.moved = false;
+                    });
+                this.activeLayer = 'ground';
                 this.startBattleAnimations();
             }
             this.updateUI();
@@ -1669,6 +1848,7 @@ class AdmiralGame {
 
         this.phase = 'placement';
         this.placementPhase[this.currentPlayer] = true;
+        this.activeLayer = this.getDomainForType(unplacedUnits[0].type);
         this.addLog(`Player ${this.currentPlayer} starts placement. Left to place: ${unplacedUnits.length}`, 'place-log');
         this.updateUI();
     }
@@ -1690,7 +1870,8 @@ class AdmiralGame {
             container.className = '';
             container.innerHTML = units.map((unit) => {
                 const status = unit.placed ? 'placed' : 'ready';
-                return `<span class="unit-badge">${unit.config.name} (${status})</span>`;
+                const layer = this.getDomainForType(unit.type) === 'air' ? 'air' : 'ground';
+                return `<span class="unit-badge">${unit.config.name} [${layer}] (${status})</span>`;
             }).join('');
         });
     }
@@ -1701,20 +1882,30 @@ class AdmiralGame {
     }
 
     getCellMeshes() {
-        return this.grid.flat().map((cell) => cell.mesh);
+        return this.getGridByLayer(this.getInteractionLayer()).flat().map((cell) => cell.mesh);
     }
 
     getPointerTarget() {
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
-        const unitHits = this.raycaster.intersectObjects(this.units, true);
-        if (unitHits.length > 0) {
-            return { kind: 'unit', object: this.getUnitRoot(unitHits[0].object) };
+        if (this.phase === 'battle') {
+            const unitHits = this.raycaster.intersectObjects(this.getUnitsByLayer(this.activeLayer), true);
+            if (unitHits.length > 0) {
+                return { kind: 'unit', object: this.getUnitRoot(unitHits[0].object) };
+            }
         }
 
         const cellHits = this.raycaster.intersectObjects(this.getCellMeshes(), false);
         if (cellHits.length > 0) {
-            return { kind: 'cell', object: cellHits[0].object };
+            const cell = cellHits[0].object;
+            const interactionLayer = this.getInteractionLayer();
+            if (cell.userData.layer === interactionLayer) {
+                return { kind: 'cell', object: cell };
+            }
+        }
+
+        if (this.phase === 'placement') {
+            return null;
         }
 
         return null;
@@ -1731,16 +1922,36 @@ class AdmiralGame {
     resetCellAppearance(cell) {
         const x = cell.userData.x;
         const z = cell.userData.z;
-        cell.material.color.setHex((x + z) % 2 === 0 ? 0x4A5F4A : 0x5A6F5A);
-        cell.material.opacity = 0.18;
+        const isAir = cell.userData.layer === 'air';
+        const baseColor = (x + z) % 2 === 0
+            ? (isAir ? 0x4b768b : 0x4A5F4A)
+            : (isAir ? 0x5a8ea6 : 0x5A6F5A);
+
+        cell.material.color.setHex(baseColor);
+        if (this.phase === 'placement') {
+            cell.material.opacity = this.getInteractionLayer() === cell.userData.layer ? 0.28 : 0.08;
+            return;
+        }
+
+        if (this.phase === 'battle') {
+            cell.material.opacity = this.activeLayer === cell.userData.layer
+                ? (isAir ? 0.2 : 0.18)
+                : 0.06;
+            return;
+        }
+
+        cell.material.opacity = isAir ? 0.12 : 0.18;
     }
 
     clearMovementHighlights() {
-        for (let x = 0; x < this.gridSize; x++) {
-            for (let z = 0; z < this.gridSize; z++) {
-                this.resetCellAppearance(this.grid[x][z].mesh);
+        ['ground', 'air'].forEach((layer) => {
+            const grid = this.getGridByLayer(layer);
+            for (let x = 0; x < this.gridSize; x++) {
+                for (let z = 0; z < this.gridSize; z++) {
+                    this.resetCellAppearance(grid[x][z].mesh);
+                }
             }
-        }
+        });
     }
 
     deselectUnit(shouldLog = false) {
@@ -1755,7 +1966,8 @@ class AdmiralGame {
 
     selectUnit(unit) {
         this.selectedUnit = unit;
-        this.selectedCell = this.grid[unit.userData.x][unit.userData.z].mesh;
+        const grid = this.getGridByLayer(unit.userData.domain);
+        this.selectedCell = grid[unit.userData.x][unit.userData.z].mesh;
         this.showMovementHighlights(unit);
         this.addLog(`Вибрано: ${this.config.unitTypes[unit.userData.type].name}`, 'move-log');
     }
@@ -1763,7 +1975,8 @@ class AdmiralGame {
     showMovementHighlights(unit) {
         this.clearMovementHighlights();
 
-        const originCell = this.grid[unit.userData.x][unit.userData.z].mesh;
+        const grid = this.getGridByLayer(unit.userData.domain);
+        const originCell = grid[unit.userData.x][unit.userData.z].mesh;
         originCell.material.color.setHex(0xFF6B35);
         originCell.material.opacity = 0.45;
 
@@ -1774,8 +1987,8 @@ class AdmiralGame {
         for (let x = 0; x < this.gridSize; x++) {
             for (let z = 0; z < this.gridSize; z++) {
                 const distance = Math.abs(x - unitX) + Math.abs(z - unitZ);
-                if (distance > 0 && distance <= maxDistance && this.grid[x][z].unit === null) {
-                    const cell = this.grid[x][z].mesh;
+                if (distance > 0 && distance <= maxDistance && grid[x][z].unit === null) {
+                    const cell = grid[x][z].mesh;
                     cell.material.color.setHex(0x52d273);
                     cell.material.opacity = 0.38;
                 }
@@ -1860,6 +2073,7 @@ class AdmiralGame {
         const unitZ = this.selectedUnit.userData.z;
         const distance = Math.abs(x - unitX) + Math.abs(z - unitZ);
         const maxDistance = this.config.unitTypes[this.selectedUnit.userData.type].movement;
+        const grid = this.getGridByLayer(this.selectedUnit.userData.domain);
 
         if (distance === 0) {
             this.deselectUnit(true);
@@ -1871,7 +2085,7 @@ class AdmiralGame {
             return;
         }
 
-        if (this.grid[x][z].unit !== null) {
+        if (grid[x][z].unit !== null) {
             this.addLog('Клітинка зайнята!', 'combat-log');
             return;
         }
@@ -1898,9 +2112,10 @@ class AdmiralGame {
         if (this.battleAnimations.length === 0) {
             this.isAnimatingBattles = false;
             this.currentPlayer = 1;
-            this.units.forEach((unit) => {
+            [...this.units, ...this.airUnits].forEach((unit) => {
                 unit.userData.moved = false;
             });
+            this.activeLayer = 'ground';
             document.getElementById('endTurnBtn').disabled = false;
             this.updateUI();
             return;
@@ -1926,7 +2141,9 @@ class AdmiralGame {
     resolveBattle(battle) {
         const attacker = battle.attacker;
         const defender = battle.defender;
-        if (!this.units.includes(attacker) || !this.units.includes(defender)) {
+        const attackerCollection = this.getUnitsByLayer(attacker.userData.domain);
+        const defenderCollection = this.getUnitsByLayer(defender.userData.domain);
+        if (!attackerCollection.includes(attacker) || !defenderCollection.includes(defender)) {
             return;
         }
 
@@ -1962,13 +2179,15 @@ class AdmiralGame {
             this.selectedCell = null;
         }
 
-        const index = this.units.indexOf(unit);
+        const unitCollection = this.getUnitsByLayer(unit.userData.domain);
+        const index = unitCollection.indexOf(unit);
         if (index > -1) {
-            this.units.splice(index, 1);
+            unitCollection.splice(index, 1);
         }
 
-        if (this.grid[unit.userData.x] && this.grid[unit.userData.x][unit.userData.z]) {
-            this.grid[unit.userData.x][unit.userData.z].unit = null;
+        const grid = this.getGridByLayer(unit.userData.domain);
+        if (grid[unit.userData.x] && grid[unit.userData.x][unit.userData.z]) {
+            grid[unit.userData.x][unit.userData.z].unit = null;
         }
         this.scene.remove(unit);
         this.clearMovementHighlights();
