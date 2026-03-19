@@ -1,5 +1,5 @@
 // Основна гра тактичної симуляції на Three.js
-const BUILD_VERSION = 'air-2026.03.19-02';
+const BUILD_VERSION = 'air-2026.03.19-03';
 
 class AdmiralGame {
     constructor() {
@@ -31,6 +31,7 @@ class AdmiralGame {
         this.gridHelpers = {};
         this.unitIdCounter = 1;
         this.fogAnimations = [];
+        this.referencePreviewCache = {};
         
         // Стани гри
         this.currentPlayer = 1;
@@ -268,6 +269,29 @@ class AdmiralGame {
                 this.toggleActiveLayer();
             });
         }
+
+        const referenceBtn = document.getElementById('referenceBtn');
+        const closeReferenceBtn = document.getElementById('closeReferenceBtn');
+        const referenceOverlay = document.getElementById('referenceOverlay');
+        if (referenceBtn) {
+            referenceBtn.addEventListener('click', () => this.toggleReferenceOverlay(true));
+        }
+        if (closeReferenceBtn) {
+            closeReferenceBtn.addEventListener('click', () => this.toggleReferenceOverlay(false));
+        }
+        if (referenceOverlay) {
+            referenceOverlay.addEventListener('click', (event) => {
+                if (event.target === referenceOverlay) {
+                    this.toggleReferenceOverlay(false);
+                }
+            });
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                this.toggleReferenceOverlay(false);
+            }
+        });
     }
     
     
@@ -463,6 +487,10 @@ class AdmiralGame {
     }
     
     updateUI() {
+        const referenceCards = document.getElementById('referenceCards');
+        if (this.config && referenceCards && referenceCards.children.length === 0) {
+            this.renderReferenceCatalog();
+        }
         // Оновлення інформації про гравців
         const allUnits = [...this.units, ...this.airUnits];
         const player1Units = allUnits.filter(u => u.userData.player === 1).length;
@@ -1449,6 +1477,171 @@ class AdmiralGame {
         });
 
         return miniature;
+    }
+
+    getDomainLabel(domain = 'ground') {
+        return domain === 'air' ? 'повітря' : 'земля';
+    }
+
+    getStandardsNote(type) {
+        const approximationTypes = ['command', 'sniper', 'droneScout', 'droneKamikaze'];
+        if (approximationTypes.includes(type)) {
+            return 'Значок наближений до сучасної штабної мови й потребує методичної вичитки щодо NATO/AFU.';
+        }
+
+        return 'Базовий тактичний знак стилізований під сучасну практику NATO/AFU, але ще не є фінальною методичною версією.';
+    }
+
+    disposePreviewObject(object) {
+        object.traverse((child) => {
+            if (child.geometry) {
+                child.geometry.dispose();
+            }
+            if (child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach((material) => material.dispose());
+                } else {
+                    child.material.dispose();
+                }
+            }
+        });
+    }
+
+    renderMiniaturePreview(type, player = 1) {
+        const cacheKey = `${type}:${player}`;
+        if (this.referencePreviewCache[cacheKey]) {
+            return this.referencePreviewCache[cacheKey];
+        }
+
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            preserveDrawingBuffer: true
+        });
+        renderer.setSize(180, 180);
+        renderer.setClearColor(0x000000, 0);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+        camera.position.set(2.2, 1.8, 2.6);
+        camera.lookAt(0, 0.45, 0);
+
+        scene.add(new THREE.AmbientLight(0xf5fbff, 1.2));
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+        keyLight.position.set(2.6, 3.2, 2.2);
+        scene.add(keyLight);
+
+        const fillLight = new THREE.DirectionalLight(0x8ab1c7, 0.5);
+        fillLight.position.set(-2.4, 1.8, -2.2);
+        scene.add(fillLight);
+
+        const turntable = new THREE.Group();
+        turntable.rotation.y = -0.52;
+        scene.add(turntable);
+
+        const base = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.7, 0.78, 0.14, 24),
+            new THREE.MeshPhongMaterial({
+                color: 0x314554,
+                transparent: true,
+                opacity: 0.82,
+                shininess: 24
+            })
+        );
+        base.position.y = 0.08;
+        turntable.add(base);
+
+        const miniature = this.createUnitMiniature(type, player);
+        miniature.position.y = 0.08;
+        turntable.add(miniature);
+
+        renderer.render(scene, camera);
+        const previewData = renderer.domElement.toDataURL('image/png');
+
+        this.disposePreviewObject(turntable);
+        renderer.dispose();
+        if (renderer.forceContextLoss) {
+            renderer.forceContextLoss();
+        }
+
+        this.referencePreviewCache[cacheKey] = previewData;
+        return previewData;
+    }
+
+    buildReferenceCard(unitType, unitConfig) {
+        const domain = this.getDomainForType(unitType);
+        const symbolTexture = this.createUnitSymbolTexture(unitType, 1);
+        const symbolData = symbolTexture.image.toDataURL('image/png');
+        symbolTexture.dispose();
+
+        const modelData = this.renderMiniaturePreview(unitType, 1);
+        const attackRange = this.getAttackRange(unitType);
+        const visionRange = this.getVisionRange({ userData: { type: unitType } });
+        const domainLabel = this.getDomainLabel(domain);
+        const attackLabel = attackRange > 1 ? `${attackRange} клітки` : 'ближній бій';
+        const note = this.getStandardsNote(unitType);
+
+        return `
+            <article class="reference-card">
+                <h4>${unitConfig.name}</h4>
+                <div class="reference-visuals">
+                    <div class="reference-visual">
+                        <div class="reference-visual-label">Значок</div>
+                        <img src="${symbolData}" alt="${unitConfig.name} значок">
+                    </div>
+                    <div class="reference-visual">
+                        <div class="reference-visual-label">Модель</div>
+                        <img src="${modelData}" alt="${unitConfig.name} модель">
+                    </div>
+                </div>
+                <div class="reference-meta">
+                    <div><strong>Шар:</strong> ${domainLabel}</div>
+                    <div><strong>Ціна:</strong> ${unitConfig.cost}</div>
+                    <div><strong>ХП:</strong> ${unitConfig.hitpoints}</div>
+                    <div><strong>Сила:</strong> ${unitConfig.strength}</div>
+                    <div><strong>Рух:</strong> ${unitConfig.movement}</div>
+                    <div><strong>Бачення:</strong> ${visionRange}</div>
+                    <div><strong>Атака:</strong> ${attackLabel}</div>
+                    <div><strong>Код:</strong> ${unitType}</div>
+                </div>
+                <div class="reference-description">${unitConfig.description}</div>
+                <div class="reference-note">${note}</div>
+            </article>
+        `;
+    }
+
+    renderReferenceCatalog() {
+        if (!this.config) {
+            return;
+        }
+
+        const referenceCards = document.getElementById('referenceCards');
+        if (!referenceCards) {
+            return;
+        }
+
+        const cardsMarkup = Object.entries(this.config.unitTypes)
+            .map(([unitType, unitConfig]) => this.buildReferenceCard(unitType, unitConfig))
+            .join('');
+
+        referenceCards.innerHTML = cardsMarkup;
+    }
+
+    toggleReferenceOverlay(forceState = null) {
+        const referenceOverlay = document.getElementById('referenceOverlay');
+        if (!referenceOverlay) {
+            return;
+        }
+
+        const shouldShow = forceState === null
+            ? !referenceOverlay.classList.contains('visible')
+            : forceState;
+
+        if (shouldShow) {
+            this.renderReferenceCatalog();
+        }
+
+        referenceOverlay.classList.toggle('visible', shouldShow);
     }
 
     createUnit(type, x, z, player) {
