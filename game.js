@@ -524,6 +524,15 @@ class AdmiralGame {
         const grid = this.getGridByLayer(domain);
         
         // Перевірка чи клітинка вільна
+        if (!this.isCellVisibleToPlayer(x, z)) {
+            this.addLog('Cannot move into fog of war.', 'combat-log');
+            return;
+        }
+        if (!this.isCellVisibleToPlayer(x, z)) {
+            this.addLog('Cannot move into fog of war.', 'combat-log');
+            return;
+        }
+
         if (grid[x][z].unit !== null) {
             this.addLog('Клітинка зайнята!', 'combat-log');
             return;
@@ -2303,6 +2312,9 @@ class AdmiralGame {
     }
 
     selectUnit(unit) {
+        if (this.phase === 'battle' && unit.userData.domain && this.activeLayer !== unit.userData.domain) {
+            this.activeLayer = unit.userData.domain;
+        }
         this.selectedUnit = unit;
         const grid = this.getGridByLayer(unit.userData.domain);
         this.selectedCell = grid[unit.userData.x][unit.userData.z].mesh;
@@ -2325,7 +2337,8 @@ class AdmiralGame {
         for (let x = 0; x < this.gridSize; x++) {
             for (let z = 0; z < this.gridSize; z++) {
                 const distance = Math.abs(x - unitX) + Math.abs(z - unitZ);
-                if (distance > 0 && distance <= maxDistance && grid[x][z].unit === null) {
+                const isVisible = this.phase !== 'battle' || this.isCellVisibleToPlayer(x, z);
+                if (distance > 0 && distance <= maxDistance && grid[x][z].unit === null && isVisible) {
                     const cell = grid[x][z].mesh;
                     cell.material.color.setHex(0x52d273);
                     cell.material.opacity = 0.38;
@@ -2423,6 +2436,10 @@ class AdmiralGame {
             return;
         }
 
+        if (!this.isCellVisibleToPlayer(x, z)) {
+            this.addLog('Cannot move into fog of war.', 'combat-log');
+            return;
+        }
         if (grid[x][z].unit !== null) {
             this.addLog('Клітинка зайнята!', 'combat-log');
             return;
