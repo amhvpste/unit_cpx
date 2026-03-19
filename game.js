@@ -524,15 +524,6 @@ class AdmiralGame {
         const grid = this.getGridByLayer(domain);
         
         // Перевірка чи клітинка вільна
-        if (!this.isCellVisibleToPlayer(x, z)) {
-            this.addLog('Cannot move into fog of war.', 'combat-log');
-            return;
-        }
-        if (!this.isCellVisibleToPlayer(x, z)) {
-            this.addLog('Cannot move into fog of war.', 'combat-log');
-            return;
-        }
-
         if (grid[x][z].unit !== null) {
             this.addLog('Клітинка зайнята!', 'combat-log');
             return;
@@ -2436,10 +2427,6 @@ class AdmiralGame {
             return;
         }
 
-        if (!this.isCellVisibleToPlayer(x, z)) {
-            this.addLog('Cannot move into fog of war.', 'combat-log');
-            return;
-        }
         if (grid[x][z].unit !== null) {
             this.addLog('Клітинка зайнята!', 'combat-log');
             return;
