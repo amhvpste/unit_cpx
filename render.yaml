@@ -1,0 +1,10 @@
+services:
+  - type: static
+    name: admiralgame-air
+    env: static
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: true
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
