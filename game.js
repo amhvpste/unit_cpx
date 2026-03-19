@@ -15,7 +15,7 @@ class AdmiralGame {
         this.renderer.setClearColor(0x000000, 0);
         
         document.getElementById('gameCanvas').appendChild(this.renderer.domElement);
-        document.title = `UNITS CPX ${this.buildVersion}`;
+        document.title = `units-cpx ${this.buildVersion}`;
         
         // Ігрові параметри
         this.gridSize = 10;
