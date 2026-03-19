@@ -381,6 +381,13 @@
             color: #d8edf8;
         }
 
+        .build-indicator {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #f6dd9a;
+            letter-spacing: 0.04em;
+        }
+
         @media (max-width: 900px) {
             #unitShop {
                 width: calc(100vw - 40px);
@@ -469,6 +476,7 @@
                 <h4 style="margin: 0 0 5px 0;">Стан гри:</h4>
                 <div class="unit-info" id="currentPhase">Розміщення фішок</div>
                 <div class="layer-indicator">Активний шар: <span id="activeLayerLabel">земний</span></div>
+                <div class="build-indicator">Build: <span id="buildVersionLabel">loading...</span></div>
             </div>
         </div>
 
@@ -479,7 +487,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260319-1"></script>
+    <script src="game.js?v=air-2026.03.19-02"></script>
 </body>
 
 </html>
