@@ -1,4 +1,4 @@
-# AdmiralGame - Тактична гра
+# AdmiralGame - Тактична гра https://unit-cpx-1.onrender.com/
 
 ## Опис гри
 
