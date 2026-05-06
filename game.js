@@ -43,26 +43,109 @@ class AdmiralGame {
         this.isAnimatingBattles = false;
         this.purchasedUnits = { 1: [], 2: [] };
         this.sessionOrder = {
-            environment: {
-                terrain: 'urban edge',
-                weather: 'clear',
-                light: 'day'
+            situation: {
+                areaOfInterest: null,
+                executionArea: null,
+                objects: [],
+                enemyInfoPercentBySide: { 1: 50, 2: 50 }
             },
-            mission: {
-                1: 'Seize the assigned line',
-                2: 'Hold the assigned area'
+            orbat: { 1: [], 2: [] },
+            tasks: [],
+            endState: [],
+            support: {
+                1: { ammo: 'норма', fuel: 'норма', medevac: 'базово', repair: 'обмежено', comms: 'стійкий', reserve: 'немає' },
+                2: { ammo: 'норма', fuel: 'норма', medevac: 'базово', repair: 'обмежено', comms: 'стійкий', reserve: 'немає' }
             },
-            commandMode: 'local-hotseat',
-            activeTaskSide: 1,
-            activeTaskTag: 'seize',
-            tasks: []
+            readiness: {},
+            ui: {
+                activeTab: 'situation',
+                activeSide: 1,
+                activeTaskTag: 'seize',
+                activeGeometry: 'point',
+                activeSituationTool: 'areaOfInterest',
+                activeEndStateTag: 'areaControlled'
+            }
+        };
+
+        this.orderTabs = [
+            { key: 'situation', label: 'Обстановка' },
+            { key: 'orbat', label: 'ORBAT' },
+            { key: 'tasks', label: 'Завдання' },
+            { key: 'endState', label: 'Кінцевий стан' },
+            { key: 'support', label: 'Забезпечення' }
+        ];
+
+        this.orderGeometryTypes = {
+            point: { label: 'Точка' },
+            line: { label: 'Лінія' },
+            area: { label: 'Район' }
         };
 
         this.orderTaskTags = {
-            seize: { label: 'Захопити', color: 0x4caf50 },
-            hold: { label: 'Утримати', color: 0xff9800 },
-            defend: { label: 'Обороняти', color: 0x2196f3 },
-            recon: { label: 'Розвідати', color: 0x9cdbff }
+            seize: { label: 'Захопити', color: 0x4caf50, geometry: 'area' },
+            hold: { label: 'Утримати', color: 0xff9800, geometry: 'area' },
+            defend: { label: 'Обороняти', color: 0x2196f3, geometry: 'area' },
+            recon: { label: 'Розвідати', color: 0x9cdbff, geometry: 'area' },
+            move: { label: 'Рух маршрутом', color: 0xffffff, geometry: 'line' },
+            block: { label: 'Блокувати', color: 0xfb7185, geometry: 'line' },
+            cover: { label: 'Прикрити', color: 0xfacc15, geometry: 'area' },
+            securePassage: { label: 'Забезпечити прохід', color: 0x7dd3fc, geometry: 'point' },
+            route: { label: 'Маршрут', color: 0xffffff, geometry: 'line' },
+            boundary: { label: 'Рубіж', color: 0xffd700, geometry: 'line' },
+            fireLine: { label: 'Вогневий рубіж', color: 0xff4d4d, geometry: 'line' },
+            passage: { label: 'Прохід', color: 0x7dd3fc, geometry: 'point' },
+            observation: { label: 'СП/НП', color: 0xbae6fd, geometry: 'point' },
+            commandPost: { label: 'КП/КСП', color: 0xfacc15, geometry: 'point' },
+            medevac: { label: 'Мед/евак', color: 0xf8fafc, geometry: 'point' },
+            supply: { label: 'Постачання', color: 0xc084fc, geometry: 'point' },
+            danger: { label: 'Небезпечна зона', color: 0xfb7185, geometry: 'area' }
+        };
+        this.endStateTags = {
+            areaControlled: { label: 'Район під контролем', color: 0x4caf50 },
+            lineHeld: { label: 'Рубіж утримано', color: 0xffd700 },
+            routeOpen: { label: 'Маршрут відкрито', color: 0xffffff },
+            enemyBlocked: { label: 'Противника заблоковано', color: 0xfb7185 },
+            reconDone: { label: 'Розвідку завершено', color: 0x9cdbff },
+            unitPreserved: { label: 'Підрозділ збережено', color: 0xa7f3d0 },
+            supplyMaintained: { label: 'Постачання збережено', color: 0xc084fc }
+        };
+        this.supportFields = {
+            ammo: { label: 'БК', options: ['низько', 'норма', 'посилено'] },
+            fuel: { label: 'Паливо', options: ['низько', 'норма', 'посилено'] },
+            medevac: { label: 'Медична евакуація', options: ['немає', 'базово', 'посилено'] },
+            repair: { label: 'Ремонт', options: ['немає', 'обмежено', 'повний'] },
+            comms: { label: 'Зв’язок', options: ['нестійкий', 'стійкий', 'резервований'] },
+            reserve: { label: 'Резерв', options: ['немає', 'малий', 'виділений'] }
+        };
+        this.orderReadinessGroups = {
+            combatLoad: {
+                title: 'Бойова викладка',
+                items: ['БК', 'гранати', 'вода', 'сухпай', 'ніж / мультитул']
+            },
+            protection: {
+                title: 'Індивідуальний захист',
+                items: ['бронежилет', 'плити', 'шолом', 'окуляри', 'рукавиці']
+            },
+            medical: {
+                title: 'Медицина',
+                items: ['аптечка', 'турнікети', 'бандаж', 'евакуаційна карта']
+            },
+            observation: {
+                title: 'Спостереження',
+                items: ['бінокль', 'тепловізор', 'ПНБ', 'далекомір']
+            },
+            navComms: {
+                title: 'Навігація та зв’язок',
+                items: ['радіостанція', 'частоти', 'позивні', 'карта', 'компас / GPS']
+            },
+            camouflage: {
+                title: 'Маскування',
+                items: ['сітка', 'стрічка', 'плащ', 'запасні шкарпетки']
+            },
+            support: {
+                title: 'Пункти забезпечення',
+                items: ['боєприпаси', 'паливо', 'ремонт', 'укриття', 'медпункт']
+            }
         };
         this.stlLoader = null;
         this.gltfLoader = null;
@@ -184,7 +267,7 @@ class AdmiralGame {
 
                 this.referenceModelUnitsLoaded = true;
                 this.referenceModelUnitsLoading = false;
-                this.addLog(`STL: ${unitModels.length} юнітів, ${this.referenceTaskModels.length} знаків задач, ${this.referenceTerrainModels.length} об'єктів місцевості`, 'place-log');
+                this.addLog(`APP-6/NATO: ${unitModels.length} юнітів, ${this.referenceTaskModels.length} знаків задач, ${this.referenceTerrainModels.length} об'єктів місцевості`, 'place-log');
                 this.updateUI();
             })
             .catch(() => {
@@ -746,6 +829,11 @@ class AdmiralGame {
         
         // Маркуємо фішку як розміщену
         unplacedUnit.placed = true;
+        this.sessionOrder.orbat[this.currentPlayer] = this.purchasedUnits[this.currentPlayer].map((orderUnit) => ({
+            type: orderUnit.type,
+            name: orderUnit.config.name,
+            placed: orderUnit.placed
+        }));
         
         this.addLog(`Гравець ${this.currentPlayer} розмістив ${unplacedUnit.config.name} на (${x}, ${z})`, 'place-log');
         
@@ -1036,6 +1124,16 @@ class AdmiralGame {
         this.battleAnimations = [];
         this.isAnimatingBattles = false;
         this.purchasedUnits = { 1: [], 2: [] };
+        this.sessionOrder.situation.areaOfInterest = null;
+        this.sessionOrder.situation.executionArea = null;
+        this.sessionOrder.situation.objects = [];
+        this.sessionOrder.tasks = [];
+        this.sessionOrder.endState = [];
+        this.sessionOrder.orbat = { 1: [], 2: [] };
+        this.sessionOrder.readiness = {};
+        this.sessionOrder.ui.activeTab = 'situation';
+        this.sessionOrder.ui.activeSide = 1;
+        this.renderOrderTaskMarkers();
         this.selectedUnit = null;
         this.selectedCell = null;
         
@@ -1206,6 +1304,7 @@ class AdmiralGame {
         }
 
         this.updateShopUI();
+        this.updateOrderSummaryHeader();
         
         // Оновлення доступних фішок
         this.updateAvailableUnitsUI();
@@ -1246,6 +1345,21 @@ class AdmiralGame {
         }
     }
     
+    updateOrderSummaryHeader() {
+        const situationSummary = document.getElementById('orderSituationSummary');
+        const tasksSummary = document.getElementById('orderTasksSummary');
+        const supportSummary = document.getElementById('orderSupportSummary');
+        const commandSummary = document.getElementById('orderCommandSummary');
+        if (!situationSummary || !tasksSummary || !supportSummary || !commandSummary) return;
+
+        const situation = this.sessionOrder.situation;
+        const activeTab = this.orderTabs.find((tab) => tab.key === this.sessionOrder.ui.activeTab);
+        situationSummary.textContent = `ЗІ: ${this.formatOrderPoint(situation.areaOfInterest)}; РВЗ: ${this.formatOrderPoint(situation.executionArea)}`;
+        tasksSummary.textContent = `Задач: ${this.sessionOrder.tasks.length}; кінцевих станів: ${this.sessionOrder.endState.length}`;
+        supportSummary.textContent = `С1 БК: ${this.sessionOrder.support[1].ammo}; С2 БК: ${this.sessionOrder.support[2].ammo}`;
+        commandSummary.textContent = `Активна вкладка: ${activeTab ? activeTab.label : 'Обстановка'}`;
+    }
+
     updateShopUI() {
         const shopContent = document.getElementById('shopContent');
         if (!this.config || this.phase !== 'order') {
@@ -1253,31 +1367,113 @@ class AdmiralGame {
             return;
         }
 
-        const sideButtons = [1, 2].map((side) => {
-            const activeClass = this.sessionOrder.activeTaskSide === side ? ' active' : '';
+        const activeTab = this.sessionOrder.ui.activeTab;
+        const tabButtons = this.orderTabs.map((tab) => {
+            const activeClass = activeTab === tab.key ? ' active' : '';
+            return `<button class="order-tab${activeClass}" onclick="game.setOrderTab('${tab.key}')">${tab.label}</button>`;
+        }).join('');
+        const tabRenderers = {
+            situation: () => this.renderSituationTab(),
+            orbat: () => this.renderOrbatTab(),
+            tasks: () => this.renderTasksTab(),
+            endState: () => this.renderEndStateTab(),
+            support: () => this.renderSupportTab()
+        };
+
+        shopContent.innerHTML = `
+            <div class="order-tabs">${tabButtons}</div>
+            ${tabRenderers[activeTab] ? tabRenderers[activeTab]() : this.renderSituationTab()}
+        `;
+        this.setupUnitCardPreviews();
+    }
+
+    renderSideButtons() {
+        return [1, 2].map((side) => {
+            const activeClass = this.sessionOrder.ui.activeSide === side ? ' active' : '';
             return `<button class="order-tag${activeClass}" onclick="game.setOrderTaskSide(${side})">Сторона ${side}</button>`;
         }).join('');
-        const tagButtons = Object.entries(this.orderTaskTags).map(([tag, config]) => {
-            const activeClass = this.sessionOrder.activeTaskTag === tag ? ' active' : '';
-            return `<button class="order-tag${activeClass}" onclick="game.setOrderTaskTag('${tag}')">${config.label}</button>`;
+    }
+
+    renderSituationTab() {
+        const situation = this.sessionOrder.situation;
+        const enemyInfo = situation.enemyInfoPercentBySide;
+        const toolButtons = [
+            { key: 'areaOfInterest', label: 'Зона інтересу' },
+            { key: 'executionArea', label: 'Район виконання' }
+        ].map((tool) => {
+            const activeClass = this.sessionOrder.ui.activeSituationTool === tool.key ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setSituationTool('${tool.key}')">${tool.label}</button>`;
         }).join('');
-        const taskList = this.sessionOrder.tasks.length === 0
-            ? '<div class="units-list-empty">Оберіть тег завдання і клікніть клітинки на карті</div>'
-            : this.sessionOrder.tasks.map((task, index) => `
-                <span class="unit-badge">${index + 1}. Сторона ${task.side}: ${this.orderTaskTags[task.tag].label}: (${task.x}, ${task.z})</span>
-            `).join('');
-        const unitCards = Object.entries(this.config.unitTypes).map(([unitType, unitConfig]) => {
-            const modelMeta = this.getUnitModelMeta(unitType, unitConfig);
+        const objectList = situation.objects.length === 0
+            ? '<div class="units-list-empty">Об’єкти району ще не задані</div>'
+            : situation.objects.map((object, index) => `<span class="unit-badge">${index + 1}. ${this.escapeHtml(object.label)} (${object.x}, ${object.z})</span>`).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Обстановка</h5>
+                <div class="details">
+                    <div class="order-note">Клік по мапі в цій вкладці задає зону інтересу або район виконання.</div>
+                    <div class="order-tags">${toolButtons}</div>
+                    <div class="order-grid-two">
+                        <div class="order-field"><strong>Зона інтересу</strong><br>${this.formatOrderPoint(situation.areaOfInterest)}</div>
+                        <div class="order-field"><strong>Район виконання</strong><br>${this.formatOrderPoint(situation.executionArea)}</div>
+                    </div>
+                    <div class="order-grid-two">
+                        ${[1, 2].map((side) => `
+                            <label class="order-field">
+                                <strong>Інформація про противника для сторони ${side}</strong><br>
+                                <input class="order-range" type="range" min="0" max="100" value="${enemyInfo[side]}" oninput="game.setEnemyInfoPercent(${side}, this.value)">
+                                <span>${enemyInfo[side]}%</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div class="units-list">
+                        <div class="units-list-title">Об’єкти району виконання</div>
+                        <div>${objectList}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderOrbatTab() {
+        const unitCards = Object.entries(this.config.unitTypes).map(([unitType, unitConfig]) => this.renderOrbatUnitCard(unitType, unitConfig)).join('');
+        const sideSummaries = [1, 2].map((side) => {
+            const units = this.purchasedUnits[side] || [];
             return `
+                <div class="order-field">
+                    <strong>Сторона ${side}</strong><br>
+                    Підрозділів у наказі: ${units.length}<br>
+                    Не розміщено: ${units.filter((unit) => !unit.placed).length}
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>ORBAT / склад бойових засобів</h5>
+                <div class="details">
+                    <div class="order-note">Це не магазин: тут формується склад сторін перед розміщенням на мапі.</div>
+                    <div class="order-grid-two">${sideSummaries}</div>
+                </div>
+            </div>
+            ${unitCards}
+        `;
+    }
+
+    renderOrbatUnitCard(unitType, unitConfig) {
+        const symbolKind = this.getUnitSymbolKind(unitType, unitConfig);
+        const symbolLabel = this.getUnitSymbolLabel(unitType, unitConfig);
+        return `
             <div class="shop-item">
                 <h5>${unitConfig.name}</h5>
                 <div class="details">
                     <div class="unit-model-panel">
-                        <div class="unit-model-preview" data-unit-type="${this.escapeHtml(unitType)}">${/\.glb$/i.test(modelMeta.path) ? 'GLB' : (/\.stl$/i.test(modelMeta.path) ? 'STL' : 'N/A')}</div>
+                        <div class="unit-model-preview" data-unit-type="${this.escapeHtml(unitType)}">APP-6</div>
                         <div class="unit-model-meta">
-                            <div class="unit-model-name" title="${this.escapeHtml(modelMeta.name)}">${this.escapeHtml(modelMeta.name)}</div>
-                            <div>${this.escapeHtml(modelMeta.category)}</div>
-                            <div class="unit-model-path" title="${this.escapeHtml(modelMeta.path)}">${this.escapeHtml(modelMeta.path)}</div>
+                            <div class="unit-model-name" title="NATO / APP-6">${this.escapeHtml(symbolLabel)}</div>
+                            <div>${this.escapeHtml(symbolKind)}</div>
+                            <div class="unit-model-path">умовний знак підрозділу</div>
                         </div>
                     </div>
                     <div>Живучість: ${unitConfig.hitpoints}</div>
@@ -1285,32 +1481,153 @@ class AdmiralGame {
                     <div>Маневреність: ${unitConfig.movement} кл.</div>
                     <div>${unitConfig.description}</div>
                     <div class="order-actions">
-                        <button class="player1-btn" onclick="event.stopPropagation(); game.assignUnitToOrder('${unitType}', 1)">Сторона 1</button>
-                        <button class="player2-btn" onclick="event.stopPropagation(); game.assignUnitToOrder('${unitType}', 2)">Сторона 2</button>
+                        <button class="player1-btn" onclick="event.stopPropagation(); game.assignUnitToOrder('${unitType}', 1)">Додати стороні 1</button>
+                        <button class="player2-btn" onclick="event.stopPropagation(); game.assignUnitToOrder('${unitType}', 2)">Додати стороні 2</button>
                     </div>
                 </div>
             </div>
         `;
-        }).join('');
+    }
 
-        shopContent.innerHTML = `
+    renderTasksTab() {
+        const sideButtons = this.renderSideButtons();
+        const tagButtons = Object.entries(this.orderTaskTags).map(([tag, config]) => {
+            const activeClass = this.sessionOrder.ui.activeTaskTag === tag ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setOrderTaskTag('${tag}')">${config.label}</button>`;
+        }).join('');
+        const geometryButtons = Object.entries(this.orderGeometryTypes).map(([geometry, config]) => {
+            const activeClass = this.sessionOrder.ui.activeGeometry === geometry ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setOrderGeometry('${geometry}')">${config.label}</button>`;
+        }).join('');
+        const taskList = this.sessionOrder.tasks.length === 0
+            ? '<div class="units-list-empty">Оберіть сторону, дію, геометрію і клікніть на мапі</div>'
+            : this.sessionOrder.tasks.map((task, index) => `
+                <span class="unit-badge">${index + 1}. Сторона ${task.side}: ${this.orderTaskTags[task.tag].label}, ${this.orderGeometryTypes[task.geometry].label}: ${this.formatTaskCells(task)}</span>
+            `).join('');
+
+        return `
             <div class="shop-item order-planner">
-                <h5>Завдання на карті</h5>
+                <h5>Завдання</h5>
                 <div class="details">
-                    <div>1. Оберіть сторону і тег завдання</div>
-                    <div>2. Клікніть область / клітинку на карті</div>
-                    <div>3. Задача буде прив'язана до координати для вибраної сторони</div>
+                    <div class="order-note">Завдання формуються через теги і прив’язуються до точки, лінії або району на мапі.</div>
+                    <div class="units-list-title">Сторона</div>
                     <div class="order-tags">${sideButtons}</div>
+                    <div class="units-list-title">Дія</div>
                     <div class="order-tags">${tagButtons}</div>
+                    <div class="units-list-title">Геометрія</div>
+                    <div class="order-tags">${geometryButtons}</div>
                     <div class="units-list">
-                        <div class="units-list-title">Прив'язані задачі</div>
+                        <div class="units-list-title">Прив’язані задачі</div>
                         <div>${taskList}</div>
                     </div>
                 </div>
             </div>
-            ${unitCards}
         `;
-        this.setupUnitCardPreviews();
+    }
+
+    renderEndStateTab() {
+        const sideButtons = this.renderSideButtons();
+        const tagButtons = Object.entries(this.endStateTags).map(([tag, config]) => {
+            const activeClass = this.sessionOrder.ui.activeEndStateTag === tag ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setEndStateTag('${tag}')">${config.label}</button>`;
+        }).join('');
+        const endStateList = this.sessionOrder.endState.length === 0
+            ? '<div class="units-list-empty">Оберіть тег кінцевого стану і клікніть на мапі</div>'
+            : this.sessionOrder.endState.map((item, index) => `
+                <span class="unit-badge">${index + 1}. Сторона ${item.side}: ${this.endStateTags[item.tag].label}: (${item.x}, ${item.z})</span>
+            `).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Кінцевий стан</h5>
+                <div class="details">
+                    <div class="order-note">Це майбутні умови успіху сценарію: що має бути правдою після виконання наказу.</div>
+                    <div class="units-list-title">Сторона</div>
+                    <div class="order-tags">${sideButtons}</div>
+                    <div class="units-list-title">Стан</div>
+                    <div class="order-tags">${tagButtons}</div>
+                    <div class="units-list">
+                        <div class="units-list-title">Прив’язані стани</div>
+                        <div>${endStateList}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderSupportTab() {
+        const readinessSections = this.renderReadinessSections();
+        const supportTables = [1, 2].map((side) => this.renderSupportSide(side)).join('');
+        return `
+            <div class="shop-item order-planner">
+                <h5>Забезпечення</h5>
+                <div class="details">
+                    <div class="order-note">Параметри забезпечення задають обмеження сценарію, а PCC лишається допоміжною перевіркою готовності.</div>
+                    <div class="order-support-grid">${supportTables}</div>
+                </div>
+            </div>
+            <div class="shop-item order-planner">
+                <h5>Готовність / PCC</h5>
+                <div class="details">
+                    <div class="order-check-grid">${readinessSections}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderSupportSide(side) {
+        const support = this.sessionOrder.support[side];
+        const rows = Object.entries(this.supportFields).map(([field, config]) => {
+            const options = config.options.map((option) => {
+                const activeClass = support[field] === option ? ' active' : '';
+                return `<button class="order-check${activeClass}" onclick="event.stopPropagation(); game.setSupportValue(${side}, '${field}', '${this.escapeAttribute(option)}')">${this.escapeHtml(option)}</button>`;
+            }).join('');
+            return `
+                <div class="support-row">
+                    <div class="support-label">${this.escapeHtml(config.label)}</div>
+                    <div class="order-tags">${options}</div>
+                </div>
+            `;
+        }).join('');
+        return `
+            <div class="order-check-group">
+                <div class="order-check-title">Сторона ${side}</div>
+                ${rows}
+            </div>
+        `;
+    }
+
+    formatOrderPoint(point) {
+        return point ? `клітинка (${point.x}, ${point.z})` : 'не задано';
+    }
+
+    formatTaskCells(task) {
+        const cells = task.cells || [{ x: task.x, z: task.z }];
+        return cells.map((cell) => `(${cell.x}, ${cell.z})`).join(' - ');
+    }
+
+    renderReadinessSections() {
+        return Object.entries(this.orderReadinessGroups).map(([groupKey, group]) => {
+            const selected = this.sessionOrder.readiness[groupKey] || [];
+            const items = group.items.map((item) => {
+                const isActive = selected.includes(item);
+                const activeClass = isActive ? ' active' : '';
+                return `<button class="order-check${activeClass}" onclick="event.stopPropagation(); game.toggleOrderReadiness('${groupKey}', '${this.escapeAttribute(item)}')">${this.escapeHtml(item)}</button>`;
+            }).join('');
+            return `
+                <div class="order-check-group">
+                    <div class="order-check-title">${this.escapeHtml(group.title)}</div>
+                    <div class="order-tags">${items}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    escapeAttribute(value) {
+        return String(value ?? '')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/\n/g, ' ');
     }
 
     escapeHtml(value) {
@@ -1342,48 +1659,27 @@ class AdmiralGame {
 
     setupUnitCardPreviews() {
         const previews = Array.from(document.querySelectorAll('.unit-model-preview'));
-        previews.slice(0, 6).forEach((element) => this.renderUnitCardPreview(element));
-        previews.forEach((element) => {
-            element.addEventListener('mouseenter', () => this.renderUnitCardPreview(element), { once: true });
-        });
+        previews.forEach((element) => this.renderUnitCardPreview(element));
     }
 
     renderUnitCardPreview(element) {
         const unitType = element.dataset.unitType;
-        const modelPath = this.unitModelPaths[unitType];
-        if (!modelPath || element.dataset.rendered === '1' || this.unitPreviewLoading.has(modelPath)) {
+        const unitConfig = this.config && this.config.unitTypes ? this.config.unitTypes[unitType] : null;
+        if (!unitType || element.dataset.rendered === '1') {
             return;
         }
 
-        if (this.unitPreviewCache[modelPath]) {
-            element.innerHTML = `<img alt="model preview" src="${this.unitPreviewCache[modelPath]}">`;
+        const cacheKey = `symbol:${unitType}:${this.getUnitSymbolKind(unitType, unitConfig)}`;
+        if (this.unitPreviewCache[cacheKey]) {
+            element.innerHTML = `<img alt="NATO symbol preview" src="${this.unitPreviewCache[cacheKey]}">`;
             element.dataset.rendered = '1';
             return;
         }
 
-        this.unitPreviewLoading.add(modelPath);
-        element.textContent = 'loading';
-        const finish = (object) => {
-            try {
-                const dataUrl = this.createUnitPreviewImage(object, 0x9be16f);
-                this.unitPreviewCache[modelPath] = dataUrl;
-                element.innerHTML = `<img alt="model preview" src="${dataUrl}">`;
-                element.dataset.rendered = '1';
-            } catch (error) {
-                element.textContent = 'preview error';
-            } finally {
-                this.unitPreviewLoading.delete(modelPath);
-            }
-        };
-
-        this.loadModelObject(
-            modelPath,
-            (object) => finish(object),
-            () => {
-                element.textContent = 'no preview';
-                this.unitPreviewLoading.delete(modelPath);
-            }
-        );
+        const dataUrl = this.createUnitSymbolDataUrl(unitType, 1, unitConfig);
+        this.unitPreviewCache[cacheKey] = dataUrl;
+        element.innerHTML = `<img alt="NATO symbol preview" src="${dataUrl}">`;
+        element.dataset.rendered = '1';
     }
 
     createUnitPreviewImage(object, color) {
@@ -1542,29 +1838,122 @@ class AdmiralGame {
 
     setOrderTaskTag(tag) {
         if (!this.orderTaskTags[tag]) return;
-        this.sessionOrder.activeTaskTag = tag;
+        this.sessionOrder.ui.activeTaskTag = tag;
+        this.sessionOrder.ui.activeGeometry = this.orderTaskTags[tag].geometry || this.sessionOrder.ui.activeGeometry;
         this.addLog(`Активний тег завдання: ${this.orderTaskTags[tag].label}`, 'place-log');
         this.updateUI();
     }
 
     setOrderTaskSide(side) {
         if (![1, 2].includes(side)) return;
-        this.sessionOrder.activeTaskSide = side;
+        this.sessionOrder.ui.activeSide = side;
         this.addLog(`Задачі призначаються для сторони ${side}`, 'place-log');
+        this.updateUI();
+    }
+
+    setOrderTab(tab) {
+        if (!this.orderTabs.some((item) => item.key === tab)) return;
+        this.sessionOrder.ui.activeTab = tab;
+        this.updateUI();
+    }
+
+    setOrderGeometry(geometry) {
+        if (!this.orderGeometryTypes[geometry]) return;
+        this.sessionOrder.ui.activeGeometry = geometry;
+        this.updateUI();
+    }
+
+    setSituationTool(tool) {
+        if (!['areaOfInterest', 'executionArea'].includes(tool)) return;
+        this.sessionOrder.ui.activeSituationTool = tool;
+        this.updateUI();
+    }
+
+    setEnemyInfoPercent(side, value) {
+        const percent = Math.max(0, Math.min(100, Number(value) || 0));
+        this.sessionOrder.situation.enemyInfoPercentBySide[side] = percent;
+        this.updateUI();
+    }
+
+    setEndStateTag(tag) {
+        if (!this.endStateTags[tag]) return;
+        this.sessionOrder.ui.activeEndStateTag = tag;
+        this.updateUI();
+    }
+
+    setSupportValue(side, field, value) {
+        if (!this.supportFields[field] || !this.sessionOrder.support[side]) return;
+        this.sessionOrder.support[side][field] = value;
+        this.updateUI();
+    }
+
+    toggleOrderReadiness(groupKey, item) {
+        if (!this.orderReadinessGroups[groupKey]) return;
+        if (!this.sessionOrder.readiness[groupKey]) {
+            this.sessionOrder.readiness[groupKey] = [];
+        }
+
+        const selected = this.sessionOrder.readiness[groupKey];
+        const itemIndex = selected.indexOf(item);
+        if (itemIndex >= 0) {
+            selected.splice(itemIndex, 1);
+        } else {
+            selected.push(item);
+        }
+
         this.updateUI();
     }
 
     addOrderTaskAtCell(x, z) {
         if (this.phase !== 'order') return;
 
-        const tag = this.sessionOrder.activeTaskTag;
-        const side = this.sessionOrder.activeTaskSide;
+        if (this.sessionOrder.ui.activeTab === 'situation') {
+            const tool = this.sessionOrder.ui.activeSituationTool;
+            this.sessionOrder.situation[tool] = { x, z };
+            this.renderOrderTaskMarkers();
+            this.addLog(`${tool === 'areaOfInterest' ? 'Зону інтересу' : 'Район виконання'} задано: (${x}, ${z})`, 'place-log');
+            this.updateUI();
+            return;
+        }
+
+        if (this.sessionOrder.ui.activeTab === 'endState') {
+            const side = this.sessionOrder.ui.activeSide;
+            const tag = this.sessionOrder.ui.activeEndStateTag;
+            const existing = this.sessionOrder.endState.find((item) => item.x === x && item.z === z && item.side === side);
+            if (existing) {
+                existing.tag = tag;
+            } else {
+                this.sessionOrder.endState.push({ id: `end-${Date.now()}-${this.sessionOrder.endState.length}`, side, tag, x, z });
+            }
+            this.renderOrderTaskMarkers();
+            this.addLog(`Сторона ${side}: кінцевий стан "${this.endStateTags[tag].label}" прив'язано до (${x}, ${z})`, 'place-log');
+            this.updateUI();
+            return;
+        }
+
+        const tag = this.sessionOrder.ui.activeTaskTag;
+        const side = this.sessionOrder.ui.activeSide;
+        const geometry = this.sessionOrder.ui.activeGeometry;
         const taskConfig = this.orderTaskTags[tag];
         const existingTask = this.sessionOrder.tasks.find((task) => task.x === x && task.z === z && task.side === side);
         if (existingTask) {
             existingTask.tag = tag;
+            existingTask.geometry = geometry;
+            existingTask.cells = [{ x, z }];
+            existingTask.generatedText = this.generateTaskText(side, tag, geometry, [{ x, z }]);
         } else {
-            this.sessionOrder.tasks.push({ side, tag, x, z });
+            const cells = [{ x, z }];
+            this.sessionOrder.tasks.push({
+                id: `task-${Date.now()}-${this.sessionOrder.tasks.length}`,
+                side,
+                tag,
+                geometry,
+                cells,
+                x,
+                z,
+                objectId: null,
+                generatedText: this.generateTaskText(side, tag, geometry, cells)
+            });
         }
 
         this.renderOrderTaskMarkers();
@@ -1572,14 +1961,41 @@ class AdmiralGame {
         this.updateUI();
     }
 
+    generateTaskText(side, tag, geometry, cells) {
+        const tagLabel = this.orderTaskTags[tag] ? this.orderTaskTags[tag].label : tag;
+        const geometryLabel = this.orderGeometryTypes[geometry] ? this.orderGeometryTypes[geometry].label.toLowerCase() : geometry;
+        const cellText = cells.map((cell) => `(${cell.x}, ${cell.z})`).join(' - ');
+        return `Сторона ${side}: ${tagLabel.toLowerCase()} ${geometryLabel} ${cellText}.`;
+    }
+
     renderOrderTaskMarkers() {
         this.orderTaskMarkerMeshes.forEach((mesh) => this.scene.remove(mesh));
         this.orderTaskMarkerMeshes = [];
 
+        const situation = this.sessionOrder.situation;
+        [
+            { point: situation.areaOfInterest, color: 0xffd700 },
+            { point: situation.executionArea, color: 0x7dd3fc }
+        ].forEach((item) => {
+            if (!item.point) return;
+            const marker = this.addCellHighlight(item.point.x, item.point.z, item.color, 0.36, 5, false);
+            this.orderTaskMarkerMeshes.push(marker);
+        });
+
         this.sessionOrder.tasks.forEach((task) => {
-            const color = this.getUnitPalette(task.side).base;
-            const marker = this.addCellHighlight(task.x, task.z, color, 0.48, 5, false);
-            marker.userData.orderTask = task;
+            const color = (this.orderTaskTags[task.tag] && this.orderTaskTags[task.tag].color) || this.getUnitPalette(task.side).base;
+            const cells = task.cells || [{ x: task.x, z: task.z }];
+            cells.forEach((cell) => {
+                const marker = this.addCellHighlight(cell.x, cell.z, color, 0.48, 5, false);
+                marker.userData.orderTask = task;
+                this.orderTaskMarkerMeshes.push(marker);
+            });
+        });
+
+        this.sessionOrder.endState.forEach((item) => {
+            const color = (this.endStateTags[item.tag] && this.endStateTags[item.tag].color) || this.getUnitPalette(item.side).base;
+            const marker = this.addCellHighlight(item.x, item.z, color, 0.62, 6, false);
+            marker.userData.endState = item;
             this.orderTaskMarkerMeshes.push(marker);
         });
     }
@@ -1593,6 +2009,11 @@ class AdmiralGame {
             config: unitConfig,
             placed: false
         });
+        this.sessionOrder.orbat[player] = this.purchasedUnits[player].map((unit) => ({
+            type: unit.type,
+            name: unit.config.name,
+            placed: unit.placed
+        }));
 
         this.addLog(`Сторона ${player}: додано ${unitConfig.name} до складу бойового наказу`, 'place-log');
         this.updateUI();
@@ -1926,12 +2347,50 @@ class AdmiralGame {
         };
     }
 
-    createUnitSymbolTexture(type, player) {
+    getUnitSymbolKind(type, unitConfig = null) {
+        const config = unitConfig || (this.config && this.config.unitTypes ? this.config.unitTypes[type] : null) || {};
+        const key = `${type} ${config.name || ''} ${config.description || ''} ${config.referencePath || ''}`.toLowerCase();
+
+        if (/armor|tank|btr|bmp|брон|танк|бтр|бмп/.test(key)) return 'armor';
+        if (/artillery|himars|grad|m777|arty|арт|град|гармат|гаубиц/.test(key)) return 'artillery';
+        if (/command|signal|ksp|зв'яз|зв’яз|команд|ксп/.test(key)) return 'command';
+        if (/recon|bpla|mavic|drone|розвід|бпла|квадро/.test(key)) return 'scout';
+        if (/sniper|снайпер/.test(key)) return 'sniper';
+        if (/antitank|javelin|rpg|ptrk|птрк|гранатомет/.test(key)) return 'antitank';
+        if (/mortar|міномет|minomet/.test(key)) return 'mortar';
+        if (/medic|медик|evac|евак/.test(key)) return 'medical';
+        if (/vehicle|pickup|пікап|машин|transport/.test(key)) return 'vehicle';
+        if (/support|кулемет|machinegun|kulemet/.test(key)) return 'support';
+        return 'infantry';
+    }
+
+    getUnitSymbolLabel(type, unitConfig = null) {
+        const config = unitConfig || (this.config && this.config.unitTypes ? this.config.unitTypes[type] : null) || {};
+        const kind = this.getUnitSymbolKind(type, config);
+        const labels = {
+            infantry: 'ПХ',
+            armor: 'ТНК',
+            artillery: 'АРТ',
+            command: 'КСП',
+            scout: 'РЗВ',
+            sniper: 'СНП',
+            antitank: 'ПТРК',
+            mortar: 'МІН',
+            medical: 'МЕД',
+            vehicle: 'ТР',
+            support: 'ПІД'
+        };
+        return labels[kind] || (config.name || type).slice(0, 4).toUpperCase();
+    }
+
+    createUnitSymbolTexture(type, player, unitConfig = null) {
         const canvas = document.createElement('canvas');
         canvas.width = 256;
         canvas.height = 256;
         const ctx = canvas.getContext('2d');
         const palette = this.getUnitPalette(player);
+        const symbolKind = this.getUnitSymbolKind(type, unitConfig);
+        const symbolLabel = this.getUnitSymbolLabel(type, unitConfig);
 
         ctx.fillStyle = '#f8f5ea';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -2008,7 +2467,47 @@ class AdmiralGame {
             ctx.stroke();
         };
 
-        switch (type) {
+        const drawAntitank = () => {
+            drawInfantry();
+            ctx.beginPath();
+            ctx.moveTo(78, 178);
+            ctx.lineTo(128, 92);
+            ctx.lineTo(178, 178);
+            ctx.stroke();
+        };
+
+        const drawMortar = () => {
+            drawArtillery();
+            ctx.beginPath();
+            ctx.moveTo(86, 158);
+            ctx.quadraticCurveTo(128, 70, 170, 158);
+            ctx.stroke();
+        };
+
+        const drawMedical = () => {
+            drawInfantry();
+            ctx.fillStyle = '#191919';
+            ctx.fillRect(116, 86, 24, 72);
+            ctx.fillRect(92, 110, 72, 24);
+        };
+
+        const drawVehicle = () => {
+            ctx.beginPath();
+            ctx.rect(72, 94, 112, 54);
+            ctx.moveTo(88, 158);
+            ctx.lineTo(168, 158);
+            ctx.stroke();
+        };
+
+        const drawSupport = () => {
+            drawInfantry();
+            ctx.beginPath();
+            ctx.moveTo(78, 154);
+            ctx.lineTo(178, 86);
+            ctx.stroke();
+        };
+
+        switch (symbolKind) {
             case 'armor':
                 drawArmor();
                 break;
@@ -2024,16 +2523,78 @@ class AdmiralGame {
             case 'sniper':
                 drawSniper();
                 break;
+            case 'antitank':
+                drawAntitank();
+                break;
+            case 'mortar':
+                drawMortar();
+                break;
+            case 'medical':
+                drawMedical();
+                break;
+            case 'vehicle':
+                drawVehicle();
+                break;
+            case 'support':
+                drawSupport();
+                break;
             case 'infantry':
             default:
                 drawInfantry();
                 break;
         }
 
+        ctx.fillStyle = '#191919';
+        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(symbolLabel, centerX, 214);
+
         const texture = new THREE.CanvasTexture(canvas);
         texture.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
         texture.needsUpdate = true;
         return texture;
+    }
+
+    createUnitSymbolDataUrl(type, player, unitConfig = null) {
+        const texture = this.createUnitSymbolTexture(type, player, unitConfig);
+        const dataUrl = texture.image.toDataURL('image/png');
+        texture.dispose();
+        return dataUrl;
+    }
+
+    createNatoSymbolToken(type, player, unitConfig = null) {
+        const palette = this.getUnitPalette(player);
+        const group = new THREE.Group();
+
+        const shadow = new THREE.Mesh(
+            new THREE.CircleGeometry(0.46, 32),
+            new THREE.MeshBasicMaterial({
+                color: palette.dark,
+                transparent: true,
+                opacity: 0.18,
+                depthWrite: false
+            })
+        );
+        shadow.rotation.x = -Math.PI / 2;
+        shadow.position.y = 0.018;
+        group.add(shadow);
+
+        const symbol = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.86, 0.86),
+            new THREE.MeshBasicMaterial({
+                map: this.createUnitSymbolTexture(type, player, unitConfig),
+                transparent: false,
+                side: THREE.DoubleSide
+            })
+        );
+        symbol.rotation.x = -Math.PI / 2;
+        symbol.position.y = 0.05;
+        symbol.renderOrder = 8;
+        symbol.userData.isNatoSymbol = true;
+        group.add(symbol);
+
+        return group;
     }
 
     attachReferenceModel(unit, type, player) {
@@ -2071,7 +2632,6 @@ class AdmiralGame {
 
     createUnit(type, x, z, player) {
         const unitConfig = this.config.unitTypes[type];
-        const palette = this.getUnitPalette(player);
         const unit = new THREE.Group();
 
         unit.position.set(this.toWorldCoord(x), this.getSurfaceYAtCell(x, z), this.toWorldCoord(z));
@@ -2087,7 +2647,9 @@ class AdmiralGame {
             strength: unitConfig.strength
         };
 
-        this.attachReferenceModel(unit, type, player);
+        const symbolToken = this.createNatoSymbolToken(type, player, unitConfig);
+        symbolToken.userData.isReferenceModel = true;
+        unit.add(symbolToken);
 
         this.scene.add(unit);
         return unit;

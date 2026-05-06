@@ -4,6 +4,8 @@ server.out.log
 server.err.log
 content_glb_test/
 tmp-*.png
+tmp_pdf_pages/
+tmp_pdf_images/
 
 # Keep deploy assets small. STL files can be committed intentionally.
 references/**/*.zip

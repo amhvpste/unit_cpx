@@ -419,6 +419,55 @@
             grid-column: 1 / -1;
         }
 
+        .order-tabs {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            padding-bottom: 8px;
+            background: rgba(86, 116, 132, 0.92);
+            backdrop-filter: blur(8px);
+        }
+
+        .order-tab {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.09);
+            color: #f8fbff;
+            border-radius: 5px;
+            padding: 8px 11px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .order-tab.active {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+        }
+
+        .order-note {
+            color: rgba(248, 251, 255, 0.82);
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .order-grid-two,
+        .order-support-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .order-range {
+            width: 100%;
+            margin-top: 8px;
+        }
+
         .order-tags {
             display: flex;
             flex-wrap: wrap;
@@ -441,6 +490,64 @@
             border-color: #FFD700;
             background: rgba(255, 215, 0, 0.18);
             color: #FFD700;
+        }
+
+        .order-check-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .order-check-group {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(10, 20, 24, 0.16);
+            border-radius: 6px;
+            padding: 9px;
+        }
+
+        .order-check-title {
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .order-check {
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            color: #f8fbff;
+            border-radius: 5px;
+            padding: 6px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .order-check.active {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.28);
+            color: #ffffff;
+        }
+
+        .support-row {
+            display: grid;
+            grid-template-columns: minmax(80px, 0.7fr) 1.3fr;
+            gap: 8px;
+            align-items: start;
+            padding: 6px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .support-row:first-of-type {
+            border-top: none;
+        }
+
+        .support-label {
+            color: #f8fbff;
+            font-size: 12px;
+            font-weight: bold;
+            padding-top: 8px;
         }
 
         .units-list {
@@ -521,10 +628,10 @@
                 <div class="unit-info" id="shopCurrentPlayer">Локальний прототип: гравці працюють по черзі з одного акаунту</div>
                 <div class="unit-info" id="shopMoneyInfo">Сформуйте склад сторін і затвердьте наказ перед розміщенням</div>
                 <div class="order-summary">
-                    <div class="order-field"><strong>Обстановка</strong><br>Місцевість: міська околиця<br>Погода: ясно<br>Освітлення: день</div>
-                    <div class="order-field"><strong>Завдання</strong><br>Сторона 1: захопити рубіж<br>Сторона 2: утримати район</div>
-                    <div class="order-field"><strong>Логістика</strong><br>Штабний ресурс: базовий<br>Постачання: за зонами доступності</div>
-                    <div class="order-field"><strong>Керування</strong><br>Зараз: один стіл, почергово<br>Далі: різні столи / кімнати</div>
+                    <div class="order-field"><strong>Обстановка</strong><br><span id="orderSituationSummary">Зони ще не задані</span></div>
+                    <div class="order-field"><strong>Завдання</strong><br><span id="orderTasksSummary">Задачі ще не призначені</span></div>
+                    <div class="order-field"><strong>Забезпечення</strong><br><span id="orderSupportSummary">Параметри базові</span></div>
+                    <div class="order-field"><strong>Керування</strong><br><span id="orderCommandSummary">Локальний hotseat, інструктор формує наказ</span></div>
                 </div>
             </div>
             <div id="shopContent"></div>
@@ -591,9 +698,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="game.js?v=20260506-grid-picking-fix"></script>
+    <script src="game.js?v=20260506-order-tabs"></script>
 </body>
 
 </html>
