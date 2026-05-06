@@ -78,7 +78,7 @@
   "gameSettings": {
     "startingMoney": 1000,
     "maxUnitCost": 300,
-    "gridSize": 10,
-    "placementRows": 2
+    "gridSize": 100,
+    "placementRows": 10
   }
 }

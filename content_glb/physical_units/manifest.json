@@ -1,0 +1,368 @@
+[
+  {
+    "id": "infantry-standing",
+    "name": "Піхотинець стоячи",
+    "role": "infantry",
+    "path": "content_glb/physical_units/infantry-standing.glb",
+    "sourceFiles": [
+      "Soltat_stoiachi.stl"
+    ],
+    "missingFiles": [],
+    "size": 412776,
+    "bounds": [
+      0.3742046356201172,
+      0.5941177606582642,
+      0.8199999928474426
+    ],
+    "scale": 0.014347202464088623
+  },
+  {
+    "id": "infantry-kneeling",
+    "name": "Піхотинець з коліна",
+    "role": "infantry",
+    "path": "content_glb/physical_units/infantry-kneeling.glb",
+    "sourceFiles": [
+      "Soldat_na_kolintsi.stl"
+    ],
+    "missingFiles": [],
+    "size": 437140,
+    "bounds": [
+      0.40405845642089844,
+      0.7599999904632568,
+      0.7711732983589172
+    ],
+    "scale": 0.015432726007419472
+  },
+  {
+    "id": "infantry-prone",
+    "name": "Піхотинець лежачи",
+    "role": "infantry",
+    "path": "content_glb/physical_units/infantry-prone.glb",
+    "sourceFiles": [
+      "Soldat_lezhachi.stl"
+    ],
+    "missingFiles": [],
+    "size": 362820,
+    "bounds": [
+      0.3334932327270508,
+      0.7599999904632568,
+      0.29136309027671814
+    ],
+    "scale": 0.011606241184463264
+  },
+  {
+    "id": "machinegunner",
+    "name": "Кулеметник",
+    "role": "support",
+    "path": "content_glb/physical_units/machinegunner.glb",
+    "sourceFiles": [
+      "Kulemetnyk_lezhachi.stl"
+    ],
+    "missingFiles": [],
+    "size": 857612,
+    "bounds": [
+      0.2470388412475586,
+      0.7599999904632568,
+      0.22395066916942596
+    ],
+    "scale": 0.008907432368510049
+  },
+  {
+    "id": "sniper",
+    "name": "Снайпер",
+    "role": "sniper",
+    "path": "content_glb/physical_units/sniper.glb",
+    "sourceFiles": [
+      "snajperr.stl",
+      "snajperPr.stl"
+    ],
+    "missingFiles": [],
+    "size": 513044,
+    "bounds": [
+      0.7599999904632568,
+      0.6446834802627563,
+      0.15841102600097656
+    ],
+    "scale": 0.00630545863154294
+  },
+  {
+    "id": "rpg",
+    "name": "Гранатометник",
+    "role": "antitank",
+    "path": "content_glb/physical_units/rpg.glb",
+    "sourceFiles": [
+      "RPGman.stl",
+      "RPG_1.stl"
+    ],
+    "missingFiles": [],
+    "size": 480096,
+    "bounds": [
+      0.5718886852264404,
+      0.4837099313735962,
+      0.8199999928474426
+    ],
+    "scale": 0.012978790693877609
+  },
+  {
+    "id": "javelin",
+    "name": "ПТРК Javelin",
+    "role": "antitank",
+    "path": "content_glb/physical_units/javelin.glb",
+    "sourceFiles": [
+      "javelin.stl",
+      "javelinA.stl",
+      "javelinB.stl"
+    ],
+    "missingFiles": [],
+    "size": 503272,
+    "bounds": [
+      0.12560996413230896,
+      0.7599999904632568,
+      0.25642985105514526
+    ],
+    "scale": 0.0036943231687209164
+  },
+  {
+    "id": "mortar-team",
+    "name": "Мінометний розрахунок",
+    "role": "mortar",
+    "path": "content_glb/physical_units/mortar-team.glb",
+    "sourceFiles": [
+      "Mynomet___3_boitsa.stl"
+    ],
+    "missingFiles": [],
+    "size": 906712,
+    "bounds": [
+      0.7599999904632568,
+      0.43712544441223145,
+      0.5163775086402893
+    ],
+    "scale": 0.007698853009497558
+  },
+  {
+    "id": "medic",
+    "name": "Медик",
+    "role": "support",
+    "path": "content_glb/physical_units/medic.glb",
+    "sourceFiles": [
+      "Medyk.stl"
+    ],
+    "missingFiles": [],
+    "size": 868144,
+    "bounds": [
+      0.3862271308898926,
+      0.4422609806060791,
+      0.8199999928474426
+    ],
+    "scale": 0.014291918092801757
+  },
+  {
+    "id": "signalman",
+    "name": "Зв'язківець",
+    "role": "command",
+    "path": "content_glb/physical_units/signalman.glb",
+    "sourceFiles": [
+      "Zviazkivets.stl"
+    ],
+    "missingFiles": [],
+    "size": 448012,
+    "bounds": [
+      0.37855079770088196,
+      0.3388979434967041,
+      0.8199999928474426
+    ],
+    "scale": 0.012438252574236709
+  },
+  {
+    "id": "bpla-operators",
+    "name": "Оператори БПЛА",
+    "role": "recon",
+    "path": "content_glb/physical_units/bpla-operators.glb",
+    "sourceFiles": [
+      "BPLA_operators.stl"
+    ],
+    "missingFiles": [],
+    "size": 638400,
+    "bounds": [
+      0.7599999904632568,
+      0.4732767343521118,
+      0.7935106158256531
+    ],
+    "scale": 0.014334377362628319
+  },
+  {
+    "id": "mavic",
+    "name": "Mavic",
+    "role": "recon",
+    "path": "content_glb/physical_units/mavic.glb",
+    "sourceFiles": [
+      "mavik.stl"
+    ],
+    "missingFiles": [],
+    "size": 150640,
+    "bounds": [
+      0.755744457244873,
+      0.7599999904632568,
+      0.11967785656452179
+    ],
+    "scale": 0.02679838620076289
+  },
+  {
+    "id": "quadcopter",
+    "name": "Квадрокоптер",
+    "role": "recon",
+    "path": "content_glb/physical_units/quadcopter.glb",
+    "sourceFiles": [
+      "kvadro_A.stl",
+      "kvadro_S_x2.stl",
+      "kvadro_WL_x2.stl",
+      "kvadro_WR_x2.stl"
+    ],
+    "missingFiles": [],
+    "size": 960308,
+    "bounds": [
+      0.7599999904632568,
+      0.6381611824035645,
+      0.33963343501091003
+    ],
+    "scale": 0.00785630574116446
+  },
+  {
+    "id": "tank",
+    "name": "Танк",
+    "role": "armor",
+    "path": "content_glb/physical_units/tank.glb",
+    "sourceFiles": [
+      "Tank.stl",
+      "Tank_dulo.stl"
+    ],
+    "missingFiles": [],
+    "size": 339376,
+    "bounds": [
+      0.4200438857078552,
+      0.7599999904632568,
+      0.20875433087348938
+    ],
+    "scale": 0.003621139122000615
+  },
+  {
+    "id": "btr",
+    "name": "БТР",
+    "role": "armor",
+    "path": "content_glb/physical_units/btr.glb",
+    "sourceFiles": [
+      "BTR.stl",
+      "BTR_kulemet.stl",
+      "BTR_wheelCx4.stl",
+      "BTR_wheelLx4.stl",
+      "BTR_wheelRX4.stl"
+    ],
+    "missingFiles": [],
+    "size": 755396,
+    "bounds": [
+      0.652958869934082,
+      0.7600000500679016,
+      0.24012933671474457
+    ],
+    "scale": 0.004522642925270828
+  },
+  {
+    "id": "grad",
+    "name": "БМ-21 Град",
+    "role": "artillery",
+    "path": "content_glb/physical_units/grad.glb",
+    "sourceFiles": [
+      "Grad.stl",
+      "Grad_dura.stl",
+      "Grad_duraS.stl",
+      "Grad_wheelRx3.stl",
+      "Grad_whellLx3.stl",
+      "Grad_whellS.stl"
+    ],
+    "missingFiles": [],
+    "size": 1371956,
+    "bounds": [
+      0.7599999904632568,
+      0.6402267813682556,
+      0.2453722357749939
+    ],
+    "scale": 0.0034943509325311077
+  },
+  {
+    "id": "himars",
+    "name": "HIMARS",
+    "role": "artillery",
+    "path": "content_glb/physical_units/himars.glb",
+    "sourceFiles": [
+      "Himars_1.stl",
+      "Himars_2.stl",
+      "Himars_wheel L X3.stl",
+      "Himars_wheel R.stl",
+      "Himars_wheel Sx3.stl"
+    ],
+    "missingFiles": [],
+    "size": 871220,
+    "bounds": [
+      0.7600001096725464,
+      0.44660067558288574,
+      0.2717164158821106
+    ],
+    "scale": 0.002537626212964029
+  },
+  {
+    "id": "m777",
+    "name": "M777",
+    "role": "artillery",
+    "path": "content_glb/physical_units/m777.glb",
+    "sourceFiles": [
+      "M777_A.stl",
+      "M777_B.stl"
+    ],
+    "missingFiles": [],
+    "size": 1132868,
+    "bounds": [
+      0.7599999904632568,
+      0.4946065843105316,
+      0.3168964982032776
+    ],
+    "scale": 0.004029372861734461
+  },
+  {
+    "id": "pickup",
+    "name": "Пікап",
+    "role": "vehicle",
+    "path": "content_glb/physical_units/pickup.glb",
+    "sourceFiles": [
+      "pickup_01_body.stl",
+      "pickup 02_pidvys.stl",
+      "pickup_03_wheel_S.stl",
+      "pickup_03_wheelL.stl",
+      "pickup_03_wheelR.stl"
+    ],
+    "missingFiles": [],
+    "size": 831920,
+    "bounds": [
+      0.7599999904632568,
+      0.6324061155319214,
+      0.2626035511493683
+    ],
+    "scale": 0.005504876179588062
+  },
+  {
+    "id": "evac",
+    "name": "Евакуаційна машина",
+    "role": "vehicle",
+    "path": "content_glb/physical_units/evac.glb",
+    "sourceFiles": [
+      "EVAKv1.stl"
+    ],
+    "missingFiles": [],
+    "size": 3670044,
+    "bounds": [
+      0.7162961959838867,
+      0.7600000500679016,
+      0.5206092000007629
+    ],
+    "scale": 0.010541207862959997
+  }
+]

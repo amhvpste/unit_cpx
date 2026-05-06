@@ -1,13 +1,10 @@
 // Основна гра тактичної симуляції на Three.js
-const BUILD_VERSION = 'air-2026.03.19-03';
-
 class AdmiralGame {
     constructor() {
-        this.buildVersion = BUILD_VERSION;
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x718ea1);
-        this.scene.fog = new THREE.FogExp2(0x7f9eb1, 0.03);
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.scene.fog = null;
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
@@ -15,27 +12,27 @@ class AdmiralGame {
         this.renderer.setClearColor(0x000000, 0);
         
         document.getElementById('gameCanvas').appendChild(this.renderer.domElement);
-        document.title = `units-cpx ${this.buildVersion}`;
         
         // Ігрові параметри
-        this.gridSize = 10;
-        this.cellSize = 2;
+        this.gridSize = 100;
+        this.cellSize = 1;
         this.grid = [];
-        this.airGrid = [];
+        this.occupiedCells = new Map();
+        this.cellPickPlane = null;
+        this.groundMesh = null;
+        this.terrainFrameMeshes = [];
+        this.mapHeightData = null;
+        this.mapHeightSize = 128;
+        this.terrainHeightScale = 1.65;
+        this.cellHighlightMeshes = [];
+        this.orderTaskMarkerMeshes = [];
         this.units = [];
-        this.airUnits = [];
         this.selectedUnit = null;
         this.selectedCell = null;
-        this.activeLayer = 'ground';
-        this.airLayerHeight = 2.35;
-        this.gridHelpers = {};
-        this.unitIdCounter = 1;
-        this.fogAnimations = [];
-        this.referencePreviewCache = {};
         
         // Стани гри
         this.currentPlayer = 1;
-        this.phase = 'shop'; // 'shop', 'placement', 'battle', 'gameOver'
+        this.phase = 'order'; // 'order', 'placement', 'battle', 'gameOver'
         this.playerMoney = { 1: 1000, 2: 1000 };
         this.playerMoves = { 1: 3, 2: 3 };
         this.placementPhase = { 1: false, 2: false };
@@ -45,14 +42,146 @@ class AdmiralGame {
         this.battleEffects = [];
         this.isAnimatingBattles = false;
         this.purchasedUnits = { 1: [], 2: [] };
+        this.sessionOrder = {
+            situation: {
+                areaOfInterest: null,
+                executionArea: null,
+                objects: [],
+                enemyInfoPercentBySide: { 1: 50, 2: 50 }
+            },
+            orbat: { 1: [], 2: [] },
+            tasks: [],
+            endState: [],
+            support: {
+                1: { ammo: 'норма', fuel: 'норма', medevac: 'базово', repair: 'обмежено', comms: 'стійкий', reserve: 'немає' },
+                2: { ammo: 'норма', fuel: 'норма', medevac: 'базово', repair: 'обмежено', comms: 'стійкий', reserve: 'немає' }
+            },
+            readiness: {},
+            ui: {
+                activeTab: 'situation',
+                activeSide: 1,
+                activeTaskTag: 'seize',
+                activeGeometry: 'point',
+                activeSituationTool: 'areaOfInterest',
+                activeEndStateTag: 'areaControlled'
+            }
+        };
+
+        this.orderTabs = [
+            { key: 'situation', label: 'Обстановка' },
+            { key: 'orbat', label: 'ORBAT' },
+            { key: 'tasks', label: 'Завдання' },
+            { key: 'endState', label: 'Кінцевий стан' },
+            { key: 'support', label: 'Забезпечення' }
+        ];
+
+        this.orderGeometryTypes = {
+            point: { label: 'Точка' },
+            line: { label: 'Лінія' },
+            area: { label: 'Район' }
+        };
+
+        this.orderTaskTags = {
+            seize: { label: 'Захопити', color: 0x4caf50, geometry: 'area' },
+            hold: { label: 'Утримати', color: 0xff9800, geometry: 'area' },
+            defend: { label: 'Обороняти', color: 0x2196f3, geometry: 'area' },
+            recon: { label: 'Розвідати', color: 0x9cdbff, geometry: 'area' },
+            move: { label: 'Рух маршрутом', color: 0xffffff, geometry: 'line' },
+            block: { label: 'Блокувати', color: 0xfb7185, geometry: 'line' },
+            cover: { label: 'Прикрити', color: 0xfacc15, geometry: 'area' },
+            securePassage: { label: 'Забезпечити прохід', color: 0x7dd3fc, geometry: 'point' },
+            route: { label: 'Маршрут', color: 0xffffff, geometry: 'line' },
+            boundary: { label: 'Рубіж', color: 0xffd700, geometry: 'line' },
+            fireLine: { label: 'Вогневий рубіж', color: 0xff4d4d, geometry: 'line' },
+            passage: { label: 'Прохід', color: 0x7dd3fc, geometry: 'point' },
+            observation: { label: 'СП/НП', color: 0xbae6fd, geometry: 'point' },
+            commandPost: { label: 'КП/КСП', color: 0xfacc15, geometry: 'point' },
+            medevac: { label: 'Мед/евак', color: 0xf8fafc, geometry: 'point' },
+            supply: { label: 'Постачання', color: 0xc084fc, geometry: 'point' },
+            danger: { label: 'Небезпечна зона', color: 0xfb7185, geometry: 'area' }
+        };
+        this.endStateTags = {
+            areaControlled: { label: 'Район під контролем', color: 0x4caf50 },
+            lineHeld: { label: 'Рубіж утримано', color: 0xffd700 },
+            routeOpen: { label: 'Маршрут відкрито', color: 0xffffff },
+            enemyBlocked: { label: 'Противника заблоковано', color: 0xfb7185 },
+            reconDone: { label: 'Розвідку завершено', color: 0x9cdbff },
+            unitPreserved: { label: 'Підрозділ збережено', color: 0xa7f3d0 },
+            supplyMaintained: { label: 'Постачання збережено', color: 0xc084fc }
+        };
+        this.supportFields = {
+            ammo: { label: 'БК', options: ['низько', 'норма', 'посилено'] },
+            fuel: { label: 'Паливо', options: ['низько', 'норма', 'посилено'] },
+            medevac: { label: 'Медична евакуація', options: ['немає', 'базово', 'посилено'] },
+            repair: { label: 'Ремонт', options: ['немає', 'обмежено', 'повний'] },
+            comms: { label: 'Зв’язок', options: ['нестійкий', 'стійкий', 'резервований'] },
+            reserve: { label: 'Резерв', options: ['немає', 'малий', 'виділений'] }
+        };
+        this.orderReadinessGroups = {
+            combatLoad: {
+                title: 'Бойова викладка',
+                items: ['БК', 'гранати', 'вода', 'сухпай', 'ніж / мультитул']
+            },
+            protection: {
+                title: 'Індивідуальний захист',
+                items: ['бронежилет', 'плити', 'шолом', 'окуляри', 'рукавиці']
+            },
+            medical: {
+                title: 'Медицина',
+                items: ['аптечка', 'турнікети', 'бандаж', 'евакуаційна карта']
+            },
+            observation: {
+                title: 'Спостереження',
+                items: ['бінокль', 'тепловізор', 'ПНБ', 'далекомір']
+            },
+            navComms: {
+                title: 'Навігація та зв’язок',
+                items: ['радіостанція', 'частоти', 'позивні', 'карта', 'компас / GPS']
+            },
+            camouflage: {
+                title: 'Маскування',
+                items: ['сітка', 'стрічка', 'плащ', 'запасні шкарпетки']
+            },
+            support: {
+                title: 'Пункти забезпечення',
+                items: ['боєприпаси', 'паливо', 'ремонт', 'укриття', 'медпункт']
+            }
+        };
+        this.stlLoader = null;
+        this.gltfLoader = null;
+        this.stlModelCache = {};
+        this.gltfModelCache = {};
+        this.unitPreviewCache = {};
+        this.unitPreviewLoading = new Set();
+        this.referenceModelUnitsLoaded = false;
+        this.referenceModelUnitsLoading = false;
+        this.referenceTaskModels = [];
+        this.referenceTerrainModels = [];
+        this.unitModelPaths = {
+            infantry: 'references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/58-1-strilets.stl',
+            armor: 'references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/66-1-tank.stl',
+            artillery: 'references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/25-1-samokhidna-artyleriiska-batareia.stl',
+            command: 'references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/51-1-ksp-mekhanizovanoho-vzvodu.stl',
+            scout: 'references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/7-1-rozviduvalne-viddilennia.stl',
+            sniper: null
+        };
+        this.unitModelPaths = {
+            infantry: null,
+            armor: null,
+            artillery: null,
+            command: null,
+            scout: null,
+            sniper: null
+        };
         this.movementAnimations = [];
         
         // Керування камерою
-        this.cameraDistance = 17;
-        this.cameraAngle = -0.6;
-        this.cameraHeight = 14;
+        this.cameraDistance = 80;
+        this.cameraAngle = 0;
+        this.cameraHeight = 110;
         this.mouse = new THREE.Vector2();
         this.raycaster = new THREE.Raycaster();
+        this.mapPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
         this.isDragging = false;
         this.previousMousePosition = { x: 0, y: 0 };
         
@@ -83,7 +212,7 @@ class AdmiralGame {
     
     loadConfig() {
         // Завантаження конфігурації з файлу
-        const configRequest = fetch(`config.json?v=${this.buildVersion}`, { cache: 'no-store' });
+        const configRequest = fetch('config.json');
         configRequest.then((response) => response.json()).then((config) => {
                 this.config = config;
                 this.gridSize = config.gameSettings.gridSize;
@@ -114,6 +243,162 @@ class AdmiralGame {
             });
     }
     
+    loadReferenceModelUnits() {
+        if (this.referenceModelUnitsLoaded || this.referenceModelUnitsLoading || !this.config) return;
+
+        this.referenceModelUnitsLoading = true;
+        fetch('/api/reference-models')
+            .then((response) => response.ok ? response.json() : [])
+            .then((models) => {
+                const unitModels = models.filter((model) => this.isReferenceUnitModel(model));
+                this.referenceTaskModels = models.filter((model) => this.isReferenceTaskModel(model));
+                this.referenceTerrainModels = models.filter((model) => this.isReferenceTerrainModel(model));
+                this.bindBaseUnitModelPaths(unitModels);
+                const baseModelPaths = new Set(Object.values(this.unitModelPaths).filter(Boolean));
+
+                unitModels.forEach((model, index) => {
+                    if (baseModelPaths.has(model.path)) return;
+                    const unitType = `ref_${index}_${this.slugifyModelName(model.name)}`;
+                    if (this.config.unitTypes[unitType]) return;
+
+                    this.config.unitTypes[unitType] = this.createReferenceUnitConfig(model);
+                    this.unitModelPaths[unitType] = model.path;
+                });
+
+                this.referenceModelUnitsLoaded = true;
+                this.referenceModelUnitsLoading = false;
+                this.addLog(`APP-6/NATO: ${unitModels.length} юнітів, ${this.referenceTaskModels.length} знаків задач, ${this.referenceTerrainModels.length} об'єктів місцевості`, 'place-log');
+                this.updateUI();
+            })
+            .catch(() => {
+                this.referenceModelUnitsLoading = false;
+                this.addLog('STL-каталог недоступний, використовується базовий набір моделей', 'combat-log');
+            });
+    }
+
+    bindBaseUnitModelPaths(unitModels) {
+        const matchByName = (pattern) => {
+            const model = unitModels.find((candidate) => pattern.test(candidate.name.toLowerCase()));
+            return model ? model.path : null;
+        };
+        const matchById = (id) => {
+            const model = unitModels.find((candidate) => candidate.id === id);
+            return model ? model.path : null;
+        };
+        const matchExactName = (names) => {
+            const normalizedNames = names.map((name) => name.toLowerCase());
+            for (const name of normalizedNames) {
+                const model = unitModels.find((candidate) => candidate.name.toLowerCase() === name);
+                if (model) return model.path;
+            }
+            return null;
+        };
+
+        this.unitModelPaths.infantry = matchById('infantry-standing')
+            || matchExactName(['Soltat_stoiachi.glb', 'Soldat_na_kolintsi.glb', 'Soldat_lezhachi.glb'])
+            || matchByName(/58-1-strilets|pikhotne-viddilennia|infantry/);
+        this.unitModelPaths.armor = matchById('tank')
+            || matchExactName(['Tank.glb'])
+            || matchByName(/66-1-tank|tank\.(stl|glb)/);
+        this.unitModelPaths.artillery = matchById('himars')
+            || matchExactName(['Himars_1.glb', 'M777_A.glb', 'Grad.glb'])
+            || matchByName(/25-1-samokhidna-artyleriiska-batareia|artyleri|m777|grad|himars/);
+        this.unitModelPaths.command = matchById('signalman')
+            || matchExactName(['Zviazkivets.glb'])
+            || matchByName(/51-1-ksp-mekhanizovanoho-vzvodu|ksp|kp_/);
+        this.unitModelPaths.scout = matchById('bpla-operators')
+            || matchExactName(['BPLA_operators.glb', 'mavik.glb'])
+            || matchByName(/7-1-rozviduvalne-viddilennia|rozvid|bpla|uav/);
+        this.unitModelPaths.sniper = matchById('sniper')
+            || matchExactName(['snajperPr.glb', 'snajperr.glb'])
+            || matchByName(/snajper|sniper/);
+    }
+
+    isReferenceUnitModel(model) {
+        if (model.role) return model.role === 'unit';
+
+        const key = `${model.name} ${model.category} ${model.path}`.toLowerCase();
+        if (/\/arrows\//.test(key) || /08 .*arrows/.test(key)) return false;
+        if (/nastup|ataka|napriam|rubizh|styk|perednii|zasidka|rozvidka boiem|vohnevyi|planuvalnyy/.test(key)) return false;
+        if (/minne|zahorod|drotiane|transhey|blindazh|orientyr|vysota|sposterezhnii|plashka/.test(key)) return false;
+        return /\/machinery\/|\/soldiers\/|\/0[1-6] [^/]+\//.test(key);
+    }
+
+    isReferenceTaskModel(model) {
+        if (model.role) return model.role === 'task';
+
+        const key = `${model.name} ${model.category} ${model.path}`.toLowerCase();
+        return /\/arrows\//.test(key)
+            || /08 .*arrows/.test(key)
+            || /nastup|ataka|napriam|rubizh|styk|perednii|zasidka|rozvidka boiem|vohnevyi|planuvalnyy/.test(key);
+    }
+
+    isReferenceTerrainModel(model) {
+        if (model.role) return model.role === 'terrain';
+
+        const key = `${model.name} ${model.category} ${model.path}`.toLowerCase();
+        return /\/buildings\/|\/environment\//.test(key)
+            || /minne|zahorod|drotiane|transhey|blindazh|orientyr|vysota|sposterezhnii|plashka/.test(key);
+    }
+
+    slugifyModelName(name) {
+        return name
+            .replace(/\.[^.]+$/, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '')
+            .slice(0, 42) || 'model';
+    }
+
+    humanizeModelName(name) {
+        return name
+            .replace(/\.[^.]+$/, '')
+            .replace(/[-_]+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    createReferenceUnitConfig(model) {
+        const key = `${model.name} ${model.category} ${model.path}`.toLowerCase();
+        const config = {
+            name: this.humanizeModelName(model.name),
+            cost: 0,
+            hitpoints: 2,
+            strength: 2,
+            movement: 1,
+            model: /\.glb$/i.test(model.path) ? 'glb' : 'stl',
+            description: `${/\.glb$/i.test(model.path) ? 'GLB' : 'STL'}: ${model.category}`,
+            referencePath: model.path,
+            referenceCategory: model.category
+        };
+
+        if (/tank|танк/.test(key)) {
+            Object.assign(config, { hitpoints: 6, strength: 6, movement: 2, description: 'Танк / броньована ударна одиниця' });
+        } else if (/bmp|btr|брон|mechaniz|mekhaniz|механ/.test(key)) {
+            Object.assign(config, { hitpoints: 4, strength: 4, movement: 2, description: 'Механізований підрозділ / бронегрупа' });
+        } else if (/samokhidna|artyleri|artyl|dyvizion|battery|batareia|арт/.test(key)) {
+            Object.assign(config, { hitpoints: 3, strength: 6, movement: 1, description: 'Артилерія / вогнева підтримка' });
+        } else if (/minomet|mortar|міном/.test(key)) {
+            Object.assign(config, { hitpoints: 2, strength: 4, movement: 1, description: 'Мінометний підрозділ' });
+        } else if (/bpla|uav|drone|бпла|rozvid|розвід/.test(key)) {
+            Object.assign(config, { hitpoints: 2, strength: 1, movement: 3, description: 'Розвідка / спостереження' });
+        } else if (/ksp|kp_|command|komand|команд/.test(key)) {
+            Object.assign(config, { hitpoints: 2, strength: 1, movement: 1, description: 'КСП / командний пункт' });
+        } else if (/ptrk|птрк|protytank/.test(key)) {
+            Object.assign(config, { hitpoints: 2, strength: 5, movement: 1, description: 'Протитанковий засіб' });
+        } else if (/kulemet|machine gun|кулем/.test(key)) {
+            Object.assign(config, { hitpoints: 2, strength: 3, movement: 1, description: 'Кулеметний розрахунок' });
+        } else if (/sniper|снайп/.test(key)) {
+            Object.assign(config, { hitpoints: 1, strength: 4, movement: 1, description: 'Снайпер / точкова вогнева дія' });
+        } else if (/strilets|pihot|pikhot|infantry|піх|стріл/.test(key)) {
+            Object.assign(config, { hitpoints: 2, strength: 2, movement: 1, description: 'Піхота / стрілецький підрозділ' });
+        } else if (/mine|minne|tm-62|wire|barbed|blindazh|okop|trench|rubizh|arrow|napriam|ataka|загород|рубіж|стріл/.test(key)) {
+            Object.assign(config, { hitpoints: 1, strength: 0, movement: 0, description: 'Інженерний / тактичний маркер місцевості' });
+        }
+
+        return config;
+    }
+
     setupLighting() {
         const ambientLight = new THREE.AmbientLight(0xdcebf5, 0.72);
         this.scene.add(ambientLight);
@@ -222,7 +507,7 @@ class AdmiralGame {
                 const cellMaterial = new THREE.MeshLambertMaterial({
                     color: (x + z) % 2 === 0 ? 0x4A5F4A : 0x5A6F5A,
                     transparent: true,
-                    opacity: 0.1
+                    opacity: this.getGridBaseOpacity()
                 });
                 const cell = new THREE.Mesh(cellGeometry, cellMaterial);
                 cell.position.set(this.toWorldCoord(x), 0, this.toWorldCoord(z));
@@ -263,37 +548,106 @@ class AdmiralGame {
             this.resetGame();
         });
 
-        const toggleLayerBtn = document.getElementById('toggleLayerBtn');
-        if (toggleLayerBtn) {
-            toggleLayerBtn.addEventListener('click', () => {
-                this.toggleActiveLayer();
-            });
-        }
-
-        const referenceBtn = document.getElementById('referenceBtn');
-        const closeReferenceBtn = document.getElementById('closeReferenceBtn');
-        const referenceOverlay = document.getElementById('referenceOverlay');
-        if (referenceBtn) {
-            referenceBtn.addEventListener('click', () => this.toggleReferenceOverlay(true));
-        }
-        if (closeReferenceBtn) {
-            closeReferenceBtn.addEventListener('click', () => this.toggleReferenceOverlay(false));
-        }
-        if (referenceOverlay) {
-            referenceOverlay.addEventListener('click', (event) => {
-                if (event.target === referenceOverlay) {
-                    this.toggleReferenceOverlay(false);
-                }
-            });
-        }
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                this.toggleReferenceOverlay(false);
-            }
-        });
     }
     
+    onMouseMove(event) {
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        
+        // Рух камери тільки при натиснутому колесі
+        if (this.isDragging) {
+            const deltaX = event.clientX - this.previousMousePosition.x;
+            const deltaY = event.clientY - this.previousMousePosition.y;
+            
+            this.cameraAngle += deltaX * 0.01;
+            this.cameraHeight = Math.max(2, Math.min(180, this.cameraHeight - deltaY * 0.25));
+            
+            this.updateCameraPosition();
+            
+            this.previousMousePosition = { x: event.clientX, y: event.clientY };
+            return; // Не обробляємо підсвічування при русі камери
+        }
+        
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+        
+        // Завжди скидаємо попереднє підсвічування при русі миші
+        if (this.selectedCell) {
+            const isSelectedUnitCell = this.selectedUnit && 
+                this.selectedCell.userData.x === this.selectedUnit.userData.x && 
+                this.selectedCell.userData.z === this.selectedUnit.userData.z;
+            
+            if (!isSelectedUnitCell) {
+                this.selectedCell.material.color.setHex((this.selectedCell.userData.x + this.selectedCell.userData.z) % 2 === 0 ? 0x4A5F4A : 0x5A6F5A);
+                this.selectedCell.material.opacity = 0.1;
+                this.selectedCell = null;
+            }
+        }
+        
+        // НЕ скидаємо підсвітку можливих ходів якщо є вибрана фішка
+        if (!this.selectedUnit) {
+            this.clearMovementHighlights();
+        }
+        
+        if (intersects.length > 0) {
+            const object = intersects[0].object;
+            
+            // Пошук клітинки або фішки
+            let targetObject = object;
+            while (targetObject.parent && !targetObject.userData.type && !targetObject.userData.player) {
+                targetObject = targetObject.parent;
+            }
+            
+            if (targetObject.userData.type === 'cell') {
+                // Підсвічування тільки в фазі розміщення
+                if (this.phase === 'placement') {
+                    this.selectedCell = targetObject;
+                    targetObject.material.color.setHex(0xFFD700); // Яскраво-золотий колір
+                    targetObject.material.opacity = 0.4; // Більш яскраве підсвічування
+                }
+            } else if (targetObject.userData.player) {
+                // Якщо наводимо на фішку, підсвітити її клітинку
+                const unitX = targetObject.userData.x;
+                const unitZ = targetObject.userData.z;
+                const cell = this.grid[unitX][unitZ].mesh;
+                
+                if (cell) {
+                    this.selectedCell = cell;
+                    cell.material.color.setHex(0xFF6B35); // Яскраво-помаранчевий
+                    cell.material.opacity = 0.5; // Ще яскравіше для фішки
+                }
+                
+                // Показати можливі ходи для фішки поточного гравця
+                if (targetObject.userData.player === this.currentPlayer && !targetObject.userData.moved) {
+                    this.showMovementHighlights(targetObject);
+                }
+                
+                // Показати інформацію про фішку
+                this.showUnitInfo(targetObject);
+            }
+        } else {
+            // Якщо нічого не наведено, скидаємо попереднє підсвічування
+            if (this.selectedCell) {
+                const isSelectedUnitCell = this.selectedUnit && 
+                    this.selectedCell.userData.x === this.selectedUnit.userData.x && 
+                    this.selectedCell.userData.z === this.selectedUnit.userData.z;
+                
+                if (!isSelectedUnitCell) {
+                    this.selectedCell.material.color.setHex((this.selectedCell.userData.x + this.selectedCell.userData.z) % 2 === 0 ? 0x4A5F4A : 0x5A6F5A);
+                    this.selectedCell.material.opacity = 0.1;
+                    this.selectedCell = null;
+                }
+            }
+            
+            // Скидаємо інформацію про фішку
+            this.hideUnitInfo();
+            
+            // Якщо нічого не наведено, скидаємо підсвітку ходів
+            if (this.selectedUnit) {
+                this.showMovementHighlights(this.selectedUnit); // Відновлюємо зелені клітинки
+            }
+        }
+    }
     
     onMouseDown(event) {
         if (event.button === 1) { // Середня кнопка (колесо)
@@ -311,9 +665,10 @@ class AdmiralGame {
     
     onMouseWheel(event) {
         event.preventDefault();
-        const fov = this.camera.fov + event.deltaY * 0.05;
-        this.camera.fov = Math.max(30, Math.min(90, fov));
-        this.camera.updateProjectionMatrix();
+        const zoomFactor = event.deltaY > 0 ? 1.12 : 0.88;
+        this.cameraDistance = Math.max(3, Math.min(160, this.cameraDistance * zoomFactor));
+        this.cameraHeight = Math.max(2, Math.min(180, this.cameraHeight * zoomFactor));
+        this.updateCameraPosition();
     }
     
     onWindowResize() {
@@ -322,16 +677,131 @@ class AdmiralGame {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
     
+    onMouseClick(event) {
+        if (this.isAnimatingBattles) return;
+        
+        this.raycaster.setFromCamera(this.mouse, this.camera);
+        const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+        
+        if (intersects.length > 0) {
+            const object = intersects[0].object;
+            
+            // Пошук клітинки або фішки
+            let targetObject = object;
+            while (targetObject.parent && !targetObject.userData.type && !targetObject.userData.player) {
+                targetObject = targetObject.parent;
+            }
+            
+            const userData = targetObject.userData;
+            
+            if (userData.type === 'cell') {
+                this.handleCellClick(userData.x, userData.z);
+            } else if (userData.player) {
+                // Шукаємо батьківський group для фішки
+                let unitGroup = targetObject;
+                while (unitGroup.parent && !unitGroup.userData.strength) {
+                    unitGroup = unitGroup.parent;
+                }
+                this.handleUnitClick(unitGroup);
+            }
+        } else {
+            // Якщо клікнули в пусте місце - знімаємо вибір
+            if (this.selectedUnit) {
+                this.selectedUnit.children[0].material.emissive = new THREE.Color(0x000000);
+                this.selectedUnit = null;
+                this.clearMovementHighlights();
+                this.addLog('Вибір фішки знято', 'move-log');
+            }
+        }
+    }
+    
+    handleCellClick(x, z) {
+        if (this.phase === 'placement') {
+            this.placeUnit(x, z);
+        } else if (this.phase === 'battle' && this.selectedUnit) {
+            // Перевіряємо чи це дозволена клітинка для руху
+            const unitX = this.selectedUnit.userData.x;
+            const unitZ = this.selectedUnit.userData.z;
+            const distance = Math.abs(x - unitX) + Math.abs(z - unitZ);
+            const maxDistance = this.config.unitTypes[this.selectedUnit.userData.type].movement;
+            
+            if (distance <= maxDistance && this.grid[x][z].unit === null) {
+                this.moveUnit(this.selectedUnit, x, z);
+            } else if (distance > maxDistance) {
+                this.addLog('Занадто далеко для цієї фішки!', 'combat-log');
+            } else if (this.grid[x][z].unit !== null) {
+                this.addLog('Клітинка зайнята!', 'combat-log');
+            }
+        }
+    }
+    
+    handleUnitClick(unit) {
+        if (this.phase === 'placement') {
+            this.addLog('Неможливо вибрати фішку під час розміщення!', 'combat-log');
+            return;
+        }
+        
+        if (this.phase === 'battle' && unit.userData.player === this.currentPlayer && !unit.userData.moved) {
+            this.selectUnit(unit);
+        } else if (this.phase === 'battle' && unit.userData.player === this.currentPlayer && unit.userData.moved) {
+            this.addLog('Ця фішка вже рухалася в цьому ході!', 'combat-log');
+        } else if (this.phase === 'battle' && unit.userData.player !== this.currentPlayer) {
+            this.addLog('Ця фішка належить іншому гравцю!', 'combat-log');
+        }
+    }
+    
+    selectUnit(unit) {
+        // Скидаємо попередній вибір
+        this.clearMovementHighlights();
+        this.selectedUnit = unit;
+        
+        // Підсвічуємо клітинку фішки
+        const cell = this.grid[unit.userData.x][unit.userData.z].mesh;
+        cell.material.color.setHex(0xFF6B35);
+        cell.material.opacity = 0.5;
+        
+        // Показуємо можливі ходи
+        this.showMovementHighlights(unit);
+        
+        this.addLog(`Вибрано: ${this.config.unitTypes[unit.userData.type].name}`, 'move-log');
+    }
+    
+    showMovementHighlights(unit) {
+        this.clearMovementHighlights();
+        
+        const unitX = unit.userData.x;
+        const unitZ = unit.userData.z;
+        const maxDistance = this.config.unitTypes[unit.userData.type].movement;
+        
+        for (let x = 0; x < this.gridSize; x++) {
+            for (let z = 0; z < this.gridSize; z++) {
+                const distance = Math.abs(x - unitX) + Math.abs(z - unitZ);
+                if (distance <= maxDistance && this.grid[x][z].unit === null) {
+                    const cell = this.grid[x][z].mesh;
+                    cell.material.color.setHex(0x00FF00);
+                    cell.material.opacity = 0.3;
+                }
+            }
+        }
+    }
+    
+    clearMovementHighlights() {
+        for (let x = 0; x < this.gridSize; x++) {
+            for (let z = 0; z < this.gridSize; z++) {
+                const cell = this.grid[x][z].mesh;
+                if (cell.material.color.getHex() === 0x00FF00) {
+                    cell.material.color.setHex((x + z) % 2 === 0 ? 0x4A5F4A : 0x5A6F5A);
+                    cell.material.opacity = 0.1;
+                }
+            }
+        }
+    }
     
     placeUnit(x, z) {
         if (this.phase !== 'placement') return;
-
-        const unplacedUnit = this.getNextPlacementUnit();
-        const domain = unplacedUnit ? this.getDomainForType(unplacedUnit.type) : 'ground';
-        const grid = this.getGridByLayer(domain);
         
         // Перевірка чи клітинка вільна
-        if (grid[x][z].unit !== null) {
+        if (this.getGridCell(x, z).unit !== null) {
             this.addLog('Клітинка зайнята!', 'combat-log');
             return;
         }
@@ -343,9 +813,10 @@ class AdmiralGame {
             return;
         }
         
-        // Перевірка чи є куплена фішка для розміщення
+        // Перевірка чи є підрозділ зі складу бойового наказу для розміщення
+        const unplacedUnit = this.purchasedUnits[this.currentPlayer].find(u => !u.placed);
         if (!unplacedUnit) {
-            this.addLog('Спочатку купіть фішку в магазині!', 'combat-log');
+            this.addLog('Спочатку додайте підрозділ до складу бойового наказу.', 'combat-log');
             return;
         }
         
@@ -353,24 +824,270 @@ class AdmiralGame {
         const unit = this.createUnit(unplacedUnit.type, x, z, this.currentPlayer);
         
         // Оновлення сітки
-        grid[x][z].unit = unit;
-        this.getUnitsByLayer(domain).push(unit);
+        this.getGridCell(x, z).unit = unit;
+        this.units.push(unit);
         
         // Маркуємо фішку як розміщену
         unplacedUnit.placed = true;
+        this.sessionOrder.orbat[this.currentPlayer] = this.purchasedUnits[this.currentPlayer].map((orderUnit) => ({
+            type: orderUnit.type,
+            name: orderUnit.config.name,
+            placed: orderUnit.placed
+        }));
         
-        const layerLabel = domain === 'air' ? 'повітряному' : 'земному';
-        this.addLog(`Гравець ${this.currentPlayer} розмістив ${unplacedUnit.config.name} на (${x}, ${z}) у ${layerLabel} шарі`, 'place-log');
-
-        this.refreshLayerVisualState();
+        this.addLog(`Гравець ${this.currentPlayer} розмістив ${unplacedUnit.config.name} на (${x}, ${z})`, 'place-log');
+        
         this.updateUI();
     }
     
+    createUnit(type, x, z, player) {
+        const unitConfig = this.config.unitTypes[type];
+        let geometry;
+        
+        switch (unitConfig.model) {
+            case 'cube':
+                geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+                break;
+            case 'pyramid':
+                geometry = new THREE.ConeGeometry(0.8, 1.6, 4);
+                break;
+            case 'cylinder':
+                geometry = new THREE.CylinderGeometry(0.6, 0.6, 1.2);
+                break;
+            case 'octahedron':
+                geometry = new THREE.OctahedronGeometry(0.8);
+                break;
+            case 'sphere':
+                geometry = new THREE.SphereGeometry(0.6);
+                break;
+            case 'tetrahedron':
+                geometry = new THREE.TetrahedronGeometry(0.8);
+                break;
+            default:
+                geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+        }
+        
+        const material = new THREE.MeshLambertMaterial({
+            color: player === 1 ? 0x2E7D32 : 0xD32F2F
+        });
+        
+        const unit = new THREE.Mesh(geometry, material);
+        unit.position.set(this.toWorldCoord(x), 0.4, this.toWorldCoord(z));
+        unit.castShadow = true;
+        unit.receiveShadow = true;
+        unit.userData = {
+            type: type,
+            player: player,
+            x: x,
+            z: z,
+            moved: false,
+            hitpoints: unitConfig.hitpoints,
+            maxHitpoints: unitConfig.hitpoints,
+            strength: unitConfig.strength
+        };
+        
+        this.scene.add(unit);
+        return unit;
+    }
+    
+    moveUnit(unit, targetX, targetZ) {
+        const oldX = unit.userData.x;
+        const oldZ = unit.userData.z;
+        
+        // Оновлення сітки
+        this.getGridCell(oldX, oldZ).unit = null;
+        this.getGridCell(targetX, targetZ).unit = unit;
+        
+        // Оновлення позиції фішки
+        unit.position.set(this.toWorldCoord(targetX), 0.4, this.toWorldCoord(targetZ));
+        unit.userData.x = targetX;
+        unit.userData.z = targetZ;
+        unit.userData.moved = true;
+        
+        // Перевірка на бій
+        const targetUnit = this.grid[targetX][targetZ].unit;
+        if (targetUnit && targetUnit !== unit) {
+            this.startBattle(unit, targetUnit);
+        }
+        
+        this.clearMovementHighlights();
+        this.selectUnit(unit);
+    }
+    
+    startBattle(attacker, defender) {
+        this.battleAnimations.push({
+            attacker: attacker,
+            defender: defender,
+            startTime: Date.now()
+        });
+    }
+    
+    animateBattles() {
+        if (this.battleAnimations.length === 0) {
+            this.isAnimatingBattles = false;
+            document.getElementById('endTurnBtn').disabled = false;
+            this.updateUI();
+            return;
+        }
+        
+        const battle = this.battleAnimations[0];
+        const elapsed = Date.now() - battle.startTime;
+        
+        if (elapsed > 1000) { // 1 секунда на бій
+            this.resolveBattle(battle);
+            this.battleAnimations.shift();
+        }
+        
+        requestAnimationFrame(() => this.animateBattles());
+    }
+    
+    resolveBattle(battle) {
+        const attacker = battle.attacker;
+        const defender = battle.defender;
+        
+        const attackerPower = attacker.userData.strength;
+        const defenderPower = defender.userData.strength;
+        
+        let winner, loser;
+        if (attackerPower > defenderPower) {
+            winner = attacker;
+            loser = defender;
+        } else if (defenderPower > attackerPower) {
+            winner = defender;
+            loser = attacker;
+        } else {
+            // Нічия
+            winner = null;
+            loser = null;
+        }
+        
+        if (winner && loser) {
+            // Віднімаємо хітпоінти
+            loser.userData.hitpoints -= winner.userData.strength;
+            
+            if (loser.userData.hitpoints <= 0) {
+                // Видаляємо фішку
+                this.removeUnit(loser);
+                this.losses[loser.userData.player]++;
+            } else {
+                // Пошкоджуємо фішку
+                loser.userData.hitpoints = Math.max(1, loser.userData.hitpoints);
+            }
+            
+            this.addLog(`${winner.userData.player === 1 ? 'Гравець 1' : 'Гравець 2'} переміг у бою!`, 'combat-log');
+        } else {
+            this.addLog('Бій завершився внічию!', 'combat-log');
+        }
+        
+        this.updateUI();
+        this.checkVictory();
+    }
+    
+    removeUnit(unit) {
+        const index = this.units.indexOf(unit);
+        if (index > -1) {
+            this.units.splice(index, 1);
+        }
+        
+        this.grid[unit.userData.x][unit.userData.z].unit = null;
+        this.scene.remove(unit);
+    }
+    
+    endTurn() {
+        if (this.phase === 'order') {
+            // Перехід до фази розміщення
+            this.startPlacement();
+        } else if (this.phase === 'placement') {
+            this.placementPhase[this.currentPlayer] = false;
+            this.addLog(`Player ${this.currentPlayer} finished placement.`, 'place-log');
+
+            if (this.currentPlayer === 1) {
+                this.currentPlayer = 2;
+                this.phase = 'placement';
+                this.placementPhase[2] = true;
+                this.addLog('Player 2 starts placement from the approved battle order.', 'place-log');
+            } else {
+                this.phase = 'battle';
+                this.currentPlayer = 1;
+                this.units.forEach((unit) => {
+                    unit.userData.moved = false;
+                });
+                this.addLog('Placement is over. Battle begins.', 'place-log');
+            }
+
+            this.updateUI();
+            return;
+            // Завершення розміщення для поточного гравця
+            this.placementPhase[this.currentPlayer] = false;
+            this.addLog(`Гравець ${this.currentPlayer} завершив розміщення фішок. Можна завершити хід.`, 'place-log');
+            
+            // Перевіряємо чи обидва гравці завершили розміщення
+            if (this.placementPhase[1] === false && this.placementPhase[2] === false) {
+                this.phase = 'battle';
+                this.addLog('Розміщення завершено! Починається фаза битви.', 'place-log');
+            }
+            
+            // Перехід ходу до наступного гравця
+            this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+        } else if (this.phase === 'battle') {
+            const finishedPlayer = this.currentPlayer;
+            this.addLog(`Player ${finishedPlayer} finished the turn.`, 'move-log');
+            this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+            this.units
+                .filter((unit) => unit.userData.player === this.currentPlayer)
+                .forEach((unit) => {
+                    unit.userData.moved = false;
+                });
+            this.updateUI();
+            return;
+            // Завершення ходу в фазі битви
+            this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+            this.addLog(`Гравець ${this.currentPlayer === 1 ? 2 : 1} завершив хід.`, 'move-log');
+            
+            // Перевіряємо чи обидва гравці завершили хід
+            const player1Units = this.units.filter(u => u.userData.player === 1);
+            const player2Units = this.units.filter(u => u.userData.player === 2);
+            
+            // Скидаємо рух для всіх фішок нового гравця
+            player1Units.forEach(unit => {
+                unit.userData.moved = false;
+            });
+            
+            // Якщо обидва гравці завершили хід, запускаємо анімацію боїв
+            if (this.allUnitsMoved()) {
+                this.startBattleAnimations();
+            }
+        }
+        
+        this.updateUI();
+    }
+    
+    startPlacement() {
+        const unplacedUnits = this.purchasedUnits[this.currentPlayer].filter((unit) => !unit.placed);
+        if (unplacedUnits.length === 0) {
+            this.addLog('Define at least one unit in the battle order before placement.', 'combat-log');
+            return;
+        }
+
+        this.phase = 'placement';
+        this.placementPhase[this.currentPlayer] = true;
+        this.addLog(`Player ${this.currentPlayer} starts placement. Left to place: ${unplacedUnits.length}`, 'place-log');
+        this.updateUI();
+        return;
+        if (this.purchasedUnits[this.currentPlayer].length === 0) {
+            this.addLog('Спочатку купіть хоча б одну фішку!', 'combat-log');
+            return;
+        }
+        
+        this.phase = 'placement';
+        this.placementPhase[this.currentPlayer] = true;
+        this.addLog(`Гравець ${this.currentPlayer} починає розміщення фішок`, 'place-log');
+        this.updateUI();
+    }
     
     checkVictory() {
-        const allUnits = [...this.units, ...this.airUnits];
-        const player1Units = allUnits.filter(u => u.userData.player === 1).length;
-        const player2Units = allUnits.filter(u => u.userData.player === 2).length;
+        const player1Units = this.units.filter(u => u.userData.player === 1).length;
+        const player2Units = this.units.filter(u => u.userData.player === 2).length;
         
         if (player1Units === 0) {
             this.phase = 'gameOver';
@@ -385,23 +1102,20 @@ class AdmiralGame {
     
     resetGame() {
         // Видалення всіх фішок
-        [...this.units, ...this.airUnits].forEach(unit => {
+        this.units.forEach(unit => {
             this.scene.remove(unit);
         });
         this.units = [];
-        this.airUnits = [];
         
         // Очищення сітки
-        for (let x = 0; x < this.gridSize; x++) {
-            for (let z = 0; z < this.gridSize; z++) {
-                this.grid[x][z].unit = null;
-                this.airGrid[x][z].unit = null;
-            }
-        }
+        this.occupiedCells.clear();
+        this.clearMovementHighlights();
+        this.orderTaskMarkerMeshes.forEach((mesh) => this.scene.remove(mesh));
+        this.orderTaskMarkerMeshes = [];
         
         // Скидання станів гри
         this.currentPlayer = 1;
-        this.phase = 'shop';
+        this.phase = 'order';
         this.playerMoney = { 1: 1000, 2: 1000 };
         this.playerMoves = { 1: 3, 2: 3 };
         this.placementPhase = { 1: false, 2: false };
@@ -410,20 +1124,44 @@ class AdmiralGame {
         this.battleAnimations = [];
         this.isAnimatingBattles = false;
         this.purchasedUnits = { 1: [], 2: [] };
+        this.sessionOrder.situation.areaOfInterest = null;
+        this.sessionOrder.situation.executionArea = null;
+        this.sessionOrder.situation.objects = [];
+        this.sessionOrder.tasks = [];
+        this.sessionOrder.endState = [];
+        this.sessionOrder.orbat = { 1: [], 2: [] };
+        this.sessionOrder.readiness = {};
+        this.sessionOrder.ui.activeTab = 'situation';
+        this.sessionOrder.ui.activeSide = 1;
+        this.renderOrderTaskMarkers();
         this.selectedUnit = null;
         this.selectedCell = null;
-        this.activeLayer = 'ground';
         
         // Очищення журналу
         document.getElementById('logContent').innerHTML = '';
-        this.refreshLayerVisualState();
         
-        this.addLog('Гру скинуто! Гравець 1 купує фішки.', 'place-log');
+        this.addLog('Сесію скинуто. Сформуйте бойовий наказ і склад сторін.', 'place-log');
         this.updateUI();
     }
     
     getBoardCenterOffset() {
         return 0;
+    }
+
+    getGridBaseOpacity() {
+        return this.gridSize >= 80 ? 0.035 : 0.18;
+    }
+
+    cellKey(x, z) {
+        return `${x}:${z}`;
+    }
+
+    getGridCell(x, z) {
+        const key = this.cellKey(x, z);
+        if (!this.occupiedCells.has(key)) {
+            this.occupiedCells.set(key, { mesh: null, unit: null });
+        }
+        return this.occupiedCells.get(key);
     }
 
     toWorldCoord(index) {
@@ -436,15 +1174,9 @@ class AdmiralGame {
         
         this.camera.position.set(x, this.cameraHeight, z);
         this.camera.lookAt(0, 0, 0);
-        this.updateUnitPlacards();
     }
     
     showUnitInfo(unit) {
-        if (this.phase === 'battle' && unit.userData.player !== this.currentPlayer && !this.isCellVisibleToPlayer(unit.userData.x, unit.userData.z)) {
-            this.hideUnitInfo();
-            return;
-        }
-
         const unitType = unit.userData.type;
         const unitConfig = this.config.unitTypes[unitType];
         const isOwnUnit = unit.userData.player === this.currentPlayer;
@@ -458,7 +1190,6 @@ class AdmiralGame {
                     ${unitConfig.name} ${isOwnUnit ? '(Ваша)' : '(Ворожа)'}
                 </h4>
                 <div><strong>Гравець:</strong> ${unit.userData.player}</div>
-                <div><strong>Ціна:</strong> ${unitConfig.cost} монет</div>
                 <div><strong>Хітпоінти:</strong> ${unitConfig.hitpoints}</div>
                 <div><strong>Сила:</strong> ${unitConfig.strength}</div>
                 <div><strong>Швидкість:</strong> ${unitConfig.movement} клітинок</div>
@@ -487,14 +1218,13 @@ class AdmiralGame {
     }
     
     updateUI() {
-        const referenceCards = document.getElementById('referenceCards');
-        if (this.config && referenceCards && referenceCards.children.length === 0) {
-            this.renderReferenceCatalog();
+        if (this.config && !this.referenceModelUnitsLoaded && !this.referenceModelUnitsLoading) {
+            this.loadReferenceModelUnits();
         }
+
         // Оновлення інформації про гравців
-        const allUnits = [...this.units, ...this.airUnits];
-        const player1Units = allUnits.filter(u => u.userData.player === 1).length;
-        const player2Units = allUnits.filter(u => u.userData.player === 2).length;
+        const player1Units = this.units.filter(u => u.userData.player === 1).length;
+        const player2Units = this.units.filter(u => u.userData.player === 2).length;
         
         document.getElementById('player1Units').textContent = player1Units;
         document.getElementById('player2Units').textContent = player2Units;
@@ -503,12 +1233,12 @@ class AdmiralGame {
         document.getElementById('player1Losses').textContent = `Втрати: ${this.losses[1]}`;
         document.getElementById('player2Losses').textContent = `Втрати: ${this.losses[2]}`;
         
-        // Оновлення грошей
-        document.getElementById('player1Money').textContent = `${this.playerMoney[1]} монет`;
-        document.getElementById('player2Money').textContent = `${this.playerMoney[2]} монет`;
+        // Оновлення ресурсного стану сторін
+        document.getElementById('player1Money').textContent = 'базовий';
+        document.getElementById('player2Money').textContent = 'базовий';
         
         // Показуємо/ховаємо панелі залежно від фази
-        if (this.phase === 'shop') {
+        if (this.phase === 'order') {
             document.getElementById('player1Info').style.display = 'block';
             document.getElementById('player2Info').style.display = 'block';
             document.getElementById('unitShop').style.display = 'block';
@@ -531,33 +1261,25 @@ class AdmiralGame {
         }
         
         // Оновлення активного гравця (тільки візуальне підсвічування)
-        if (this.phase !== 'shop') {
+        if (this.phase !== 'order') {
             document.getElementById('player1Info').classList.toggle('active-player', this.currentPlayer === 1);
             document.getElementById('player2Info').classList.toggle('active-player', this.currentPlayer === 2);
         }
         
         // Оновлення стану гри
-        const phaseText = this.phase === 'shop' ? 'Магазин' : 
+        const phaseText = this.phase === 'order' ? 'Бойовий наказ' : 
                          this.phase === 'placement' ? 'Розміщення фішок' : 
                          this.phase === 'battle' ? 'Битва' : 
                          this.phase === 'gameOver' ? 'Гру завершено' : 'Невідомий стан';
         document.getElementById('currentPhase').textContent = phaseText;
-        const buildVersionLabel = document.getElementById('buildVersionLabel');
-        if (buildVersionLabel) {
-            buildVersionLabel.textContent = this.buildVersion;
-        }
-        const activeLayerLabel = document.getElementById('activeLayerLabel');
-        if (activeLayerLabel) {
-            activeLayerLabel.textContent = this.getLayerLabel(this.getInteractionLayer());
-        }
         
         // Оновлення центрової інформації про хід
         const currentTurnElement = document.getElementById('currentTurn');
         if (this.phase === 'gameOver') {
             currentTurnElement.textContent = 'Гру завершено!';
             currentTurnElement.style.color = '#ff6b6b';
-        } else if (this.phase === 'shop') {
-            currentTurnElement.textContent = `Гравець ${this.currentPlayer} купує фішки`;
+        } else if (this.phase === 'order') {
+            currentTurnElement.textContent = 'Налаштування сесії: бойовий наказ';
             currentTurnElement.style.color = this.currentPlayer === 1 ? '#4CAF50' : '#FF9800';
         } else {
             currentTurnElement.textContent = `Ваш хід - Гравець ${this.currentPlayer}`;
@@ -565,17 +1287,24 @@ class AdmiralGame {
         }
         document.getElementById('turnCount').textContent = `Хід №${this.turnNumber}`;
         
-        // Оновлення магазину фішок
+        // Оновлення панелі бойового наказу
         const shopCurrentPlayer = document.getElementById('shopCurrentPlayer');
         const shopMoneyInfo = document.getElementById('shopMoneyInfo');
-        if (shopCurrentPlayer) {
-            shopCurrentPlayer.textContent = `Гравець ${this.currentPlayer} купує фішки`;
-        }
-        if (shopMoneyInfo) {
-            shopMoneyInfo.textContent = `Бюджет: ${this.playerMoney[this.currentPlayer]} монет`;
+
+        if (this.phase === 'order') {
+            document.getElementById('currentPhase').textContent = 'Бойовий наказ';
+            currentTurnElement.textContent = 'Налаштування сесії: бойовий наказ';
+            currentTurnElement.style.color = '#FFD700';
+            if (shopCurrentPlayer) {
+                shopCurrentPlayer.textContent = 'Локальний прототип: гравці працюють по черзі з одного акаунту';
+            }
+            if (shopMoneyInfo) {
+                shopMoneyInfo.textContent = 'Сформуйте склад сторін і затвердьте наказ перед розміщенням';
+            }
         }
 
         this.updateShopUI();
+        this.updateOrderSummaryHeader();
         
         // Оновлення доступних фішок
         this.updateAvailableUnitsUI();
@@ -585,10 +1314,9 @@ class AdmiralGame {
         
         // Кнопки - активні тільки в правильний час
         const endTurnBtn = document.getElementById('endTurnBtn');
-        const toggleLayerBtn = document.getElementById('toggleLayerBtn');
-        if (this.phase === 'shop') {
+        if (this.phase === 'order') {
             endTurnBtn.disabled = false;
-            endTurnBtn.textContent = 'Почати розміщення';
+            endTurnBtn.textContent = 'Затвердити наказ і перейти до розміщення';
         } else if (this.phase === 'placement') {
             // В фазі розміщення кнопка активна тільки для поточного гравця
             endTurnBtn.disabled = false;
@@ -606,82 +1334,691 @@ class AdmiralGame {
             endTurnBtn.textContent = 'Завершити хід';
         }
         
-        if (toggleLayerBtn) {
-            toggleLayerBtn.style.display = this.phase === 'battle' ? 'block' : 'none';
-            toggleLayerBtn.textContent = this.getLayerButtonLabel();
-            toggleLayerBtn.disabled = this.phase !== 'battle';
+        // Відновлюємо підсвітку якщо є вибрана фішка
+        if (this.phase === 'order') {
+            endTurnBtn.disabled = false;
+            endTurnBtn.textContent = 'Затвердити наказ і перейти до розміщення';
         }
 
-        this.refreshLayerVisualState();
-        this.applyFogOfWar();
-
-        // Відновлюємо підсвітку якщо є вибрана фішка
         if (this.selectedUnit) {
-            const selectedGrid = this.getGridByLayer(this.selectedUnit.userData.domain);
-            const cell = selectedGrid[this.selectedUnit.userData.x][this.selectedUnit.userData.z].mesh;
-            cell.material.color.setHex(0xFF6B35);
-            cell.material.opacity = 0.5;
             this.showMovementHighlights(this.selectedUnit);
         }
     }
     
+    updateOrderSummaryHeader() {
+        const situationSummary = document.getElementById('orderSituationSummary');
+        const tasksSummary = document.getElementById('orderTasksSummary');
+        const supportSummary = document.getElementById('orderSupportSummary');
+        const commandSummary = document.getElementById('orderCommandSummary');
+        if (!situationSummary || !tasksSummary || !supportSummary || !commandSummary) return;
+
+        const situation = this.sessionOrder.situation;
+        const activeTab = this.orderTabs.find((tab) => tab.key === this.sessionOrder.ui.activeTab);
+        situationSummary.textContent = `ЗІ: ${this.formatOrderPoint(situation.areaOfInterest)}; РВЗ: ${this.formatOrderPoint(situation.executionArea)}`;
+        tasksSummary.textContent = `Задач: ${this.sessionOrder.tasks.length}; кінцевих станів: ${this.sessionOrder.endState.length}`;
+        supportSummary.textContent = `С1 БК: ${this.sessionOrder.support[1].ammo}; С2 БК: ${this.sessionOrder.support[2].ammo}`;
+        commandSummary.textContent = `Активна вкладка: ${activeTab ? activeTab.label : 'Обстановка'}`;
+    }
+
     updateShopUI() {
-        if (!this.config || this.phase !== 'shop') {
-            document.getElementById('shopContent').innerHTML = '';
+        const shopContent = document.getElementById('shopContent');
+        if (!this.config || this.phase !== 'order') {
+            shopContent.innerHTML = '';
             return;
         }
-        
-        const currentMoney = this.playerMoney[this.currentPlayer];
-        const shopContent = document.getElementById('shopContent');
-        
-        let shopHTML = '';
-        
-        for (const [unitType, unitConfig] of Object.entries(this.config.unitTypes)) {
-            const canAfford = currentMoney >= unitConfig.cost;
-            const disabledClass = canAfford ? '' : 'disabled';
-            
-            shopHTML += `
-                <div class="shop-item ${disabledClass}" onclick="game.purchaseUnit('${unitType}')">
-                    <h5>${unitConfig.name}</h5>
-                    <div class="details">
-                        <div>Ціна: <span class="${canAfford ? 'cost' : 'cant-afford'}">${unitConfig.cost} монет</span></div>
-                        <div>Хітпоінти: ${unitConfig.hitpoints}</div>
-                        <div>Сила: ${unitConfig.strength}</div>
-                        <div>Швидкість: ${unitConfig.movement} клітинок</div>
-                        <div>${unitConfig.description}</div>
+
+        const activeTab = this.sessionOrder.ui.activeTab;
+        const tabButtons = this.orderTabs.map((tab) => {
+            const activeClass = activeTab === tab.key ? ' active' : '';
+            return `<button class="order-tab${activeClass}" onclick="game.setOrderTab('${tab.key}')">${tab.label}</button>`;
+        }).join('');
+        const tabRenderers = {
+            situation: () => this.renderSituationTab(),
+            orbat: () => this.renderOrbatTab(),
+            tasks: () => this.renderTasksTab(),
+            endState: () => this.renderEndStateTab(),
+            support: () => this.renderSupportTab()
+        };
+
+        shopContent.innerHTML = `
+            <div class="order-tabs">${tabButtons}</div>
+            ${tabRenderers[activeTab] ? tabRenderers[activeTab]() : this.renderSituationTab()}
+        `;
+        this.setupUnitCardPreviews();
+    }
+
+    renderSideButtons() {
+        return [1, 2].map((side) => {
+            const activeClass = this.sessionOrder.ui.activeSide === side ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setOrderTaskSide(${side})">Сторона ${side}</button>`;
+        }).join('');
+    }
+
+    renderSituationTab() {
+        const situation = this.sessionOrder.situation;
+        const enemyInfo = situation.enemyInfoPercentBySide;
+        const toolButtons = [
+            { key: 'areaOfInterest', label: 'Зона інтересу' },
+            { key: 'executionArea', label: 'Район виконання' }
+        ].map((tool) => {
+            const activeClass = this.sessionOrder.ui.activeSituationTool === tool.key ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setSituationTool('${tool.key}')">${tool.label}</button>`;
+        }).join('');
+        const objectList = situation.objects.length === 0
+            ? '<div class="units-list-empty">Об’єкти району ще не задані</div>'
+            : situation.objects.map((object, index) => `<span class="unit-badge">${index + 1}. ${this.escapeHtml(object.label)} (${object.x}, ${object.z})</span>`).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Обстановка</h5>
+                <div class="details">
+                    <div class="order-note">Клік по мапі в цій вкладці задає зону інтересу або район виконання.</div>
+                    <div class="order-tags">${toolButtons}</div>
+                    <div class="order-grid-two">
+                        <div class="order-field"><strong>Зона інтересу</strong><br>${this.formatOrderPoint(situation.areaOfInterest)}</div>
+                        <div class="order-field"><strong>Район виконання</strong><br>${this.formatOrderPoint(situation.executionArea)}</div>
+                    </div>
+                    <div class="order-grid-two">
+                        ${[1, 2].map((side) => `
+                            <label class="order-field">
+                                <strong>Інформація про противника для сторони ${side}</strong><br>
+                                <input class="order-range" type="range" min="0" max="100" value="${enemyInfo[side]}" oninput="game.setEnemyInfoPercent(${side}, this.value)">
+                                <span>${enemyInfo[side]}%</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                    <div class="units-list">
+                        <div class="units-list-title">Об’єкти району виконання</div>
+                        <div>${objectList}</div>
                     </div>
                 </div>
-            `;
-        }
-        
-        shopContent.innerHTML = shopHTML;
+            </div>
+        `;
     }
-    
-    purchaseUnit(unitType) {
-        if (this.phase !== 'shop') return;
-        
-        const unitConfig = this.config.unitTypes[unitType];
-        const currentMoney = this.playerMoney[this.currentPlayer];
-        
-        if (currentMoney < unitConfig.cost) {
-            this.addLog('Недостатньо грошей для покупки цієї фішки!', 'combat-log');
+
+    renderOrbatTab() {
+        const unitCards = Object.entries(this.config.unitTypes).map(([unitType, unitConfig]) => this.renderOrbatUnitCard(unitType, unitConfig)).join('');
+        const sideSummaries = [1, 2].map((side) => {
+            const units = this.purchasedUnits[side] || [];
+            return `
+                <div class="order-field">
+                    <strong>Сторона ${side}</strong><br>
+                    Підрозділів у наказі: ${units.length}<br>
+                    Не розміщено: ${units.filter((unit) => !unit.placed).length}
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>ORBAT / склад бойових засобів</h5>
+                <div class="details">
+                    <div class="order-note">Це не магазин: тут формується склад сторін перед розміщенням на мапі.</div>
+                    <div class="order-grid-two">${sideSummaries}</div>
+                </div>
+            </div>
+            ${unitCards}
+        `;
+    }
+
+    renderOrbatUnitCard(unitType, unitConfig) {
+        const symbolKind = this.getUnitSymbolKind(unitType, unitConfig);
+        const symbolLabel = this.getUnitSymbolLabel(unitType, unitConfig);
+        return `
+            <div class="shop-item">
+                <h5>${unitConfig.name}</h5>
+                <div class="details">
+                    <div class="unit-model-panel">
+                        <div class="unit-model-preview" data-unit-type="${this.escapeHtml(unitType)}">APP-6</div>
+                        <div class="unit-model-meta">
+                            <div class="unit-model-name" title="NATO / APP-6">${this.escapeHtml(symbolLabel)}</div>
+                            <div>${this.escapeHtml(symbolKind)}</div>
+                            <div class="unit-model-path">умовний знак підрозділу</div>
+                        </div>
+                    </div>
+                    <div>Живучість: ${unitConfig.hitpoints}</div>
+                    <div>Вогнева потужність: ${unitConfig.strength}</div>
+                    <div>Маневреність: ${unitConfig.movement} кл.</div>
+                    <div>${unitConfig.description}</div>
+                    <div class="order-actions">
+                        <button class="player1-btn" onclick="event.stopPropagation(); game.assignUnitToOrder('${unitType}', 1)">Додати стороні 1</button>
+                        <button class="player2-btn" onclick="event.stopPropagation(); game.assignUnitToOrder('${unitType}', 2)">Додати стороні 2</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderTasksTab() {
+        const sideButtons = this.renderSideButtons();
+        const tagButtons = Object.entries(this.orderTaskTags).map(([tag, config]) => {
+            const activeClass = this.sessionOrder.ui.activeTaskTag === tag ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setOrderTaskTag('${tag}')">${config.label}</button>`;
+        }).join('');
+        const geometryButtons = Object.entries(this.orderGeometryTypes).map(([geometry, config]) => {
+            const activeClass = this.sessionOrder.ui.activeGeometry === geometry ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setOrderGeometry('${geometry}')">${config.label}</button>`;
+        }).join('');
+        const taskList = this.sessionOrder.tasks.length === 0
+            ? '<div class="units-list-empty">Оберіть сторону, дію, геометрію і клікніть на мапі</div>'
+            : this.sessionOrder.tasks.map((task, index) => `
+                <span class="unit-badge">${index + 1}. Сторона ${task.side}: ${this.orderTaskTags[task.tag].label}, ${this.orderGeometryTypes[task.geometry].label}: ${this.formatTaskCells(task)}</span>
+            `).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Завдання</h5>
+                <div class="details">
+                    <div class="order-note">Завдання формуються через теги і прив’язуються до точки, лінії або району на мапі.</div>
+                    <div class="units-list-title">Сторона</div>
+                    <div class="order-tags">${sideButtons}</div>
+                    <div class="units-list-title">Дія</div>
+                    <div class="order-tags">${tagButtons}</div>
+                    <div class="units-list-title">Геометрія</div>
+                    <div class="order-tags">${geometryButtons}</div>
+                    <div class="units-list">
+                        <div class="units-list-title">Прив’язані задачі</div>
+                        <div>${taskList}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderEndStateTab() {
+        const sideButtons = this.renderSideButtons();
+        const tagButtons = Object.entries(this.endStateTags).map(([tag, config]) => {
+            const activeClass = this.sessionOrder.ui.activeEndStateTag === tag ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setEndStateTag('${tag}')">${config.label}</button>`;
+        }).join('');
+        const endStateList = this.sessionOrder.endState.length === 0
+            ? '<div class="units-list-empty">Оберіть тег кінцевого стану і клікніть на мапі</div>'
+            : this.sessionOrder.endState.map((item, index) => `
+                <span class="unit-badge">${index + 1}. Сторона ${item.side}: ${this.endStateTags[item.tag].label}: (${item.x}, ${item.z})</span>
+            `).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Кінцевий стан</h5>
+                <div class="details">
+                    <div class="order-note">Це майбутні умови успіху сценарію: що має бути правдою після виконання наказу.</div>
+                    <div class="units-list-title">Сторона</div>
+                    <div class="order-tags">${sideButtons}</div>
+                    <div class="units-list-title">Стан</div>
+                    <div class="order-tags">${tagButtons}</div>
+                    <div class="units-list">
+                        <div class="units-list-title">Прив’язані стани</div>
+                        <div>${endStateList}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderSupportTab() {
+        const readinessSections = this.renderReadinessSections();
+        const supportTables = [1, 2].map((side) => this.renderSupportSide(side)).join('');
+        return `
+            <div class="shop-item order-planner">
+                <h5>Забезпечення</h5>
+                <div class="details">
+                    <div class="order-note">Параметри забезпечення задають обмеження сценарію, а PCC лишається допоміжною перевіркою готовності.</div>
+                    <div class="order-support-grid">${supportTables}</div>
+                </div>
+            </div>
+            <div class="shop-item order-planner">
+                <h5>Готовність / PCC</h5>
+                <div class="details">
+                    <div class="order-check-grid">${readinessSections}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderSupportSide(side) {
+        const support = this.sessionOrder.support[side];
+        const rows = Object.entries(this.supportFields).map(([field, config]) => {
+            const options = config.options.map((option) => {
+                const activeClass = support[field] === option ? ' active' : '';
+                return `<button class="order-check${activeClass}" onclick="event.stopPropagation(); game.setSupportValue(${side}, '${field}', '${this.escapeAttribute(option)}')">${this.escapeHtml(option)}</button>`;
+            }).join('');
+            return `
+                <div class="support-row">
+                    <div class="support-label">${this.escapeHtml(config.label)}</div>
+                    <div class="order-tags">${options}</div>
+                </div>
+            `;
+        }).join('');
+        return `
+            <div class="order-check-group">
+                <div class="order-check-title">Сторона ${side}</div>
+                ${rows}
+            </div>
+        `;
+    }
+
+    formatOrderPoint(point) {
+        return point ? `клітинка (${point.x}, ${point.z})` : 'не задано';
+    }
+
+    formatTaskCells(task) {
+        const cells = task.cells || [{ x: task.x, z: task.z }];
+        return cells.map((cell) => `(${cell.x}, ${cell.z})`).join(' - ');
+    }
+
+    renderReadinessSections() {
+        return Object.entries(this.orderReadinessGroups).map(([groupKey, group]) => {
+            const selected = this.sessionOrder.readiness[groupKey] || [];
+            const items = group.items.map((item) => {
+                const isActive = selected.includes(item);
+                const activeClass = isActive ? ' active' : '';
+                return `<button class="order-check${activeClass}" onclick="event.stopPropagation(); game.toggleOrderReadiness('${groupKey}', '${this.escapeAttribute(item)}')">${this.escapeHtml(item)}</button>`;
+            }).join('');
+            return `
+                <div class="order-check-group">
+                    <div class="order-check-title">${this.escapeHtml(group.title)}</div>
+                    <div class="order-tags">${items}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    escapeAttribute(value) {
+        return String(value ?? '')
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/\n/g, ' ');
+    }
+
+    escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    getUnitModelMeta(unitType, unitConfig) {
+        const path = this.unitModelPaths[unitType] || unitConfig.referencePath || '';
+        if (!path) {
+            return {
+                name: 'Немає STL',
+                category: 'fallback / без моделі',
+                path: 'опис поки не привʼязаний до файлу'
+            };
+        }
+
+        const parts = path.split('/');
+        return {
+            name: parts[parts.length - 1] || path,
+            category: unitConfig.referenceCategory || parts[Math.max(0, parts.length - 2)] || 'STL',
+            path
+        };
+    }
+
+    setupUnitCardPreviews() {
+        const previews = Array.from(document.querySelectorAll('.unit-model-preview'));
+        previews.forEach((element) => this.renderUnitCardPreview(element));
+    }
+
+    renderUnitCardPreview(element) {
+        const unitType = element.dataset.unitType;
+        const unitConfig = this.config && this.config.unitTypes ? this.config.unitTypes[unitType] : null;
+        if (!unitType || element.dataset.rendered === '1') {
             return;
         }
-        
-        // Віднімаємо гроші
-        this.playerMoney[this.currentPlayer] -= unitConfig.cost;
-        
-        // Додаємо фішку до списку куплених
-        this.purchasedUnits[this.currentPlayer].push({
+
+        const cacheKey = `symbol:${unitType}:${this.getUnitSymbolKind(unitType, unitConfig)}`;
+        if (this.unitPreviewCache[cacheKey]) {
+            element.innerHTML = `<img alt="NATO symbol preview" src="${this.unitPreviewCache[cacheKey]}">`;
+            element.dataset.rendered = '1';
+            return;
+        }
+
+        const dataUrl = this.createUnitSymbolDataUrl(unitType, 1, unitConfig);
+        this.unitPreviewCache[cacheKey] = dataUrl;
+        element.innerHTML = `<img alt="NATO symbol preview" src="${dataUrl}">`;
+        element.dataset.rendered = '1';
+    }
+
+    createUnitPreviewImage(object, color) {
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1f3038);
+        const camera = new THREE.PerspectiveCamera(32, 132 / 96, 0.01, 100);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+        renderer.setSize(264, 192, false);
+        renderer.setPixelRatio(1);
+
+        const preview = this.prepareLoadedModelForDisplay(object, color, 1.82, 1.45, true);
+        preview.rotation.y -= Math.PI / 5;
+        scene.add(preview);
+
+        scene.add(new THREE.HemisphereLight(0xffffff, 0x33424a, 0.92));
+        const keyLight = new THREE.DirectionalLight(0xffffff, 0.9);
+        keyLight.position.set(2, 3, 4);
+        scene.add(keyLight);
+
+        camera.position.set(2.2, 1.6, 2.6);
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+        const dataUrl = renderer.domElement.toDataURL('image/png');
+        renderer.dispose();
+        if (renderer.forceContextLoss) {
+            renderer.forceContextLoss();
+        }
+        if (renderer.domElement && renderer.domElement.remove) {
+            renderer.domElement.remove();
+        }
+        return dataUrl;
+    }
+
+    ensureModelLoader(modelPath) {
+        if (/\.glb$/i.test(modelPath)) {
+            if (!this.gltfLoader && window.THREE && THREE.GLTFLoader) {
+                this.gltfLoader = new THREE.GLTFLoader();
+            }
+            return this.gltfLoader;
+        }
+
+        if (!this.stlLoader && window.THREE && THREE.STLLoader) {
+            this.stlLoader = new THREE.STLLoader();
+        }
+        return this.stlLoader;
+    }
+
+    loadModelObject(modelPath, onLoad, onError) {
+        const isGlb = /\.glb$/i.test(modelPath);
+        const cache = isGlb ? this.gltfModelCache : this.stlModelCache;
+        const cached = cache[modelPath];
+
+        if (cached) {
+            onLoad(isGlb ? this.cloneModelObject(cached) : cached.clone());
+            return;
+        }
+
+        const loader = this.ensureModelLoader(modelPath);
+        if (!loader) {
+            onError();
+            return;
+        }
+
+        loader.load(
+            encodeURI(modelPath),
+            (asset) => {
+                const object = isGlb ? asset.scene : asset;
+                cache[modelPath] = object;
+                onLoad(isGlb ? this.cloneModelObject(object) : object.clone());
+            },
+            undefined,
+            onError
+        );
+    }
+
+    cloneModelObject(object) {
+        return object.clone(true);
+    }
+
+    prepareLoadedModelForDisplay(object, color, maxFootprint = 0.78, maxHeight = 0.82, centerY = false) {
+        let displayObject;
+        if (object.isBufferGeometry) {
+            object.computeBoundingBox();
+            object.computeVertexNormals();
+            displayObject = new THREE.Mesh(
+                object,
+                new THREE.MeshPhongMaterial({
+                    color,
+                    emissive: 0x143014,
+                    emissiveIntensity: 0.08,
+                    shininess: 42,
+                    specular: 0x1f1f1f
+                })
+            );
+            return this.fitStlMeshToCell(displayObject, maxFootprint, maxHeight, centerY);
+        }
+
+        displayObject = object;
+        displayObject.traverse((child) => {
+            if (!child.isMesh) return;
+            child.material = new THREE.MeshPhongMaterial({
+                color,
+                emissive: 0x143014,
+                emissiveIntensity: 0.08,
+                shininess: 42,
+                specular: 0x1f1f1f
+            });
+            child.castShadow = true;
+            child.receiveShadow = true;
+            if (child.geometry) {
+                child.geometry.computeVertexNormals();
+            }
+        });
+        this.fitObjectToCell(displayObject, maxFootprint, maxHeight, centerY);
+        return displayObject;
+    }
+
+    fitObjectToCell(object, maxFootprint = 0.78, maxHeight = 0.82, centerY = false) {
+        object.updateMatrixWorld(true);
+
+        let box = new THREE.Box3().setFromObject(object);
+        const size = box.getSize(new THREE.Vector3());
+        const footprint = Math.max(size.x, size.z) || 1;
+        const height = size.y || 1;
+        object.scale.multiplyScalar(Math.min(maxFootprint / footprint, maxHeight / height));
+        object.updateMatrixWorld(true);
+
+        box = new THREE.Box3().setFromObject(object);
+        const center = box.getCenter(new THREE.Vector3());
+        object.position.x -= center.x;
+        object.position.z -= center.z;
+        object.position.y += centerY ? -center.y : 0.01 - box.min.y;
+        object.updateMatrixWorld(true);
+        return object;
+    }
+
+    fitStlMeshToCell(mesh, maxFootprint = 0.78, maxHeight = 0.82, centerY = false) {
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.updateMatrixWorld(true);
+
+        let box = new THREE.Box3().setFromObject(mesh);
+        const size = box.getSize(new THREE.Vector3());
+        const footprint = Math.max(size.x, size.z) || 1;
+        const height = size.y || 1;
+        mesh.scale.setScalar(Math.min(maxFootprint / footprint, maxHeight / height));
+        mesh.updateMatrixWorld(true);
+
+        box = new THREE.Box3().setFromObject(mesh);
+        const center = box.getCenter(new THREE.Vector3());
+        mesh.position.x -= center.x;
+        mesh.position.z -= center.z;
+        mesh.position.y += centerY ? -center.y : 0.01 - box.min.y;
+        mesh.updateMatrixWorld(true);
+        return mesh;
+    }
+
+    setOrderTaskTag(tag) {
+        if (!this.orderTaskTags[tag]) return;
+        this.sessionOrder.ui.activeTaskTag = tag;
+        this.sessionOrder.ui.activeGeometry = this.orderTaskTags[tag].geometry || this.sessionOrder.ui.activeGeometry;
+        this.addLog(`Активний тег завдання: ${this.orderTaskTags[tag].label}`, 'place-log');
+        this.updateUI();
+    }
+
+    setOrderTaskSide(side) {
+        if (![1, 2].includes(side)) return;
+        this.sessionOrder.ui.activeSide = side;
+        this.addLog(`Задачі призначаються для сторони ${side}`, 'place-log');
+        this.updateUI();
+    }
+
+    setOrderTab(tab) {
+        if (!this.orderTabs.some((item) => item.key === tab)) return;
+        this.sessionOrder.ui.activeTab = tab;
+        this.updateUI();
+    }
+
+    setOrderGeometry(geometry) {
+        if (!this.orderGeometryTypes[geometry]) return;
+        this.sessionOrder.ui.activeGeometry = geometry;
+        this.updateUI();
+    }
+
+    setSituationTool(tool) {
+        if (!['areaOfInterest', 'executionArea'].includes(tool)) return;
+        this.sessionOrder.ui.activeSituationTool = tool;
+        this.updateUI();
+    }
+
+    setEnemyInfoPercent(side, value) {
+        const percent = Math.max(0, Math.min(100, Number(value) || 0));
+        this.sessionOrder.situation.enemyInfoPercentBySide[side] = percent;
+        this.updateUI();
+    }
+
+    setEndStateTag(tag) {
+        if (!this.endStateTags[tag]) return;
+        this.sessionOrder.ui.activeEndStateTag = tag;
+        this.updateUI();
+    }
+
+    setSupportValue(side, field, value) {
+        if (!this.supportFields[field] || !this.sessionOrder.support[side]) return;
+        this.sessionOrder.support[side][field] = value;
+        this.updateUI();
+    }
+
+    toggleOrderReadiness(groupKey, item) {
+        if (!this.orderReadinessGroups[groupKey]) return;
+        if (!this.sessionOrder.readiness[groupKey]) {
+            this.sessionOrder.readiness[groupKey] = [];
+        }
+
+        const selected = this.sessionOrder.readiness[groupKey];
+        const itemIndex = selected.indexOf(item);
+        if (itemIndex >= 0) {
+            selected.splice(itemIndex, 1);
+        } else {
+            selected.push(item);
+        }
+
+        this.updateUI();
+    }
+
+    addOrderTaskAtCell(x, z) {
+        if (this.phase !== 'order') return;
+
+        if (this.sessionOrder.ui.activeTab === 'situation') {
+            const tool = this.sessionOrder.ui.activeSituationTool;
+            this.sessionOrder.situation[tool] = { x, z };
+            this.renderOrderTaskMarkers();
+            this.addLog(`${tool === 'areaOfInterest' ? 'Зону інтересу' : 'Район виконання'} задано: (${x}, ${z})`, 'place-log');
+            this.updateUI();
+            return;
+        }
+
+        if (this.sessionOrder.ui.activeTab === 'endState') {
+            const side = this.sessionOrder.ui.activeSide;
+            const tag = this.sessionOrder.ui.activeEndStateTag;
+            const existing = this.sessionOrder.endState.find((item) => item.x === x && item.z === z && item.side === side);
+            if (existing) {
+                existing.tag = tag;
+            } else {
+                this.sessionOrder.endState.push({ id: `end-${Date.now()}-${this.sessionOrder.endState.length}`, side, tag, x, z });
+            }
+            this.renderOrderTaskMarkers();
+            this.addLog(`Сторона ${side}: кінцевий стан "${this.endStateTags[tag].label}" прив'язано до (${x}, ${z})`, 'place-log');
+            this.updateUI();
+            return;
+        }
+
+        const tag = this.sessionOrder.ui.activeTaskTag;
+        const side = this.sessionOrder.ui.activeSide;
+        const geometry = this.sessionOrder.ui.activeGeometry;
+        const taskConfig = this.orderTaskTags[tag];
+        const existingTask = this.sessionOrder.tasks.find((task) => task.x === x && task.z === z && task.side === side);
+        if (existingTask) {
+            existingTask.tag = tag;
+            existingTask.geometry = geometry;
+            existingTask.cells = [{ x, z }];
+            existingTask.generatedText = this.generateTaskText(side, tag, geometry, [{ x, z }]);
+        } else {
+            const cells = [{ x, z }];
+            this.sessionOrder.tasks.push({
+                id: `task-${Date.now()}-${this.sessionOrder.tasks.length}`,
+                side,
+                tag,
+                geometry,
+                cells,
+                x,
+                z,
+                objectId: null,
+                generatedText: this.generateTaskText(side, tag, geometry, cells)
+            });
+        }
+
+        this.renderOrderTaskMarkers();
+        this.addLog(`Сторона ${side}: ${taskConfig.label} прив'язано до (${x}, ${z})`, 'place-log');
+        this.updateUI();
+    }
+
+    generateTaskText(side, tag, geometry, cells) {
+        const tagLabel = this.orderTaskTags[tag] ? this.orderTaskTags[tag].label : tag;
+        const geometryLabel = this.orderGeometryTypes[geometry] ? this.orderGeometryTypes[geometry].label.toLowerCase() : geometry;
+        const cellText = cells.map((cell) => `(${cell.x}, ${cell.z})`).join(' - ');
+        return `Сторона ${side}: ${tagLabel.toLowerCase()} ${geometryLabel} ${cellText}.`;
+    }
+
+    renderOrderTaskMarkers() {
+        this.orderTaskMarkerMeshes.forEach((mesh) => this.scene.remove(mesh));
+        this.orderTaskMarkerMeshes = [];
+
+        const situation = this.sessionOrder.situation;
+        [
+            { point: situation.areaOfInterest, color: 0xffd700 },
+            { point: situation.executionArea, color: 0x7dd3fc }
+        ].forEach((item) => {
+            if (!item.point) return;
+            const marker = this.addCellHighlight(item.point.x, item.point.z, item.color, 0.36, 5, false);
+            this.orderTaskMarkerMeshes.push(marker);
+        });
+
+        this.sessionOrder.tasks.forEach((task) => {
+            const color = (this.orderTaskTags[task.tag] && this.orderTaskTags[task.tag].color) || this.getUnitPalette(task.side).base;
+            const cells = task.cells || [{ x: task.x, z: task.z }];
+            cells.forEach((cell) => {
+                const marker = this.addCellHighlight(cell.x, cell.z, color, 0.48, 5, false);
+                marker.userData.orderTask = task;
+                this.orderTaskMarkerMeshes.push(marker);
+            });
+        });
+
+        this.sessionOrder.endState.forEach((item) => {
+            const color = (this.endStateTags[item.tag] && this.endStateTags[item.tag].color) || this.getUnitPalette(item.side).base;
+            const marker = this.addCellHighlight(item.x, item.z, color, 0.62, 6, false);
+            marker.userData.endState = item;
+            this.orderTaskMarkerMeshes.push(marker);
+        });
+    }
+    
+    assignUnitToOrder(unitType, player) {
+        if (this.phase !== 'order') return;
+
+        const unitConfig = this.config.unitTypes[unitType];
+        this.purchasedUnits[player].push({
             type: unitType,
             config: unitConfig,
             placed: false
         });
-        
-        this.addLog(`Куплено: ${unitConfig.name} за ${unitConfig.cost} монет`, 'place-log');
+        this.sessionOrder.orbat[player] = this.purchasedUnits[player].map((unit) => ({
+            type: unit.type,
+            name: unit.config.name,
+            placed: unit.placed
+        }));
+
+        this.addLog(`Сторона ${player}: додано ${unitConfig.name} до складу бойового наказу`, 'place-log');
         this.updateUI();
     }
-    
+
     updateButtonColors() {
         const endTurnBtn = document.getElementById('endTurnBtn');
         const resetBtn = document.getElementById('resetBtn');
@@ -716,42 +2053,6 @@ class AdmiralGame {
     }
     
     findBattles() {
-        const scheduledBattles = new Set();
-        const scheduleBattle = (attacker, defender, mode = 'melee') => {
-            if (!attacker || !defender) {
-                return;
-            }
-
-            const key = mode === 'melee'
-                ? `${mode}:${[attacker.userData.id, defender.userData.id].sort((a, b) => a - b).join(':')}`
-                : `${mode}:${attacker.userData.id}:${defender.userData.id}`;
-
-            if (scheduledBattles.has(key)) {
-                return;
-            }
-
-            scheduledBattles.add(key);
-            this.startBattle(attacker, defender, mode);
-        };
-
-        this.airUnits
-            .filter((unit) => unit.userData.type === 'droneKamikaze')
-            .forEach((drone) => {
-                const groundTarget = this.grid[drone.userData.x]?.[drone.userData.z]?.unit;
-                if (groundTarget && groundTarget.userData.player !== drone.userData.player) {
-                    scheduleBattle(drone, groundTarget, 'kamikazeStrike');
-                }
-            });
-
-        this.getAllUnits()
-            .filter((unit) => unit.userData.type === 'artillery' || unit.userData.type === 'sniper')
-            .forEach((unit) => {
-                const range = this.getAttackRange(unit.userData.type);
-                const target = this.getNearestEnemyTarget(unit, range, unit.userData.domain);
-                if (target) {
-                    scheduleBattle(unit, target, 'rangedStrike');
-                }
-            });
         // Знаходимо всі сусідні фішки різних гравців
         for (let i = 0; i < this.units.length; i++) {
             for (let j = i + 1; j < this.units.length; j++) {
@@ -759,31 +2060,10 @@ class AdmiralGame {
                 const unit2 = this.units[j];
                 
                 if (unit1.userData.player !== unit2.userData.player) {
-                    if (unit1.userData.type === 'artillery' || unit1.userData.type === 'sniper' || unit2.userData.type === 'artillery' || unit2.userData.type === 'sniper') {
-                        continue;
-                    }
                     const distance = Math.abs(unit1.userData.x - unit2.userData.x) + Math.abs(unit1.userData.z - unit2.userData.z);
                     
                     if (distance === 1) { // Сусідні клітинки
-                        scheduleBattle(unit1, unit2, 'melee');
-                    }
-                }
-            }
-        }
-
-        for (let i = 0; i < this.airUnits.length; i++) {
-            for (let j = i + 1; j < this.airUnits.length; j++) {
-                const unit1 = this.airUnits[i];
-                const unit2 = this.airUnits[j];
-
-                if (unit1.userData.player !== unit2.userData.player) {
-                    if (unit1.userData.type === 'artillery' || unit1.userData.type === 'sniper' || unit2.userData.type === 'artillery' || unit2.userData.type === 'sniper') {
-                        continue;
-                    }
-                    const distance = Math.abs(unit1.userData.x - unit2.userData.x) + Math.abs(unit1.userData.z - unit2.userData.z);
-
-                    if (distance === 1) {
-                        scheduleBattle(unit1, unit2, 'melee');
+                        this.startBattle(unit1, unit2);
                     }
                 }
             }
@@ -791,534 +2071,484 @@ class AdmiralGame {
     }
     
     createGround() {
-        const groundGeometry = new THREE.PlaneGeometry(this.gridSize * this.cellSize + 2, this.gridSize * this.cellSize + 2);
+        const groundWidth = this.gridSize * this.cellSize + 2;
+        const groundDepth = this.gridSize * this.cellSize + 2;
         const groundX = this.getBoardCenterOffset();
         const groundZ = this.getBoardCenterOffset();
         const textureLoader = new THREE.TextureLoader();
 
+        this.createTerrainFrame(groundWidth, groundDepth);
+
         textureLoader.load('testmap1.png', (texture) => {
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
+            texture.wrapS = THREE.ClampToEdgeWrapping;
+            texture.wrapT = THREE.ClampToEdgeWrapping;
+            texture.minFilter = THREE.LinearFilter;
+            texture.magFilter = THREE.LinearFilter;
+            texture.generateMipmaps = false;
             texture.repeat.set(1, 1);
+            texture.needsUpdate = true;
+            this.buildMapHeightData(texture.image);
 
             const ground = new THREE.Mesh(
-                groundGeometry,
-                new THREE.MeshLambertMaterial({ map: texture, transparent: false, opacity: 1 })
+                this.createReliefGeometry(groundWidth, groundDepth),
+                new THREE.MeshLambertMaterial({
+                    map: texture,
+                    side: THREE.DoubleSide,
+                    transparent: false,
+                    opacity: 1,
+                    emissive: 0x111816,
+                    emissiveIntensity: 0.12
+                })
             );
             ground.rotation.x = -Math.PI / 2;
-            ground.position.set(groundX, -0.15, groundZ);
+            ground.position.set(groundX, 0, groundZ);
             ground.receiveShadow = true;
+            ground.renderOrder = 0;
+            this.groundMesh = ground;
             this.scene.add(ground);
+            this.reseatMapObjects();
+            console.log('Map texture loaded:', texture.image?.width, texture.image?.height);
         }, undefined, () => {
             const ground = new THREE.Mesh(
-                groundGeometry,
-                new THREE.MeshLambertMaterial({ color: 0x7d6a55, transparent: false, opacity: 1 })
+                this.createReliefGeometry(groundWidth, groundDepth),
+                new THREE.MeshLambertMaterial({
+                    color: 0x62785f,
+                    side: THREE.DoubleSide,
+                    transparent: false,
+                    opacity: 1
+                })
             );
             ground.rotation.x = -Math.PI / 2;
-            ground.position.set(groundX, -0.15, groundZ);
+            ground.position.set(groundX, 0, groundZ);
             ground.receiveShadow = true;
+            ground.renderOrder = 0;
+            this.groundMesh = ground;
             this.scene.add(ground);
+            this.reseatMapObjects();
+            console.error('Map texture failed: testmap1.png');
         });
     }
 
-    createGrid() {
-        this.grid = this.createGridLayer('ground');
-        this.airGrid = this.createGridLayer('air');
-        this.refreshLayerVisualState();
+    createReliefGeometry(width, depth) {
+        const segments = Math.min(240, Math.max(120, this.gridSize * 2));
+        const geometry = new THREE.PlaneGeometry(width, depth, segments, segments);
+        const positions = geometry.attributes.position;
+
+        for (let i = 0; i < positions.count; i++) {
+            const x = positions.getX(i);
+            const worldZ = -positions.getY(i);
+            positions.setZ(i, this.getTerrainHeightAtWorld(x, worldZ));
+        }
+
+        positions.needsUpdate = true;
+        geometry.computeVertexNormals();
+        return geometry;
     }
 
-    createFogOverlay(layer, x, z, y) {
-        const fogHeight = layer === 'air' ? 1.1 : 1.7;
-        const fog = new THREE.Mesh(
-            new THREE.BoxGeometry(this.cellSize * 0.92, fogHeight, this.cellSize * 0.92),
-            new THREE.MeshPhongMaterial({
-                transparent: true,
-                opacity: 0,
-                depthWrite: false,
-                color: layer === 'air' ? 0x9fb8c6 : 0x899197,
-                emissive: layer === 'air' ? 0x243743 : 0x2f3438,
-                shininess: 6
-            })
-        );
+    createTerrainFrame(width, depth) {
+        this.terrainFrameMeshes.forEach((mesh) => {
+            this.scene.remove(mesh);
+            if (mesh.geometry) mesh.geometry.dispose();
+            if (mesh.material) mesh.material.dispose();
+        });
+        this.terrainFrameMeshes = [];
 
-        const markerCanvas = document.createElement('canvas');
-        markerCanvas.width = 128;
-        markerCanvas.height = 128;
-        const markerCtx = markerCanvas.getContext('2d');
-        markerCtx.clearRect(0, 0, 128, 128);
-        markerCtx.fillStyle = layer === 'air' ? 'rgba(196, 239, 255, 0.98)' : 'rgba(255, 248, 230, 0.98)';
-        markerCtx.strokeStyle = 'rgba(40, 46, 52, 0.98)';
-        markerCtx.lineWidth = 10;
-        markerCtx.font = 'bold 92px Arial';
-        markerCtx.textAlign = 'center';
-        markerCtx.textBaseline = 'middle';
-        markerCtx.strokeText('?', 64, 68);
-        markerCtx.fillText('?', 64, 68);
-        const markerTexture = new THREE.CanvasTexture(markerCanvas);
+        const material = new THREE.MeshLambertMaterial({
+            color: 0x8a5d35,
+            emissive: 0x1f1208,
+            emissiveIntensity: 0.08
+        });
+        const borderHeight = 1.7;
+        const borderThickness = 1.1;
+        const y = borderHeight / 2 - 0.22;
+        const longGeometry = new THREE.BoxGeometry(width + borderThickness * 2, borderHeight, borderThickness);
+        const shortGeometry = new THREE.BoxGeometry(borderThickness, borderHeight, depth);
 
-        const marker = new THREE.Sprite(
-            new THREE.SpriteMaterial({
-                map: markerTexture,
-                transparent: true,
-                opacity: 0,
-                depthWrite: false
-            })
-        );
-        marker.scale.set(0.74, 0.74, 0.74);
-        marker.position.set(0, fogHeight * 0.18, 0);
-        fog.add(marker);
-
-        fog.position.set(this.toWorldCoord(x), y + fogHeight / 2 + 0.08, this.toWorldCoord(z));
-        fog.visible = false;
-        fog.userData.marker = marker;
-        fog.userData.baseOpacity = layer === 'air' ? 0.22 : 0.28;
-        fog.userData.markerOpacity = layer === 'air' ? 0.72 : 0.78;
-        this.scene.add(fog);
-
-        this.fogAnimations.push({
-            mesh: fog,
-            baseY: fog.position.y,
-            phase: (x + z) * 0.6,
-            baseOpacity: fog.userData.baseOpacity
+        [
+            { geometry: longGeometry, x: 0, z: -depth / 2 - borderThickness / 2 },
+            { geometry: longGeometry, x: 0, z: depth / 2 + borderThickness / 2 },
+            { geometry: shortGeometry, x: -width / 2 - borderThickness / 2, z: 0 },
+            { geometry: shortGeometry, x: width / 2 + borderThickness / 2, z: 0 }
+        ].forEach((part) => {
+            const mesh = new THREE.Mesh(part.geometry, material);
+            mesh.position.set(part.x, y, part.z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            mesh.renderOrder = -1;
+            this.scene.add(mesh);
+            this.terrainFrameMeshes.push(mesh);
         });
 
-        return fog;
+        const baseGeometry = new THREE.BoxGeometry(width + borderThickness * 2, 0.35, depth + borderThickness * 2);
+        const base = new THREE.Mesh(baseGeometry, new THREE.MeshLambertMaterial({ color: 0x5c3b22 }));
+        base.position.set(0, -0.34, 0);
+        base.receiveShadow = true;
+        base.renderOrder = -2;
+        this.scene.add(base);
+        this.terrainFrameMeshes.push(base);
     }
 
-    createGridLayer(layer) {
-        const grid = [];
-        const isAir = layer === 'air';
-        const y = isAir ? this.airLayerHeight : 0;
-        const evenColor = isAir ? 0x4b768b : 0x4A5F4A;
-        const oddColor = isAir ? 0x5a8ea6 : 0x5A6F5A;
-        const helperColors = isAir ? [0x9fd8f1, 0x75b8d6] : [0xd7d7d7, 0xa5a5a5];
+    buildMapHeightData(image) {
+        const size = this.mapHeightSize;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(image, 0, 0, size, size);
+        const pixels = ctx.getImageData(0, 0, size, size).data;
+        let height = new Float32Array(size * size);
 
-        for (let x = 0; x < this.gridSize; x++) {
-            grid[x] = [];
-            for (let z = 0; z < this.gridSize; z++) {
-                const cellGeometry = new THREE.BoxGeometry(this.cellSize, 0.08, this.cellSize);
-                const cellMaterial = new THREE.MeshLambertMaterial({
-                    color: (x + z) % 2 === 0 ? evenColor : oddColor,
-                    transparent: true,
-                    opacity: isAir ? 0.12 : 0.18
-                });
-                const cell = new THREE.Mesh(cellGeometry, cellMaterial);
-                cell.position.set(this.toWorldCoord(x), y, this.toWorldCoord(z));
-                cell.receiveShadow = !isAir;
-                cell.userData = { type: 'cell', x, z, layer };
-                const fog = this.createFogOverlay(layer, x, z, y);
-                this.scene.add(cell);
-                grid[x][z] = { mesh: cell, fog, unit: null };
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                const index = (y * size + x) * 4;
+                const r = pixels[index];
+                const g = pixels[index + 1];
+                const b = pixels[index + 2];
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                const saturation = max === 0 ? 0 : (max - min) / max;
+                const brightness = (r + g + b) / 3;
+
+                const brownContour = r > 105 && r > g + 8 && g > b + 2 && saturation > 0.14 ? 1 : 0;
+                const blackContour = brightness < 95 && saturation < 0.38 ? 0.55 : 0;
+                const greenReliefTint = g > r + 6 && g > b + 2 ? 0.12 : 0;
+                const waterLow = b > r + 18 && b > g + 8 ? -0.55 : 0;
+                const urbanLow = brightness < 150 && Math.abs(r - g) < 14 && Math.abs(g - b) < 18 ? -0.10 : 0;
+
+                height[y * size + x] = brownContour + blackContour + greenReliefTint + waterLow + urbanLow;
             }
         }
 
-        const gridHelper = new THREE.GridHelper(this.gridSize * this.cellSize, this.gridSize, helperColors[0], helperColors[1]);
-        gridHelper.position.set(this.getBoardCenterOffset(), y + 0.05, this.getBoardCenterOffset());
-        this.scene.add(gridHelper);
-        this.gridHelpers[layer] = gridHelper;
-
-        return grid;
+        height = this.blurHeightData(height, size, 7);
+        height = this.normalizeHeightData(height);
+        height = this.blurHeightData(height, size, 3);
+        this.mapHeightData = height;
     }
 
-    getDomainForType(type) {
-        return this.config?.unitTypes?.[type]?.domain || 'ground';
+    blurHeightData(source, size, passes) {
+        let current = source;
+        for (let pass = 0; pass < passes; pass++) {
+            const next = new Float32Array(size * size);
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    let total = 0;
+                    let weight = 0;
+                    for (let oy = -1; oy <= 1; oy++) {
+                        for (let ox = -1; ox <= 1; ox++) {
+                            const sx = Math.max(0, Math.min(size - 1, x + ox));
+                            const sy = Math.max(0, Math.min(size - 1, y + oy));
+                            const w = ox === 0 && oy === 0 ? 4 : (ox === 0 || oy === 0 ? 2 : 1);
+                            total += current[sy * size + sx] * w;
+                            weight += w;
+                        }
+                    }
+                    next[y * size + x] = total / weight;
+                }
+            }
+            current = next;
+        }
+        return current;
     }
 
-    getGridByLayer(layer = 'ground') {
-        return layer === 'air' ? this.airGrid : this.grid;
+    normalizeHeightData(source) {
+        const sorted = Array.from(source).sort((a, b) => a - b);
+        const low = sorted[Math.floor(sorted.length * 0.08)] ?? 0;
+        const high = sorted[Math.floor(sorted.length * 0.94)] ?? 1;
+        const range = Math.max(high - low, 0.0001);
+        const normalized = new Float32Array(source.length);
+
+        for (let i = 0; i < source.length; i++) {
+            const value = Math.max(0, Math.min(1, (source[i] - low) / range));
+            normalized[i] = Math.pow(value, 1.35);
+        }
+
+        return normalized;
     }
 
-    getUnitsByLayer(layer = 'ground') {
-        return layer === 'air' ? this.airUnits : this.units;
-    }
-
-    getLayerLabel(layer = this.activeLayer) {
-        return layer === 'air' ? 'повітряний' : 'земний';
-    }
-
-    getLayerButtonLabel(layer = this.activeLayer) {
-        return layer === 'air' ? 'Шар: повітря' : 'Шар: земля';
-    }
-
-    getNextPlacementUnit() {
-        return this.purchasedUnits[this.currentPlayer].find((unit) => !unit.placed) || null;
-    }
-
-    getAllUnits() {
-        return [...this.units, ...this.airUnits];
-    }
-
-    getVisionRange(unit) {
-        if (!unit) {
+    getTerrainHeightAtWorld(worldX, worldZ) {
+        if (!this.mapHeightData) {
             return 0;
         }
 
-        if (unit.userData.type === 'scout' || unit.userData.type.startsWith('drone')) {
-            return 3;
-        }
-
-        return 1;
+        const boardSize = this.gridSize * this.cellSize + 2;
+        const u = Math.max(0, Math.min(1, (worldX / boardSize) + 0.5));
+        const v = Math.max(0, Math.min(1, 0.5 - (worldZ / boardSize)));
+        const size = this.mapHeightSize;
+        const px = u * (size - 1);
+        const py = v * (size - 1);
+        const x0 = Math.floor(px);
+        const y0 = Math.floor(py);
+        const x1 = Math.min(size - 1, x0 + 1);
+        const y1 = Math.min(size - 1, y0 + 1);
+        const tx = px - x0;
+        const ty = py - y0;
+        const h00 = this.mapHeightData[y0 * size + x0];
+        const h10 = this.mapHeightData[y0 * size + x1];
+        const h01 = this.mapHeightData[y1 * size + x0];
+        const h11 = this.mapHeightData[y1 * size + x1];
+        const hx0 = h00 * (1 - tx) + h10 * tx;
+        const hx1 = h01 * (1 - tx) + h11 * tx;
+        return (hx0 * (1 - ty) + hx1 * ty) * this.terrainHeightScale;
     }
 
-    getVisibleCells(player = this.currentPlayer) {
-        const visible = new Set();
-        const ownUnits = this.getAllUnits().filter((unit) => unit.userData.player === player);
+    getSurfaceYAtCell(x, z) {
+        return this.getTerrainHeightAtWorld(this.toWorldCoord(x), this.toWorldCoord(z)) + 0.03;
+    }
 
-        ownUnits.forEach((unit) => {
-            const visionRange = this.getVisionRange(unit);
-            for (let x = 0; x < this.gridSize; x++) {
-                for (let z = 0; z < this.gridSize; z++) {
-                    const distance = Math.abs(x - unit.userData.x) + Math.abs(z - unit.userData.z);
-                    if (distance <= visionRange) {
-                        visible.add(`${x}:${z}`);
-                    }
-                }
-            }
+    reseatMapObjects() {
+        this.units.forEach((unit) => {
+            unit.position.y = this.getSurfaceYAtCell(unit.userData.x, unit.userData.z);
         });
-
-        return visible;
-    }
-
-    isCellVisibleToPlayer(x, z, player = this.currentPlayer) {
-        if (this.phase !== 'battle') {
-            return true;
+        this.renderOrderTaskMarkers();
+        if (this.selectedUnit) {
+            this.showMovementHighlights(this.selectedUnit);
         }
-
-        return this.getVisibleCells(player).has(`${x}:${z}`);
     }
 
-    applyFogOfWar() {
-        const visibleCells = this.getVisibleCells(this.currentPlayer);
+    createGrid() {
+        this.grid = [];
+        this.occupiedCells.clear();
 
-        this.getAllUnits().forEach((unit) => {
-            const isOwnUnit = unit.userData.player === this.currentPlayer;
-            const isVisible = isOwnUnit || this.phase !== 'battle' || visibleCells.has(`${unit.userData.x}:${unit.userData.z}`);
-            unit.visible = isVisible;
+        const boardSize = this.gridSize * this.cellSize;
+        this.cellPickPlane = null;
+
+        const gridHelper = new THREE.GridHelper(boardSize, this.gridSize, 0x1f3a45, 0x355866);
+        gridHelper.position.set(this.getBoardCenterOffset(), 0.04, this.getBoardCenterOffset());
+        const gridMaterials = Array.isArray(gridHelper.material) ? gridHelper.material : [gridHelper.material];
+        gridMaterials.forEach((material) => {
+            material.transparent = true;
+            material.opacity = 0.42;
+            material.depthWrite = false;
+            material.depthTest = false;
         });
-
-        ['ground', 'air'].forEach((layer) => {
-            const grid = this.getGridByLayer(layer);
-            for (let x = 0; x < this.gridSize; x++) {
-                for (let z = 0; z < this.gridSize; z++) {
-                    const fog = grid[x][z].fog;
-                    if (!fog) {
-                        continue;
-                    }
-
-                    const shouldShow = this.phase === 'battle'
-                        && layer === this.activeLayer
-                        && !visibleCells.has(`${x}:${z}`);
-
-                    fog.visible = shouldShow;
-                    fog.material.opacity = shouldShow ? fog.userData.baseOpacity : 0;
-                    if (fog.userData.marker) {
-                        fog.userData.marker.material.opacity = shouldShow ? fog.userData.markerOpacity : 0;
-                    }
-                }
-            }
-        });
-    }
-
-    getAttackRange(type) {
-        if (type === 'artillery') {
-            return 3;
-        }
-
-        if (type === 'sniper') {
-            return 2;
-        }
-
-        return 1;
-    }
-
-    getNearestEnemyTarget(attacker, maxRange, targetDomain = attacker.userData.domain) {
-        const enemyUnits = this.getUnitsByLayer(targetDomain)
-            .filter((unit) => unit.userData.player !== attacker.userData.player);
-
-        let bestTarget = null;
-        let bestDistance = Infinity;
-
-        enemyUnits.forEach((unit) => {
-            const distance = Math.abs(unit.userData.x - attacker.userData.x) + Math.abs(unit.userData.z - attacker.userData.z);
-            if (distance === 0 || distance > maxRange) {
-                return;
-            }
-
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                bestTarget = unit;
-            }
-        });
-
-        return bestTarget;
-    }
-
-    getInteractionLayer() {
-        if (this.phase === 'placement') {
-            const nextUnit = this.getNextPlacementUnit();
-            return nextUnit ? this.getDomainForType(nextUnit.type) : this.activeLayer;
-        }
-
-        return this.activeLayer;
-    }
-
-    toggleActiveLayer() {
-        if (this.phase !== 'battle') {
-            return;
-        }
-
-        this.activeLayer = this.activeLayer === 'ground' ? 'air' : 'ground';
-        if (this.selectedUnit && this.selectedUnit.userData.domain !== this.activeLayer) {
-            this.deselectUnit(false);
-        }
-        this.addLog(`Активний шар: ${this.getLayerLabel()}.`, 'move-log');
-        this.refreshLayerVisualState();
-        this.updateUI();
-    }
-
-    refreshLayerVisualState() {
-        ['ground', 'air'].forEach((layer) => {
-            const grid = this.getGridByLayer(layer);
-            if (!grid || grid.length === 0) {
-                return;
-            }
-
-            for (let x = 0; x < this.gridSize; x++) {
-                for (let z = 0; z < this.gridSize; z++) {
-                    this.resetCellAppearance(grid[x][z].mesh);
-                }
-            }
-
-            if (this.gridHelpers[layer]) {
-                if (this.phase === 'placement') {
-                    this.gridHelpers[layer].visible = this.getInteractionLayer() === layer;
-                } else if (this.phase === 'battle') {
-                    this.gridHelpers[layer].visible = this.activeLayer === layer;
-                } else {
-                    this.gridHelpers[layer].visible = layer === 'ground';
-                }
-            }
-        });
+        gridHelper.renderOrder = 3;
+        this.scene.add(gridHelper);
     }
 
     getUnitPalette(player) {
         if (player === 1) {
             return {
-                base: 0x5b7f34,
-                dark: 0x2f4717,
-                accent: '#b7d56c',
-                frame: 0xd8ccb2,
-                metal: 0x626d57
+                base: 0x4caf50,
+                dark: 0x1f4d25,
+                accent: '#b7f2a1',
+                frame: 0x9be16f,
+                model: 0x6fd15f,
+                marker: 0xd7ffd0
             };
         }
 
         return {
-            base: 0x7f4634,
-            dark: 0x4c2419,
-            accent: '#e5a578',
-            frame: 0xd9c4b0,
-            metal: 0x6f6259
+            base: 0xff9800,
+            dark: 0x7a3b00,
+            accent: '#ffd08a',
+            frame: 0xffb347,
+            model: 0xffa21a,
+            marker: 0xfff0c8
         };
     }
 
-    getUnitSymbolProfile(type) {
-        const profiles = {
-            infantry: { branch: 'infantry', echelon: 'III', frame: 'line', accent: '#6d8f3c' },
-            armor: { branch: 'armor', echelon: 'II', frame: 'armor', accent: '#927348' },
-            artillery: { branch: 'artillery', echelon: '|', frame: 'support', accent: '#8d5a45' },
-            command: { branch: 'command', echelon: 'X', frame: 'command', accent: '#556b8d' },
-            scout: { branch: 'recon', echelon: '..', frame: 'recon', accent: '#558060' },
-            sniper: { branch: 'sniper', echelon: '.', frame: 'precision', accent: '#7b5a72' },
-            droneScout: { branch: 'recon', echelon: '..', frame: 'recon', accent: '#4b8db2' },
-            droneKamikaze: { branch: 'sniper', echelon: '.', frame: 'precision', accent: '#b26a4b' }
+    getUnitSymbolKind(type, unitConfig = null) {
+        const config = unitConfig || (this.config && this.config.unitTypes ? this.config.unitTypes[type] : null) || {};
+        const key = `${type} ${config.name || ''} ${config.description || ''} ${config.referencePath || ''}`.toLowerCase();
+
+        if (/armor|tank|btr|bmp|брон|танк|бтр|бмп/.test(key)) return 'armor';
+        if (/artillery|himars|grad|m777|arty|арт|град|гармат|гаубиц/.test(key)) return 'artillery';
+        if (/command|signal|ksp|зв'яз|зв’яз|команд|ксп/.test(key)) return 'command';
+        if (/recon|bpla|mavic|drone|розвід|бпла|квадро/.test(key)) return 'scout';
+        if (/sniper|снайпер/.test(key)) return 'sniper';
+        if (/antitank|javelin|rpg|ptrk|птрк|гранатомет/.test(key)) return 'antitank';
+        if (/mortar|міномет|minomet/.test(key)) return 'mortar';
+        if (/medic|медик|evac|евак/.test(key)) return 'medical';
+        if (/vehicle|pickup|пікап|машин|transport/.test(key)) return 'vehicle';
+        if (/support|кулемет|machinegun|kulemet/.test(key)) return 'support';
+        return 'infantry';
+    }
+
+    getUnitSymbolLabel(type, unitConfig = null) {
+        const config = unitConfig || (this.config && this.config.unitTypes ? this.config.unitTypes[type] : null) || {};
+        const kind = this.getUnitSymbolKind(type, config);
+        const labels = {
+            infantry: 'ПХ',
+            armor: 'ТНК',
+            artillery: 'АРТ',
+            command: 'КСП',
+            scout: 'РЗВ',
+            sniper: 'СНП',
+            antitank: 'ПТРК',
+            mortar: 'МІН',
+            medical: 'МЕД',
+            vehicle: 'ТР',
+            support: 'ПІД'
         };
-
-        return profiles[type] || profiles.infantry;
+        return labels[kind] || (config.name || type).slice(0, 4).toUpperCase();
     }
 
-    drawUnitFrame(ctx, frame) {
-        ctx.beginPath();
-
-        switch (frame) {
-            case 'armor':
-                ctx.moveTo(34, 58);
-                ctx.lineTo(222, 58);
-                ctx.lineTo(230, 102);
-                ctx.lineTo(230, 176);
-                ctx.lineTo(26, 176);
-                ctx.lineTo(26, 102);
-                ctx.closePath();
-                break;
-            case 'support':
-                ctx.moveTo(42, 58);
-                ctx.lineTo(214, 58);
-                ctx.lineTo(230, 82);
-                ctx.lineTo(230, 176);
-                ctx.lineTo(26, 176);
-                ctx.lineTo(26, 82);
-                ctx.closePath();
-                break;
-            case 'recon':
-                ctx.moveTo(44, 58);
-                ctx.lineTo(212, 58);
-                ctx.lineTo(230, 86);
-                ctx.lineTo(212, 176);
-                ctx.lineTo(44, 176);
-                ctx.lineTo(26, 86);
-                ctx.closePath();
-                break;
-            case 'command':
-                ctx.moveTo(26, 58);
-                ctx.lineTo(230, 58);
-                ctx.lineTo(230, 176);
-                ctx.lineTo(144, 176);
-                ctx.lineTo(128, 196);
-                ctx.lineTo(112, 176);
-                ctx.lineTo(26, 176);
-                ctx.closePath();
-                break;
-            case 'precision':
-                ctx.moveTo(34, 58);
-                ctx.lineTo(222, 58);
-                ctx.lineTo(230, 176);
-                ctx.lineTo(26, 176);
-                ctx.closePath();
-                break;
-            case 'line':
-            default:
-                ctx.rect(26, 58, 204, 118);
-                break;
-        }
-
-        ctx.stroke();
-    }
-
-    drawUnitEchelon(ctx, echelon) {
-        ctx.save();
-        ctx.translate(128, 34);
-        ctx.strokeStyle = '#141414';
-        ctx.fillStyle = '#141414';
-        ctx.lineWidth = 8;
-
-        if (echelon.includes('|')) {
-            const count = echelon.length;
-            for (let i = 0; i < count; i++) {
-                const x = (i - (count - 1) / 2) * 18;
-                ctx.beginPath();
-                ctx.moveTo(x, -10);
-                ctx.lineTo(x, 10);
-                ctx.stroke();
-            }
-        } else if (echelon.includes('I')) {
-            const count = echelon.length;
-            for (let i = 0; i < count; i++) {
-                const x = (i - (count - 1) / 2) * 18;
-                ctx.beginPath();
-                ctx.moveTo(x, -10);
-                ctx.lineTo(x, 10);
-                ctx.stroke();
-            }
-        } else if (echelon.includes('.')) {
-            const count = echelon.length;
-            for (let i = 0; i < count; i++) {
-                const x = (i - (count - 1) / 2) * 18;
-                ctx.beginPath();
-                ctx.arc(x, 0, 5, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        } else if (echelon === 'X') {
-            ctx.beginPath();
-            ctx.moveTo(-12, -10);
-            ctx.lineTo(12, 10);
-            ctx.moveTo(12, -10);
-            ctx.lineTo(-12, 10);
-            ctx.stroke();
-        }
-
-        ctx.restore();
-    }
-
-    drawUnitBranchSymbol(ctx, branch) {
-        const centerX = 128;
-        const centerY = 118;
-        const left = 56;
-        const right = 200;
-        const top = 76;
-        const bottom = 160;
-
-        switch (branch) {
-            case 'armor':
-                ctx.beginPath();
-                ctx.ellipse(centerX, centerY, 52, 28, 0, 0, Math.PI * 2);
-                ctx.stroke();
-                break;
-            case 'artillery':
-                ctx.fillStyle = '#171717';
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 18, 0, Math.PI * 2);
-                ctx.fill();
-                break;
-            case 'command':
-                ctx.beginPath();
-                ctx.moveTo(centerX, 70);
-                ctx.lineTo(centerX, 164);
-                ctx.lineTo(176, 142);
-                ctx.moveTo(centerX, 84);
-                ctx.lineTo(176, 84);
-                ctx.stroke();
-                break;
-            case 'recon':
-                ctx.beginPath();
-                ctx.moveTo(72, 152);
-                ctx.lineTo(184, 84);
-                ctx.stroke();
-                break;
-            case 'sniper':
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, 34, 0, Math.PI * 2);
-                ctx.moveTo(centerX - 50, centerY);
-                ctx.lineTo(centerX + 50, centerY);
-                ctx.moveTo(centerX, centerY - 50);
-                ctx.lineTo(centerX, centerY + 50);
-                ctx.stroke();
-                break;
-            case 'infantry':
-            default:
-                ctx.beginPath();
-                ctx.moveTo(left, top);
-                ctx.lineTo(right, bottom);
-                ctx.moveTo(right, top);
-                ctx.lineTo(left, bottom);
-                ctx.stroke();
-                break;
-        }
-    }
-
-    createUnitSymbolTexture(type, player) {
+    createUnitSymbolTexture(type, player, unitConfig = null) {
         const canvas = document.createElement('canvas');
         canvas.width = 256;
         canvas.height = 256;
         const ctx = canvas.getContext('2d');
         const palette = this.getUnitPalette(player);
-        const profile = this.getUnitSymbolProfile(type);
+        const symbolKind = this.getUnitSymbolKind(type, unitConfig);
+        const symbolLabel = this.getUnitSymbolLabel(type, unitConfig);
 
         ctx.fillStyle = '#f8f5ea';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
-        ctx.strokeStyle = '#171717';
-        ctx.lineWidth = 9;
-
-        ctx.fillStyle = profile.accent;
-        ctx.fillRect(38, 214, 180, 12);
-
-        this.drawUnitEchelon(ctx, profile.echelon);
-        this.drawUnitFrame(ctx, profile.frame);
-        this.drawUnitBranchSymbol(ctx, profile.branch);
+        ctx.strokeStyle = '#191919';
+        ctx.lineWidth = 10;
+        ctx.strokeRect(24, 46, 208, 148);
 
         ctx.fillStyle = palette.accent;
-        ctx.fillRect(38, 214, 116, 12);
+        ctx.fillRect(24, 24, 208, 14);
+        ctx.fillRect(24, 202, 208, 18);
+
+        const centerX = 128;
+        const centerY = 120;
+        const left = 54;
+        const right = 202;
+        const top = 66;
+        const bottom = 174;
+
+        const drawInfantry = () => {
+            ctx.beginPath();
+            ctx.moveTo(left, top);
+            ctx.lineTo(right, bottom);
+            ctx.moveTo(right, top);
+            ctx.lineTo(left, bottom);
+            ctx.stroke();
+        };
+
+        const drawArmor = () => {
+            ctx.beginPath();
+            ctx.ellipse(centerX, centerY, 54, 30, 0, 0, Math.PI * 2);
+            ctx.stroke();
+        };
+
+        const drawArtillery = () => {
+            ctx.fillStyle = '#191919';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        const drawRecon = () => {
+            ctx.beginPath();
+            ctx.moveTo(72, 166);
+            ctx.lineTo(184, 74);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(98, 96, 14, 0, Math.PI * 2);
+            ctx.arc(156, 144, 14, 0, Math.PI * 2);
+            ctx.stroke();
+        };
+
+        const drawCommand = () => {
+            ctx.beginPath();
+            ctx.moveTo(centerX, 62);
+            ctx.lineTo(centerX, 178);
+            ctx.lineTo(178, 150);
+            ctx.moveTo(centerX, 78);
+            ctx.lineTo(176, 78);
+            ctx.stroke();
+            ctx.fillStyle = '#191919';
+            ctx.fillRect(108, 28, 40, 10);
+        };
+
+        const drawSniper = () => {
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 40, 0, Math.PI * 2);
+            ctx.moveTo(centerX - 56, centerY);
+            ctx.lineTo(centerX + 56, centerY);
+            ctx.moveTo(centerX, centerY - 56);
+            ctx.lineTo(centerX, centerY + 56);
+            ctx.stroke();
+        };
+
+        const drawAntitank = () => {
+            drawInfantry();
+            ctx.beginPath();
+            ctx.moveTo(78, 178);
+            ctx.lineTo(128, 92);
+            ctx.lineTo(178, 178);
+            ctx.stroke();
+        };
+
+        const drawMortar = () => {
+            drawArtillery();
+            ctx.beginPath();
+            ctx.moveTo(86, 158);
+            ctx.quadraticCurveTo(128, 70, 170, 158);
+            ctx.stroke();
+        };
+
+        const drawMedical = () => {
+            drawInfantry();
+            ctx.fillStyle = '#191919';
+            ctx.fillRect(116, 86, 24, 72);
+            ctx.fillRect(92, 110, 72, 24);
+        };
+
+        const drawVehicle = () => {
+            ctx.beginPath();
+            ctx.rect(72, 94, 112, 54);
+            ctx.moveTo(88, 158);
+            ctx.lineTo(168, 158);
+            ctx.stroke();
+        };
+
+        const drawSupport = () => {
+            drawInfantry();
+            ctx.beginPath();
+            ctx.moveTo(78, 154);
+            ctx.lineTo(178, 86);
+            ctx.stroke();
+        };
+
+        switch (symbolKind) {
+            case 'armor':
+                drawArmor();
+                break;
+            case 'artillery':
+                drawArtillery();
+                break;
+            case 'command':
+                drawCommand();
+                break;
+            case 'scout':
+                drawRecon();
+                break;
+            case 'sniper':
+                drawSniper();
+                break;
+            case 'antitank':
+                drawAntitank();
+                break;
+            case 'mortar':
+                drawMortar();
+                break;
+            case 'medical':
+                drawMedical();
+                break;
+            case 'vehicle':
+                drawVehicle();
+                break;
+            case 'support':
+                drawSupport();
+                break;
+            case 'infantry':
+            default:
+                drawInfantry();
+                break;
+        }
+
+        ctx.fillStyle = '#191919';
+        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(symbolLabel, centerX, 214);
 
         const texture = new THREE.CanvasTexture(canvas);
         texture.anisotropy = this.renderer.capabilities.getMaxAnisotropy();
@@ -1326,338 +2556,89 @@ class AdmiralGame {
         return texture;
     }
 
-    createUnitPlacard(type, player) {
-        const placard = new THREE.Group();
+    createUnitSymbolDataUrl(type, player, unitConfig = null) {
+        const texture = this.createUnitSymbolTexture(type, player, unitConfig);
+        const dataUrl = texture.image.toDataURL('image/png');
+        texture.dispose();
+        return dataUrl;
+    }
+
+    createNatoSymbolToken(type, player, unitConfig = null) {
         const palette = this.getUnitPalette(player);
-        const symbolTexture = this.createUnitSymbolTexture(type, player);
+        const group = new THREE.Group();
 
-        const post = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.03, 0.04, 0.8, 10),
-            new THREE.MeshPhongMaterial({ color: palette.metal, shininess: 20 })
-        );
-        post.position.y = 0.4;
-        post.castShadow = true;
-        placard.add(post);
-
-        const boardFrame = new THREE.Mesh(
-            new THREE.BoxGeometry(0.92, 0.58, 0.08),
-            new THREE.MeshPhongMaterial({ color: palette.frame, shininess: 12 })
-        );
-        boardFrame.position.y = 0.88;
-        boardFrame.castShadow = true;
-        boardFrame.receiveShadow = true;
-        placard.add(boardFrame);
-
-        const boardMaterial = new THREE.MeshPhongMaterial({
-            color: 0xf8f5ea,
-            map: symbolTexture,
-            shininess: 8
-        });
-
-        const boardFace = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.48), boardMaterial);
-        boardFace.position.set(0, 0.88, 0.045);
-        placard.add(boardFace);
-
-        const boardBack = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.48), boardMaterial.clone());
-        boardBack.position.set(0, 0.88, -0.045);
-        boardBack.rotation.y = Math.PI;
-        placard.add(boardBack);
-
-        placard.userData.isPlacard = true;
-
-        return placard;
-    }
-
-    createUnitMiniature(type, player) {
-        const miniature = new THREE.Group();
-        const palette = this.getUnitPalette(player);
-        const baseMaterial = new THREE.MeshPhongMaterial({ color: palette.base, shininess: 30 });
-        const darkMaterial = new THREE.MeshPhongMaterial({ color: palette.dark, shininess: 18 });
-        const metalMaterial = new THREE.MeshPhongMaterial({ color: palette.metal, shininess: 32 });
-
-        switch (type) {
-            case 'armor': {
-                const hull = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.22, 0.46), baseMaterial);
-                hull.position.y = 0.21;
-                const turret = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 0.14, 18), darkMaterial);
-                turret.rotation.x = Math.PI / 2;
-                turret.position.set(0, 0.37, 0.02);
-                const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.52, 10), metalMaterial);
-                barrel.rotation.z = Math.PI / 2;
-                barrel.position.set(0.38, 0.37, 0.02);
-                miniature.add(hull, turret, barrel);
-                break;
-            }
-            case 'artillery': {
-                const carriage = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.14, 0.32), baseMaterial);
-                carriage.position.y = 0.18;
-                const shield = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.04), darkMaterial);
-                shield.position.set(-0.04, 0.32, 0);
-                const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 0.72, 10), metalMaterial);
-                barrel.rotation.z = -Math.PI / 2.7;
-                barrel.position.set(0.18, 0.4, 0);
-                miniature.add(carriage, shield, barrel);
-                break;
-            }
-            case 'command': {
-                const table = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.24, 0.2, 14), baseMaterial);
-                table.position.y = 0.16;
-                const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.7, 10), metalMaterial);
-                mast.position.set(0.04, 0.52, 0);
-                const flag = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.12, 0.02), darkMaterial);
-                flag.position.set(0.16, 0.72, 0);
-                miniature.add(table, mast, flag);
-                break;
-            }
-            case 'scout': {
-                const body = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.16, 0.26), baseMaterial);
-                body.position.y = 0.16;
-                const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.22), darkMaterial);
-                cabin.position.set(-0.04, 0.29, 0);
-                const sensor = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), metalMaterial);
-                sensor.position.set(0.14, 0.34, 0);
-                miniature.add(body, cabin, sensor);
-                break;
-            }
-            case 'sniper': {
-                const body = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.12, 0.16), baseMaterial);
-                body.position.set(-0.05, 0.16, 0);
-                body.rotation.z = -0.24;
-                const rifle = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.66, 10), metalMaterial);
-                rifle.rotation.z = Math.PI / 2;
-                rifle.position.set(0.17, 0.24, 0);
-                const head = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 10), darkMaterial);
-                head.position.set(-0.18, 0.24, 0);
-                miniature.add(body, rifle, head);
-                break;
-            }
-            case 'droneScout': {
-                const body = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.08, 0.2), baseMaterial);
-                body.position.y = 0.26;
-                const wing = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.03, 0.12), darkMaterial);
-                wing.position.y = 0.28;
-                const tail = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.12, 0.03), metalMaterial);
-                tail.position.set(-0.2, 0.34, 0);
-                const sensor = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 10), metalMaterial);
-                sensor.position.set(0.18, 0.23, 0);
-                miniature.add(body, wing, tail, sensor);
-                break;
-            }
-            case 'droneKamikaze': {
-                const fuselage = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, 0.56, 12), baseMaterial);
-                fuselage.rotation.z = Math.PI / 2;
-                fuselage.position.set(0.02, 0.28, 0);
-                const wing = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.02, 0.58), darkMaterial);
-                wing.position.set(0, 0.29, 0);
-                const tail = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 0.02), metalMaterial);
-                tail.position.set(-0.2, 0.36, 0);
-                const nose = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.16, 10), metalMaterial);
-                nose.rotation.z = -Math.PI / 2;
-                nose.position.set(0.33, 0.28, 0);
-                miniature.add(fuselage, wing, tail, nose);
-                break;
-            }
-            case 'infantry':
-            default: {
-                const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.12, 0.3, 12), baseMaterial);
-                torso.position.y = 0.24;
-                const head = new THREE.Mesh(new THREE.SphereGeometry(0.08, 12, 12), darkMaterial);
-                head.position.y = 0.46;
-                const rifle = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.42, 10), metalMaterial);
-                rifle.rotation.z = -0.85;
-                rifle.position.set(0.13, 0.26, 0);
-                miniature.add(torso, head, rifle);
-                break;
-            }
-        }
-
-        miniature.children.forEach((mesh) => {
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-        });
-
-        return miniature;
-    }
-
-    getDomainLabel(domain = 'ground') {
-        return domain === 'air' ? 'повітря' : 'земля';
-    }
-
-    getStandardsNote(type) {
-        const approximationTypes = ['command', 'sniper', 'droneScout', 'droneKamikaze'];
-        if (approximationTypes.includes(type)) {
-            return 'Значок наближений до сучасної штабної мови й потребує методичної вичитки щодо NATO/AFU.';
-        }
-
-        return 'Базовий тактичний знак стилізований під сучасну практику NATO/AFU, але ще не є фінальною методичною версією.';
-    }
-
-    disposePreviewObject(object) {
-        object.traverse((child) => {
-            if (child.geometry) {
-                child.geometry.dispose();
-            }
-            if (child.material) {
-                if (Array.isArray(child.material)) {
-                    child.material.forEach((material) => material.dispose());
-                } else {
-                    child.material.dispose();
-                }
-            }
-        });
-    }
-
-    renderMiniaturePreview(type, player = 1) {
-        const cacheKey = `${type}:${player}`;
-        if (this.referencePreviewCache[cacheKey]) {
-            return this.referencePreviewCache[cacheKey];
-        }
-
-        const renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            alpha: true,
-            preserveDrawingBuffer: true
-        });
-        renderer.setSize(180, 180);
-        renderer.setClearColor(0x000000, 0);
-
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-        camera.position.set(2.2, 1.8, 2.6);
-        camera.lookAt(0, 0.45, 0);
-
-        scene.add(new THREE.AmbientLight(0xf5fbff, 1.2));
-        const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
-        keyLight.position.set(2.6, 3.2, 2.2);
-        scene.add(keyLight);
-
-        const fillLight = new THREE.DirectionalLight(0x8ab1c7, 0.5);
-        fillLight.position.set(-2.4, 1.8, -2.2);
-        scene.add(fillLight);
-
-        const turntable = new THREE.Group();
-        turntable.rotation.y = -0.52;
-        scene.add(turntable);
-
-        const base = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.7, 0.78, 0.14, 24),
-            new THREE.MeshPhongMaterial({
-                color: 0x314554,
+        const shadow = new THREE.Mesh(
+            new THREE.CircleGeometry(0.46, 32),
+            new THREE.MeshBasicMaterial({
+                color: palette.dark,
                 transparent: true,
-                opacity: 0.82,
-                shininess: 24
+                opacity: 0.18,
+                depthWrite: false
             })
         );
-        base.position.y = 0.08;
-        turntable.add(base);
+        shadow.rotation.x = -Math.PI / 2;
+        shadow.position.y = 0.018;
+        group.add(shadow);
 
-        const miniature = this.createUnitMiniature(type, player);
-        miniature.position.y = 0.08;
-        turntable.add(miniature);
+        const symbol = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.86, 0.86),
+            new THREE.MeshBasicMaterial({
+                map: this.createUnitSymbolTexture(type, player, unitConfig),
+                transparent: false,
+                side: THREE.DoubleSide
+            })
+        );
+        symbol.rotation.x = -Math.PI / 2;
+        symbol.position.y = 0.05;
+        symbol.renderOrder = 8;
+        symbol.userData.isNatoSymbol = true;
+        group.add(symbol);
 
-        renderer.render(scene, camera);
-        const previewData = renderer.domElement.toDataURL('image/png');
-
-        this.disposePreviewObject(turntable);
-        renderer.dispose();
-        if (renderer.forceContextLoss) {
-            renderer.forceContextLoss();
-        }
-
-        this.referencePreviewCache[cacheKey] = previewData;
-        return previewData;
+        return group;
     }
 
-    buildReferenceCard(unitType, unitConfig) {
-        const domain = this.getDomainForType(unitType);
-        const symbolTexture = this.createUnitSymbolTexture(unitType, 1);
-        const symbolData = symbolTexture.image.toDataURL('image/png');
-        symbolTexture.dispose();
-
-        const modelData = this.renderMiniaturePreview(unitType, 1);
-        const attackRange = this.getAttackRange(unitType);
-        const visionRange = this.getVisionRange({ userData: { type: unitType } });
-        const domainLabel = this.getDomainLabel(domain);
-        const attackLabel = attackRange > 1 ? `${attackRange} клітки` : 'ближній бій';
-        const note = this.getStandardsNote(unitType);
-
-        return `
-            <article class="reference-card">
-                <h4>${unitConfig.name}</h4>
-                <div class="reference-visuals">
-                    <div class="reference-visual">
-                        <div class="reference-visual-label">Значок</div>
-                        <img src="${symbolData}" alt="${unitConfig.name} значок">
-                    </div>
-                    <div class="reference-visual">
-                        <div class="reference-visual-label">Модель</div>
-                        <img src="${modelData}" alt="${unitConfig.name} модель">
-                    </div>
-                </div>
-                <div class="reference-meta">
-                    <div><strong>Шар:</strong> ${domainLabel}</div>
-                    <div><strong>Ціна:</strong> ${unitConfig.cost}</div>
-                    <div><strong>ХП:</strong> ${unitConfig.hitpoints}</div>
-                    <div><strong>Сила:</strong> ${unitConfig.strength}</div>
-                    <div><strong>Рух:</strong> ${unitConfig.movement}</div>
-                    <div><strong>Бачення:</strong> ${visionRange}</div>
-                    <div><strong>Атака:</strong> ${attackLabel}</div>
-                    <div><strong>Код:</strong> ${unitType}</div>
-                </div>
-                <div class="reference-description">${unitConfig.description}</div>
-                <div class="reference-note">${note}</div>
-            </article>
-        `;
-    }
-
-    renderReferenceCatalog() {
-        if (!this.config) {
+    attachReferenceModel(unit, type, player) {
+        if (!window.THREE || !this.unitModelPaths[type]) {
             return;
         }
 
-        const referenceCards = document.getElementById('referenceCards');
-        if (!referenceCards) {
-            return;
-        }
+        const modelPath = this.unitModelPaths[type];
+        const palette = this.getUnitPalette(player);
+        const addModel = (object) => {
+            const model = this.prepareLoadedModelForDisplay(object, palette.model, 0.76, 0.82, false);
+            model.traverse((child) => {
+                if (!child.isMesh) return;
+                if (child.material && child.material.emissive) {
+                    child.material.emissive.setHex(palette.dark);
+                }
+            });
+            model.castShadow = true;
+            model.receiveShadow = true;
+            model.userData.isReferenceModel = true;
+            unit.add(model);
+        };
 
-        const cardsMarkup = Object.entries(this.config.unitTypes)
-            .map(([unitType, unitConfig]) => this.buildReferenceCard(unitType, unitConfig))
-            .join('');
-
-        referenceCards.innerHTML = cardsMarkup;
-    }
-
-    toggleReferenceOverlay(forceState = null) {
-        const referenceOverlay = document.getElementById('referenceOverlay');
-        if (!referenceOverlay) {
-            return;
-        }
-
-        const shouldShow = forceState === null
-            ? !referenceOverlay.classList.contains('visible')
-            : forceState;
-
-        if (shouldShow) {
-            this.renderReferenceCatalog();
-        }
-
-        referenceOverlay.classList.toggle('visible', shouldShow);
+        this.loadModelObject(
+            modelPath,
+            (object) => {
+                addModel(object);
+                this.addLog(`Model loaded: ${type}`, 'place-log');
+            },
+            () => {
+                this.addLog(`Model failed, using symbol fallback: ${type}`, 'combat-log');
+            }
+        );
     }
 
     createUnit(type, x, z, player) {
         const unitConfig = this.config.unitTypes[type];
-        const palette = this.getUnitPalette(player);
         const unit = new THREE.Group();
-        const domain = this.getDomainForType(type);
-        const baseY = domain === 'air' ? this.airLayerHeight + 0.42 : 0.42;
 
-        unit.position.set(this.toWorldCoord(x), baseY, this.toWorldCoord(z));
+        unit.position.set(this.toWorldCoord(x), this.getSurfaceYAtCell(x, z), this.toWorldCoord(z));
         unit.userData = {
             isUnitRoot: true,
-            id: this.unitIdCounter++,
             type,
             player,
-            domain,
             x,
             z,
             moved: false,
@@ -1666,117 +2647,20 @@ class AdmiralGame {
             strength: unitConfig.strength
         };
 
-        const base = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.42, 0.48, 0.18, 24),
-            new THREE.MeshPhongMaterial({
-                color: palette.dark,
-                shininess: 20
-            })
-        );
-        base.position.y = 0.09;
-        base.castShadow = true;
-        base.receiveShadow = true;
-        if (domain === 'air') {
-            base.scale.set(0.86, 0.8, 0.86);
-        }
-        unit.add(base);
-
-        const ring = new THREE.Mesh(
-            new THREE.TorusGeometry(0.34, 0.045, 12, 32),
-            new THREE.MeshPhongMaterial({
-                color: palette.accent,
-                shininess: 24
-            })
-        );
-        ring.rotation.x = Math.PI / 2;
-        ring.position.y = 0.18;
-        ring.castShadow = true;
-        if (domain === 'air') {
-            ring.material.color.set(0x8cd4f5);
-        }
-        unit.add(ring);
-
-        if (domain === 'air') {
-            const beamLength = Math.max(0.2, baseY - 0.1);
-            const beam = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.035, 0.035, beamLength, 10),
-                new THREE.MeshBasicMaterial({
-                    color: 0xa7e6ff,
-                    transparent: true,
-                    opacity: 0.26,
-                    depthWrite: false
-                })
-            );
-            beam.position.y = -(beamLength * 0.5);
-            unit.add(beam);
-
-            const footprint = new THREE.Mesh(
-                new THREE.RingGeometry(0.52, 0.68, 24),
-                new THREE.MeshBasicMaterial({
-                    color: 0xa7e6ff,
-                    transparent: true,
-                    opacity: 0.42,
-                    side: THREE.DoubleSide,
-                    depthWrite: false
-                })
-            );
-            footprint.rotation.x = -Math.PI / 2;
-            footprint.position.y = -baseY + 0.045;
-            unit.add(footprint);
-
-            const footprintBox = new THREE.Mesh(
-                new THREE.PlaneGeometry(this.cellSize * 0.8, this.cellSize * 0.8),
-                new THREE.MeshBasicMaterial({
-                    color: 0x9edfff,
-                    transparent: true,
-                    opacity: 0.12,
-                    side: THREE.DoubleSide,
-                    depthWrite: false
-                })
-            );
-            footprintBox.rotation.x = -Math.PI / 2;
-            footprintBox.position.y = -baseY + 0.03;
-            unit.add(footprintBox);
-        }
-
-        const miniature = this.createUnitMiniature(type, player);
-        miniature.position.set(-0.04, 0.18, 0);
-        unit.add(miniature);
-
-        const placard = this.createUnitPlacard(type, player);
-        placard.position.set(0.23, 0.14, -0.18);
-        unit.add(placard);
-        unit.userData.placard = placard;
+        const symbolToken = this.createNatoSymbolToken(type, player, unitConfig);
+        symbolToken.userData.isReferenceModel = true;
+        unit.add(symbolToken);
 
         this.scene.add(unit);
-        this.updatePlacardFacing(placard);
         return unit;
     }
 
-    updatePlacardFacing(placard) {
-        if (!placard || !placard.parent) {
-            return;
-        }
-
-        const cameraPosition = this.camera.position.clone();
-        placard.parent.worldToLocal(cameraPosition);
-        placard.lookAt(cameraPosition);
-    }
-
-    updateUnitPlacards() {
-        [...this.units, ...this.airUnits].forEach((unit) => {
-            this.updatePlacardFacing(unit.userData.placard);
-        });
-    }
-
     moveUnit(unit, targetX, targetZ) {
-        const domain = unit.userData.domain || 'ground';
-        const grid = this.getGridByLayer(domain);
         const oldX = unit.userData.x;
         const oldZ = unit.userData.z;
 
-        grid[oldX][oldZ].unit = null;
-        grid[targetX][targetZ].unit = unit;
+        this.getGridCell(oldX, oldZ).unit = null;
+        this.getGridCell(targetX, targetZ).unit = unit;
         this.movementAnimations = this.movementAnimations.filter((animation) => animation.unit !== unit);
         this.movementAnimations.push({
             unit,
@@ -1784,7 +2668,7 @@ class AdmiralGame {
             startY: unit.position.y,
             startZ: unit.position.z,
             endX: this.toWorldCoord(targetX),
-            endY: domain === 'air' ? this.airLayerHeight + 0.42 : 0.42,
+            endY: this.getSurfaceYAtCell(targetX, targetZ),
             endZ: this.toWorldCoord(targetZ),
             startTime: performance.now(),
             duration: 350
@@ -1793,33 +2677,12 @@ class AdmiralGame {
         unit.userData.z = targetZ;
         unit.userData.moved = true;
 
-        if (unit.userData.type === 'droneKamikaze' && domain === 'air') {
-            const groundTarget = this.grid[targetX]?.[targetZ]?.unit;
-            if (groundTarget && groundTarget.userData.player !== unit.userData.player) {
-                this.resolveImmediateKamikazeStrike(unit, groundTarget);
-                return;
-            }
-        }
-
         this.deselectUnit(false);
-        this.updateUI();
-    }
-
-    resolveImmediateKamikazeStrike(drone, target) {
-        this.createExplosionAt(drone.position.clone(), 0xff8c5a);
-        this.createExplosionAt(target.position.clone(), 0xffd166);
-        this.removeUnit(drone);
-        this.removeUnit(target);
-        this.losses[drone.userData.player] += 1;
-        this.losses[target.userData.player] += 1;
-        this.addLog('БПЛА-камікадзе одразу уразив ціль під собою.', 'combat-log');
-        this.deselectUnit(false);
-        this.checkVictory();
-        this.updateUI();
     }
 
     endTurn() {
-        if (this.phase === 'shop') {
+        if (this.phase === 'order') {
+            this.currentPlayer = 1;
             this.startPlacement();
             return;
         }
@@ -1830,15 +2693,15 @@ class AdmiralGame {
 
             if (this.currentPlayer === 1) {
                 this.currentPlayer = 2;
-                this.phase = 'shop';
-                this.addLog('Player 2 now buys units.', 'place-log');
+                this.phase = 'placement';
+                this.placementPhase[2] = true;
+                this.addLog('Player 2 starts placement from the approved battle order.', 'place-log');
             } else {
                 this.phase = 'battle';
                 this.currentPlayer = 1;
-                [...this.units, ...this.airUnits].forEach((unit) => {
+                this.units.forEach((unit) => {
                     unit.userData.moved = false;
                 });
-                this.activeLayer = 'ground';
                 this.addLog('Placement is over. Battle begins.', 'place-log');
             }
 
@@ -1851,7 +2714,7 @@ class AdmiralGame {
             this.addLog(`Player ${finishedPlayer} finished the turn.`, 'move-log');
             if (finishedPlayer === 1) {
                 this.currentPlayer = 2;
-                [...this.units, ...this.airUnits]
+                this.units
                     .filter((unit) => unit.userData.player === 2)
                     .forEach((unit) => {
                         unit.userData.moved = false;
@@ -1859,12 +2722,6 @@ class AdmiralGame {
             } else {
                 this.turnNumber += 1;
                 this.currentPlayer = 1;
-                [...this.units, ...this.airUnits]
-                    .filter((unit) => unit.userData.player === 1)
-                    .forEach((unit) => {
-                        unit.userData.moved = false;
-                    });
-                this.activeLayer = 'ground';
                 this.startBattleAnimations();
             }
             this.updateUI();
@@ -1874,14 +2731,13 @@ class AdmiralGame {
     startPlacement() {
         const unplacedUnits = this.purchasedUnits[this.currentPlayer].filter((unit) => !unit.placed);
         if (unplacedUnits.length === 0) {
-            this.addLog('Buy at least one unit before placement.', 'combat-log');
+            this.addLog('Define at least one unit in the battle order before placement.', 'combat-log');
             return;
         }
 
         this.phase = 'placement';
         this.placementPhase[this.currentPlayer] = true;
-        this.activeLayer = this.getDomainForType(unplacedUnits[0].type);
-        this.addLog(`Player ${this.currentPlayer} starts placement. Left to place: ${unplacedUnits.length}`, 'place-log');
+        this.addLog(`Player ${this.currentPlayer} starts placement from the approved order. Left to place: ${unplacedUnits.length}`, 'place-log');
         this.updateUI();
     }
 
@@ -1895,15 +2751,14 @@ class AdmiralGame {
             const units = this.purchasedUnits[player];
             if (!units || units.length === 0) {
                 container.className = 'units-list-empty';
-                container.textContent = 'Nothing bought yet';
+                container.textContent = 'Склад ще не визначено';
                 return;
             }
 
             container.className = '';
             container.innerHTML = units.map((unit) => {
-                const status = unit.placed ? 'placed' : 'ready';
-                const layer = this.getDomainForType(unit.type) === 'air' ? 'air' : 'ground';
-                return `<span class="unit-badge">${unit.config.name} [${layer}] (${status})</span>`;
+                const status = unit.placed ? 'розміщено' : 'готовий';
+                return `<span class="unit-badge">${unit.config.name} (${status})</span>`;
             }).join('');
         });
     }
@@ -1914,33 +2769,63 @@ class AdmiralGame {
     }
 
     getCellMeshes() {
-        return this.getGridByLayer(this.getInteractionLayer()).flat().map((cell) => cell.mesh);
+        return [];
     }
 
     getPointerTarget() {
         this.raycaster.setFromCamera(this.mouse, this.camera);
 
-        if (this.phase === 'battle') {
-            const unitHits = this.raycaster.intersectObjects(this.getUnitsByLayer(this.activeLayer), true);
-            if (unitHits.length > 0) {
-                return { kind: 'unit', object: this.getUnitRoot(unitHits[0].object) };
+        const unitHits = this.raycaster.intersectObjects(this.units, true);
+        if (unitHits.length > 0) {
+            return { kind: 'unit', object: this.getUnitRoot(unitHits[0].object) };
+        }
+
+        const point = new THREE.Vector3();
+        if (this.raycaster.ray.intersectPlane(this.mapPlane, point)) {
+            const coords = this.worldPointToCell(point);
+            if (coords) {
+                return {
+                    kind: 'cell',
+                    object: {
+                        userData: {
+                            type: 'cell',
+                            x: coords.x,
+                            z: coords.z
+                        }
+                    }
+                };
             }
         }
 
-        const cellHits = this.raycaster.intersectObjects(this.getCellMeshes(), false);
-        if (cellHits.length > 0) {
-            const cell = cellHits[0].object;
-            const interactionLayer = this.getInteractionLayer();
-            if (cell.userData.layer === interactionLayer) {
-                return { kind: 'cell', object: cell };
+        if (this.groundMesh) {
+            const groundHits = this.raycaster.intersectObject(this.groundMesh, false);
+            if (groundHits.length > 0) {
+                const coords = this.worldPointToCell(groundHits[0].point);
+                if (!coords) return null;
+                return {
+                    kind: 'cell',
+                    object: {
+                        userData: {
+                            type: 'cell',
+                            x: coords.x,
+                            z: coords.z
+                        }
+                    }
+                };
             }
-        }
-
-        if (this.phase === 'placement') {
-            return null;
         }
 
         return null;
+    }
+
+    worldPointToCell(point) {
+        const half = (this.gridSize * this.cellSize) / 2;
+        const x = Math.floor((point.x + half) / this.cellSize);
+        const z = Math.floor((point.z + half) / this.cellSize);
+        if (x < 0 || z < 0 || x >= this.gridSize || z >= this.gridSize) {
+            return null;
+        }
+        return { x, z };
     }
 
     getUnitRoot(object) {
@@ -1952,75 +2837,16 @@ class AdmiralGame {
     }
 
     resetCellAppearance(cell) {
+        if (!cell) return;
         const x = cell.userData.x;
         const z = cell.userData.z;
-        const isAir = cell.userData.layer === 'air';
-        const grid = this.getGridByLayer(cell.userData.layer);
-        const fog = grid[x][z].fog;
-        const baseColor = (x + z) % 2 === 0
-            ? (isAir ? 0x4b768b : 0x4A5F4A)
-            : (isAir ? 0x5a8ea6 : 0x5A6F5A);
-
-        cell.material.color.setHex(baseColor);
-        if (this.phase === 'placement') {
-            cell.material.opacity = this.getInteractionLayer() === cell.userData.layer ? 0.28 : 0.08;
-            if (fog) {
-                fog.visible = false;
-                fog.material.opacity = 0;
-                if (fog.userData.marker) {
-                    fog.userData.marker.material.opacity = 0;
-                }
-            }
-            return;
-        }
-
-        if (this.phase === 'battle') {
-            const isVisible = this.isCellVisibleToPlayer(x, z);
-            if (!isVisible) {
-                const isActiveLayer = cell.userData.layer === this.activeLayer;
-                cell.material.opacity = isActiveLayer ? (isAir ? 0.07 : 0.09) : 0.015;
-                if (fog) {
-                    fog.visible = isActiveLayer;
-                    fog.material.opacity = isActiveLayer ? fog.userData.baseOpacity : 0;
-                    if (fog.userData.marker) {
-                        fog.userData.marker.material.opacity = isActiveLayer ? fog.userData.markerOpacity : 0;
-                    }
-                }
-                return;
-            }
-
-            cell.material.opacity = this.activeLayer === cell.userData.layer
-                ? (isAir ? 0.2 : 0.18)
-                : 0.06;
-            if (fog) {
-                fog.visible = false;
-                fog.material.opacity = 0;
-                if (fog.userData.marker) {
-                    fog.userData.marker.material.opacity = 0;
-                }
-            }
-            return;
-        }
-
-        cell.material.opacity = isAir ? 0.12 : 0.18;
-        if (fog) {
-            fog.visible = false;
-            fog.material.opacity = 0;
-            if (fog.userData.marker) {
-                fog.userData.marker.material.opacity = 0;
-            }
-        }
+        cell.material.color.setHex((x + z) % 2 === 0 ? 0x4A5F4A : 0x5A6F5A);
+        cell.material.opacity = this.getGridBaseOpacity();
     }
 
     clearMovementHighlights() {
-        ['ground', 'air'].forEach((layer) => {
-            const grid = this.getGridByLayer(layer);
-            for (let x = 0; x < this.gridSize; x++) {
-                for (let z = 0; z < this.gridSize; z++) {
-                    this.resetCellAppearance(grid[x][z].mesh);
-                }
-            }
-        });
+        this.cellHighlightMeshes.forEach((mesh) => this.scene.remove(mesh));
+        this.cellHighlightMeshes = [];
     }
 
     deselectUnit(shouldLog = false) {
@@ -2034,12 +2860,8 @@ class AdmiralGame {
     }
 
     selectUnit(unit) {
-        if (this.phase === 'battle' && unit.userData.domain && this.activeLayer !== unit.userData.domain) {
-            this.activeLayer = unit.userData.domain;
-        }
         this.selectedUnit = unit;
-        const grid = this.getGridByLayer(unit.userData.domain);
-        this.selectedCell = grid[unit.userData.x][unit.userData.z].mesh;
+        this.selectedCell = null;
         this.showMovementHighlights(unit);
         this.addLog(`Вибрано: ${this.config.unitTypes[unit.userData.type].name}`, 'move-log');
     }
@@ -2047,26 +2869,45 @@ class AdmiralGame {
     showMovementHighlights(unit) {
         this.clearMovementHighlights();
 
-        const grid = this.getGridByLayer(unit.userData.domain);
-        const originCell = grid[unit.userData.x][unit.userData.z].mesh;
-        originCell.material.color.setHex(0xFF6B35);
-        originCell.material.opacity = 0.45;
+        this.addCellHighlight(unit.userData.x, unit.userData.z, 0xff6b35, 0.45, 0.9);
 
         const unitX = unit.userData.x;
         const unitZ = unit.userData.z;
         const maxDistance = this.config.unitTypes[unit.userData.type].movement;
 
-        for (let x = 0; x < this.gridSize; x++) {
-            for (let z = 0; z < this.gridSize; z++) {
+        const fromX = Math.max(0, unitX - maxDistance);
+        const toX = Math.min(this.gridSize - 1, unitX + maxDistance);
+        const fromZ = Math.max(0, unitZ - maxDistance);
+        const toZ = Math.min(this.gridSize - 1, unitZ + maxDistance);
+
+        for (let x = fromX; x <= toX; x++) {
+            for (let z = fromZ; z <= toZ; z++) {
                 const distance = Math.abs(x - unitX) + Math.abs(z - unitZ);
-                const isVisible = this.phase !== 'battle' || this.isCellVisibleToPlayer(x, z);
-                if (distance > 0 && distance <= maxDistance && grid[x][z].unit === null && isVisible) {
-                    const cell = grid[x][z].mesh;
-                    cell.material.color.setHex(0x52d273);
-                    cell.material.opacity = 0.38;
+                if (distance > 0 && distance <= maxDistance && this.getGridCell(x, z).unit === null) {
+                    this.addCellHighlight(x, z, 0x52d273, 0.38, 0.72);
                 }
             }
         }
+    }
+
+    addCellHighlight(x, z, color, opacity, sizeMultiplier = 1, trackAsMovement = true) {
+        const markerSize = Math.max(this.cellSize * sizeMultiplier, 0.18);
+        const geometry = new THREE.PlaneGeometry(markerSize, markerSize);
+        const material = new THREE.MeshBasicMaterial({
+            color,
+            transparent: true,
+            opacity,
+            depthWrite: false,
+            side: THREE.DoubleSide
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.set(this.toWorldCoord(x), this.getSurfaceYAtCell(x, z) + 0.025, this.toWorldCoord(z));
+        this.scene.add(mesh);
+        if (trackAsMovement) {
+            this.cellHighlightMeshes.push(mesh);
+        }
+        return mesh;
     }
 
     onMouseMove(event) {
@@ -2077,7 +2918,7 @@ class AdmiralGame {
             const deltaY = event.clientY - this.previousMousePosition.y;
 
             this.cameraAngle += deltaX * 0.01;
-            this.cameraHeight = Math.max(5, Math.min(40, this.cameraHeight - deltaY * 0.1));
+            this.cameraHeight = Math.max(2, Math.min(180, this.cameraHeight - deltaY * 0.25));
             this.updateCameraPosition();
 
             this.previousMousePosition = { x: event.clientX, y: event.clientY };
@@ -2133,6 +2974,11 @@ class AdmiralGame {
     }
 
     handleCellClick(x, z) {
+        if (this.phase === 'order') {
+            this.addOrderTaskAtCell(x, z);
+            return;
+        }
+
         if (this.phase === 'placement') {
             this.placeUnit(x, z);
             return;
@@ -2146,7 +2992,6 @@ class AdmiralGame {
         const unitZ = this.selectedUnit.userData.z;
         const distance = Math.abs(x - unitX) + Math.abs(z - unitZ);
         const maxDistance = this.config.unitTypes[this.selectedUnit.userData.type].movement;
-        const grid = this.getGridByLayer(this.selectedUnit.userData.domain);
 
         if (distance === 0) {
             this.deselectUnit(true);
@@ -2158,7 +3003,7 @@ class AdmiralGame {
             return;
         }
 
-        if (grid[x][z].unit !== null) {
+        if (this.getGridCell(x, z).unit !== null) {
             this.addLog('Клітинка зайнята!', 'combat-log');
             return;
         }
@@ -2185,10 +3030,9 @@ class AdmiralGame {
         if (this.battleAnimations.length === 0) {
             this.isAnimatingBattles = false;
             this.currentPlayer = 1;
-            [...this.units, ...this.airUnits].forEach((unit) => {
+            this.units.forEach((unit) => {
                 unit.userData.moved = false;
             });
-            this.activeLayer = 'ground';
             document.getElementById('endTurnBtn').disabled = false;
             this.updateUI();
             return;
@@ -2214,36 +3058,12 @@ class AdmiralGame {
     resolveBattle(battle) {
         const attacker = battle.attacker;
         const defender = battle.defender;
-        const attackerCollection = this.getUnitsByLayer(attacker.userData.domain);
-        const defenderCollection = this.getUnitsByLayer(defender.userData.domain);
-        if (!attackerCollection.includes(attacker) || !defenderCollection.includes(defender)) {
+        if (!this.units.includes(attacker) || !this.units.includes(defender)) {
             return;
         }
 
         const attackerPower = attacker.userData.strength;
         const defenderPower = defender.userData.strength;
-        const mode = battle.mode || 'melee';
-
-        if (mode === 'kamikazeStrike') {
-            this.removeUnit(attacker);
-            this.removeUnit(defender);
-            this.losses[attacker.userData.player] += 1;
-            this.losses[defender.userData.player] += 1;
-            this.addLog('БПЛА-камікадзе знищив ціль під собою.', 'combat-log');
-            this.checkVictory();
-            return;
-        }
-
-        if (mode === 'rangedStrike') {
-            defender.userData.hitpoints -= attackerPower;
-            this.addLog(`${this.config.unitTypes[attacker.userData.type].name} атакує ціль на дистанції.`, 'combat-log');
-            if (defender.userData.hitpoints <= 0) {
-                this.removeUnit(defender);
-                this.losses[defender.userData.player] += 1;
-            }
-            this.checkVictory();
-            return;
-        }
 
         if (attackerPower === defenderPower) {
             this.removeUnit(attacker);
@@ -2274,16 +3094,12 @@ class AdmiralGame {
             this.selectedCell = null;
         }
 
-        const unitCollection = this.getUnitsByLayer(unit.userData.domain);
-        const index = unitCollection.indexOf(unit);
+        const index = this.units.indexOf(unit);
         if (index > -1) {
-            unitCollection.splice(index, 1);
+            this.units.splice(index, 1);
         }
 
-        const grid = this.getGridByLayer(unit.userData.domain);
-        if (grid[unit.userData.x] && grid[unit.userData.x][unit.userData.z]) {
-            grid[unit.userData.x][unit.userData.z].unit = null;
-        }
+        this.getGridCell(unit.userData.x, unit.userData.z).unit = null;
         this.scene.remove(unit);
         this.clearMovementHighlights();
     }
@@ -2317,10 +3133,6 @@ class AdmiralGame {
     
     animate() {
         requestAnimationFrame(() => this.animate());
-        this.updateUnitPlacards();
-        if (this.phase === 'battle') {
-            this.applyFogOfWar();
-        }
         if (this.movementAnimations.length > 0) {
             const now = performance.now();
             this.movementAnimations = this.movementAnimations.filter((animation) => {
@@ -2345,25 +3157,6 @@ class AdmiralGame {
                     return false;
                 }
                 return true;
-            });
-        }
-        if (this.fogAnimations.length > 0) {
-            const t = performance.now() * 0.001;
-            this.fogAnimations.forEach((fog) => {
-                if (!fog.mesh.parent) {
-                    return;
-                }
-
-                fog.mesh.position.y = fog.baseY + Math.sin(t + fog.phase) * 0.03;
-                fog.mesh.material.opacity = fog.mesh.visible
-                    ? fog.mesh.material.opacity * 0.96 + fog.baseOpacity * 0.04
-                    : 0;
-                if (fog.mesh.userData.marker) {
-                    const markerBaseOpacity = fog.mesh.userData.markerOpacity || 0.75;
-                    fog.mesh.userData.marker.material.opacity = fog.mesh.visible
-                        ? fog.mesh.userData.marker.material.opacity * 0.9 + markerBaseOpacity * 0.1
-                        : 0;
-                }
             });
         }
         this.renderer.render(this.scene, this.camera);
