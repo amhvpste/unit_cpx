@@ -1,0 +1,15 @@
+node_modules/
+npm-debug.log*
+server.out.log
+server.err.log
+content_glb_test/
+tmp-*.png
+
+# Keep deploy assets small. STL files can be committed intentionally.
+references/**/*.zip
+references/**/*.3mf
+references/**/*.jpg
+references/**/*.jpeg
+references/**/*.pdf
+references/**/*.docx
+references/**/*.xlsx

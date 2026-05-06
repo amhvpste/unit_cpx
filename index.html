@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admiral Game - Тактична Симуляція</title>
+    <title>UNITS CPX TEST</title>
     <style>
         body {
             margin: 0;
@@ -270,8 +270,8 @@
             top: 20px;
             transform: translateX(-50%);
             z-index: 4;
-            width: min(760px, calc(100vw - 280px));
-            max-height: min(320px, calc(100vh - 180px));
+            width: min(980px, calc(100vw - 220px));
+            max-height: min(520px, calc(100vh - 150px));
             overflow-y: auto;
             background: linear-gradient(180deg, rgba(87, 118, 138, 0.74), rgba(55, 79, 97, 0.68));
             border: 1px solid rgba(214, 232, 243, 0.24);
@@ -294,15 +294,15 @@
 
         #shopContent {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
         }
 
         .shop-item {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.14);
             border-radius: 10px;
-            padding: 12px;
+            padding: 14px;
             cursor: pointer;
             transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
         }
@@ -316,7 +316,7 @@
         .shop-item h5 {
             margin: 0 0 8px 0;
             color: #FFD700;
-            font-size: 15px;
+            font-size: 18px;
         }
 
         .shop-item .details {
@@ -325,6 +325,122 @@
             gap: 4px;
             font-size: 12px;
             color: #e8e8e8;
+        }
+
+        .unit-model-panel {
+            display: grid;
+            grid-template-columns: 132px 1fr;
+            gap: 10px;
+            align-items: center;
+            margin: 6px 0;
+            padding: 6px;
+            background: rgba(0, 0, 0, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+        }
+
+        .unit-model-preview {
+            width: 132px;
+            height: 96px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: rgba(255, 255, 255, 0.62);
+            font-size: 11px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(228, 236, 239, 0.12), rgba(20, 32, 38, 0.32));
+            border-radius: 4px;
+        }
+
+        .unit-model-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .unit-model-meta {
+            min-width: 0;
+            color: #d9e7ec;
+            font-size: 11px;
+            line-height: 1.25;
+        }
+
+        .unit-model-name,
+        .unit-model-path {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .unit-model-name {
+            color: #ffffff;
+        }
+
+        .unit-model-path {
+            color: rgba(255, 255, 255, 0.58);
+        }
+
+        .order-summary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin: 10px 0 12px;
+        }
+
+        .order-field {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 12px;
+            line-height: 1.35;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .order-actions button {
+            flex: 1;
+            padding: 7px 8px;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .order-planner {
+            grid-column: 1 / -1;
+        }
+
+        .order-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .order-tag {
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            color: #f8fbff;
+            border-radius: 5px;
+            padding: 7px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .order-tag.active {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.18);
+            color: #FFD700;
         }
 
         .units-list {
@@ -390,6 +506,7 @@
             #ui3 {
                 top: 190px;
             }
+
         }
     </style>
 </head>
@@ -400,10 +517,15 @@
 
         <div id="unitShop">
             <div id="shopHeader">
-                <h3>Магазин фішок</h3>
-                <div class="unit-info" id="shopCurrentPlayer">Гравець 1 купує фішки</div>
-                <div class="unit-info" id="shopMoneyInfo">Бюджет: 1000 монет</div>
-                <div class="unit-info">Клікни по картці, щоб купити підрозділ</div>
+                <h3>Бойовий наказ / налаштування сесії</h3>
+                <div class="unit-info" id="shopCurrentPlayer">Локальний прототип: гравці працюють по черзі з одного акаунту</div>
+                <div class="unit-info" id="shopMoneyInfo">Сформуйте склад сторін і затвердьте наказ перед розміщенням</div>
+                <div class="order-summary">
+                    <div class="order-field"><strong>Обстановка</strong><br>Місцевість: міська околиця<br>Погода: ясно<br>Освітлення: день</div>
+                    <div class="order-field"><strong>Завдання</strong><br>Сторона 1: захопити рубіж<br>Сторона 2: утримати район</div>
+                    <div class="order-field"><strong>Логістика</strong><br>Штабний ресурс: базовий<br>Постачання: за зонами доступності</div>
+                    <div class="order-field"><strong>Керування</strong><br>Зараз: один стіл, почергово<br>Далі: різні столи / кімнати</div>
+                </div>
             </div>
             <div id="shopContent"></div>
         </div>
@@ -412,19 +534,19 @@
             <div id="logoContainer" style="text-align: center; margin-bottom: 15px;">
                 <img src="logo-test.jpg" alt="Units CPX Logo" style="width: 80px; height: auto; margin-bottom: 5px;">
                 <h1 style="color: #FFD700; margin: 0; font-size: 18px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
-                    UNITS CPX
+                    UNITS CPX TEST
                 </h1>
             </div>
 
             <div id="player1Info" class="player-info player1">
                 <h4 style="margin: 0 0 5px 0;">Гравець 1</h4>
-                <div class="unit-info">Грошей: <span id="player1Money">1000</span> монет</div>
-                <div class="unit-info">Фішок: <span id="player1Units">0</span></div>
+                <div class="unit-info">Ресурс штабу: <span id="player1Money">базовий</span></div>
+                <div class="unit-info">Підрозділів на карті: <span id="player1Units">0</span></div>
                 <div class="unit-info">Рухів: <span id="player1Moves">3</span></div>
                 <div class="loss-info" id="player1Losses">Втрати: 0</div>
                 <div class="units-list">
-                    <div class="units-list-title">Purchased Units</div>
-                    <div id="player1PurchasedList" class="units-list-empty">Nothing bought yet</div>
+                    <div class="units-list-title">Склад / ORBAT</div>
+                    <div id="player1PurchasedList" class="units-list-empty">Склад ще не визначено</div>
                 </div>
             </div>
         </div>
@@ -444,32 +566,34 @@
         <div id="ui2">
             <div id="player2Info" class="player-info player2">
                 <h4 style="margin: 0 0 5px 0;">Гравець 2</h4>
-                <div class="unit-info">Грошей: <span id="player2Money">1000</span> монет</div>
-                <div class="unit-info">Фішок: <span id="player2Units">0</span></div>
+                <div class="unit-info">Ресурс штабу: <span id="player2Money">базовий</span></div>
+                <div class="unit-info">Підрозділів на карті: <span id="player2Units">0</span></div>
                 <div class="unit-info">Рухів: <span id="player2Moves">3</span></div>
                 <div class="loss-info" id="player2Losses">Втрати: 0</div>
                 <div class="units-list">
-                    <div class="units-list-title">Purchased Units</div>
-                    <div id="player2PurchasedList" class="units-list-empty">Nothing bought yet</div>
+                    <div class="units-list-title">Склад / ORBAT</div>
+                    <div id="player2PurchasedList" class="units-list-empty">Склад ще не визначено</div>
                 </div>
             </div>
         </div>
 
         <div id="ui3">
             <div id="gameStatus">
-                <h4 style="margin: 0 0 5px 0;">Стан гри:</h4>
+                <h4 style="margin: 0 0 5px 0;">Стан сесії:</h4>
                 <div class="unit-info" id="currentPhase">Розміщення фішок</div>
             </div>
         </div>
 
         <div id="gameLog">
-            <h4>Журнал гри:</h4>
+            <h4>Журнал сесії:</h4>
             <div id="logContent"></div>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260318-7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="game.js?v=20260506-grid-picking-fix"></script>
 </body>
 
 </html>

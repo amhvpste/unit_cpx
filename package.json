@@ -1,0 +1,13 @@
+{
+  "name": "unit-cpx",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UNITS CPX prototype",
+  "scripts": {
+    "start": "node dev-server.js",
+    "check": "node --check game.js && node --check dev-server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

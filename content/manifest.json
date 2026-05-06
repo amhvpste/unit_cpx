@@ -1,0 +1,2550 @@
+﻿[
+    {
+        "name":  "arrow001_L.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow001_L.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow001_L.stl",
+        "size":  32584
+    },
+    {
+        "name":  "arrow001_R.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow001_R.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow001_R.stl",
+        "size":  32584
+    },
+    {
+        "name":  "arrow002_L.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow002_L.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow002_L.stl",
+        "size":  33384
+    },
+    {
+        "name":  "arrow002_R.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow002_R.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow002_R.stl",
+        "size":  33384
+    },
+    {
+        "name":  "arrow003.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow003.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow003.stl",
+        "size":  27384
+    },
+    {
+        "name":  "arrow004.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow004.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow004.stl",
+        "size":  75484
+    },
+    {
+        "name":  "arrow005.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow005.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow005.stl",
+        "size":  28084
+    },
+    {
+        "name":  "arrow006.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow006.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow006.stl",
+        "size":  17184
+    },
+    {
+        "name":  "arrow007.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow007.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow007.stl",
+        "size":  11284
+    },
+    {
+        "name":  "arrow008.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow008.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow008.stl",
+        "size":  27084
+    },
+    {
+        "name":  "arrow009.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/arrow009.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Arrows/arrows/arrow009.stl",
+        "size":  2484
+    },
+    {
+        "name":  "wire1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/wire1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Barbed wire/wire1.stl",
+        "size":  352384
+    },
+    {
+        "name":  "wire2.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/wire2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Barbed wire/wire2.stl",
+        "size":  958884
+    },
+    {
+        "name":  "wire3.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/wire3.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Barbed wire/wire3.stl",
+        "size":  1360884
+    },
+    {
+        "name":  "wire_A1 2mm.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/wire_A1 2mm.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Barbed wire/wire_A1 2mm.stl",
+        "size":  20684
+    },
+    {
+        "name":  "kaponir BTR v1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/kaponir BTR v1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Caponier with BMP/kaponir BTR v1.stl",
+        "size":  561184
+    },
+    {
+        "name":  "kaponir BTR_kulemet v1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/kaponir BTR_kulemet v1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Caponier with BMP/kaponir BTR_kulemet v1.stl",
+        "size":  10084
+    },
+    {
+        "name":  "kaponir tank v1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/kaponir tank v1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Caponier with tank/kaponir tank v1.stl",
+        "size":  590084
+    },
+    {
+        "name":  "Tank_dulo.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/Tank_dulo.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Caponier with tank/Tank_dulo.stl",
+        "size":  9684
+    },
+    {
+        "name":  "KP_nametr.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/KP_nametr.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Command post/KP_nametr.stl",
+        "size":  130384
+    },
+    {
+        "name":  "KP_namet_flagf.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/KP_namet_flagf.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Command post/KP_namet_flagf.stl",
+        "size":  3284
+    },
+    {
+        "name":  "KP_namet_roof.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/KP_namet_roof.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Command post/KP_namet_roof.stl",
+        "size":  157384
+    },
+    {
+        "name":  "BLINDAGE.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/BLINDAGE.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Dugout/BLINDAGE.stl",
+        "size":  291684
+    },
+    {
+        "name":  "TM-62 stl.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/TM-62 stl.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Field TM-62/TM-62 stl.stl",
+        "size":  1569584
+    },
+    {
+        "name":  "garage.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/garage.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Garage/garage.stl",
+        "size":  36884
+    },
+    {
+        "name":  "garage_roof.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/garage_roof.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Garage/garage_roof.stl",
+        "size":  1684
+    },
+    {
+        "name":  "okop PG_7.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/okop PG_7.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Grenade launcher trench/okop PG_7.stl",
+        "size":  227084
+    },
+    {
+        "name":  "okopRPG_v1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/okopRPG_v1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Grenade launcher trench/okopRPG_v1.stl",
+        "size":  253284
+    },
+    {
+        "name":  "okop_K_v1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/okop_K_v1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Machine gun trench/okop_K_v1.stl",
+        "size":  539984
+    },
+    {
+        "name":  "mishky.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/mishky.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Sandbags/mishky.stl",
+        "size":  1724584
+    },
+    {
+        "name":  "dum.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/dum.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Smoke/dum.stl",
+        "size":  479184
+    },
+    {
+        "name":  "smoke.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/smoke.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Smoke/smoke.stl",
+        "size":  567884
+    },
+    {
+        "name":  "smokeA1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/smokeA1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Smoke/smokeA1.stl",
+        "size":  20684
+    },
+    {
+        "name":  "smokeSm.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/smokeSm.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Smoke/smokeSm.stl",
+        "size":  418584
+    },
+    {
+        "name":  "blokPost.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/blokPost.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/STOP checkpoint/blokPost.stl",
+        "size":  30284
+    },
+    {
+        "name":  "blokPost_A.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/blokPost_A.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/STOP checkpoint/blokPost_A.stl",
+        "size":  7484
+    },
+    {
+        "name":  "STOP.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/STOP.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/STOP checkpoint/STOP.stl",
+        "size":  123084
+    },
+    {
+        "name":  "namet_vD1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/namet_vD1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Tent/namet_vD1.stl",
+        "size":  144384
+    },
+    {
+        "name":  "namet_vD1_roof.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/namet_vD1_roof.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Tent/namet_vD1_roof.stl",
+        "size":  166984
+    },
+    {
+        "name":  "REB.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/REB.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Tower-REB/REB.stl",
+        "size":  159184
+    },
+    {
+        "name":  "REB_1a.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/REB_1a.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Tower-REB/REB_1a.stl",
+        "size":  14384
+    },
+    {
+        "name":  "REB_2a.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/REB_2a.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Tower-REB/REB_2a.stl",
+        "size":  66984
+    },
+    {
+        "name":  "REB_3a.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/REB_3a.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Buildings/Tower-REB/REB_3a.stl",
+        "size":  49684
+    },
+    {
+        "name":  "bridge sup vd_x2.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/bridge sup vd_x2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/bridge/bridge sup vd_x2.stl",
+        "size":  5284
+    },
+    {
+        "name":  "bridge vd_x1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/bridge vd_x1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/bridge/bridge vd_x1.stl",
+        "size":  15684
+    },
+    {
+        "name":  "bridge1 vd_x2.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/bridge1 vd_x2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/bridge/bridge1 vd_x2.stl",
+        "size":  12484
+    },
+    {
+        "name":  "brush1_x2.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/brush1_x2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/brush/brush1_x2.stl",
+        "size":  23284
+    },
+    {
+        "name":  "brush2_x2.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/brush2_x2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/brush/brush2_x2.stl",
+        "size":  18484
+    },
+    {
+        "name":  "brush3_x2.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/brush3_x2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/brush/brush3_x2.stl",
+        "size":  51884
+    },
+    {
+        "name":  "brush4_x2.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/brush4_x2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/brush/brush4_x2.stl",
+        "size":  54084
+    },
+    {
+        "name":  "brush_base_x8.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/brush_base_x8.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/brush/brush_base_x8.stl",
+        "size":  31484
+    },
+    {
+        "name":  "fence-sA.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/fence-sA.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/fence_s/fence-sA.stl",
+        "size":  15984
+    },
+    {
+        "name":  "fence.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/fence.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/fence_s/fence.stl",
+        "size":  28284
+    },
+    {
+        "name":  "fenceA.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/fenceA.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/fence_s/fenceA.stl",
+        "size":  16384
+    },
+    {
+        "name":  "fence_s.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/fence_s.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/fence_s/fence_s.stl",
+        "size":  30884
+    },
+    {
+        "name":  "el.stovp.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/el.stovp.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/pillar/el.stovp.stl",
+        "size":  18084
+    },
+    {
+        "name":  "el.stovp_A.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/el.stovp_A.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/pillar/el.stovp_A.stl",
+        "size":  25784
+    },
+    {
+        "name":  "tree1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/tree1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/trees/tree1.stl",
+        "size":  42684
+    },
+    {
+        "name":  "tree2.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/tree2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/trees/tree2.stl",
+        "size":  42684
+    },
+    {
+        "name":  "tree_A.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/tree_A.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/trees/tree_A.stl",
+        "size":  32284
+    },
+    {
+        "name":  "corner_base_x4.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/corner_base_x4.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/walls\u0026corner_x4/corner_base_x4.stl",
+        "size":  18584
+    },
+    {
+        "name":  "corner_wall_x8.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/corner_wall_x8.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/walls\u0026corner_x4/corner_wall_x8.stl",
+        "size":  32684
+    },
+    {
+        "name":  "walls_base_x4.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/walls_base_x4.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/walls\u0026corner_x4/walls_base_x4.stl",
+        "size":  16384
+    },
+    {
+        "name":  "wall_x4.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/wall_x4.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Environment/walls\u0026corner_x4/wall_x4.stl",
+        "size":  32484
+    },
+    {
+        "name":  "BTR.stl",
+        "role":  "units",
+        "path":  "content/units/BTR.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/APC/BTR.stl",
+        "size":  61184
+    },
+    {
+        "name":  "BTR_kulemet.stl",
+        "role":  "units",
+        "path":  "content/units/BTR_kulemet.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/APC/BTR_kulemet.stl",
+        "size":  9984
+    },
+    {
+        "name":  "BTR_wheelCx4.stl",
+        "role":  "units",
+        "path":  "content/units/BTR_wheelCx4.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/APC/BTR_wheelCx4.stl",
+        "size":  15084
+    },
+    {
+        "name":  "BTR_wheelLx4.stl",
+        "role":  "units",
+        "path":  "content/units/BTR_wheelLx4.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/APC/BTR_wheelLx4.stl",
+        "size":  239184
+    },
+    {
+        "name":  "BTR_wheelRX4.stl",
+        "role":  "units",
+        "path":  "content/units/BTR_wheelRX4.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/APC/BTR_wheelRX4.stl",
+        "size":  239184
+    },
+    {
+        "name":  "4oven.stl",
+        "role":  "units",
+        "path":  "content/units/4oven.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Boat/4oven.stl",
+        "size":  33284
+    },
+    {
+        "name":  "Himars_1.stl",
+        "role":  "units",
+        "path":  "content/units/Himars_1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Himars/Himars_1.stl",
+        "size":  142884
+    },
+    {
+        "name":  "Himars_2.stl",
+        "role":  "units",
+        "path":  "content/units/Himars_2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Himars/Himars_2.stl",
+        "size":  53584
+    },
+    {
+        "name":  "Himars_wheel L X3.stl",
+        "role":  "units",
+        "path":  "content/units/Himars_wheel L X3.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Himars/Himars_wheel L X3.stl",
+        "size":  239184
+    },
+    {
+        "name":  "Himars_wheel R.stl",
+        "role":  "units",
+        "path":  "content/units/Himars_wheel R.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Himars/Himars_wheel R.stl",
+        "size":  238084
+    },
+    {
+        "name":  "Himars_wheel Sx3.stl",
+        "role":  "units",
+        "path":  "content/units/Himars_wheel Sx3.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Himars/Himars_wheel Sx3.stl",
+        "size":  6884
+    },
+    {
+        "name":  "M777_A.stl",
+        "role":  "units",
+        "path":  "content/units/M777_A.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/M-777/M777_A.stl",
+        "size":  806784
+    },
+    {
+        "name":  "M777_B.stl",
+        "role":  "units",
+        "path":  "content/units/M777_B.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/M-777/M777_B.stl",
+        "size":  47684
+    },
+    {
+        "name":  "Grad.stl",
+        "role":  "units",
+        "path":  "content/units/Grad.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/MLRS Grad/Grad.stl",
+        "size":  149884
+    },
+    {
+        "name":  "Grad_dura.stl",
+        "role":  "units",
+        "path":  "content/units/Grad_dura.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/MLRS Grad/Grad_dura.stl",
+        "size":  184684
+    },
+    {
+        "name":  "Grad_duraS.stl",
+        "role":  "units",
+        "path":  "content/units/Grad_duraS.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/MLRS Grad/Grad_duraS.stl",
+        "size":  144084
+    },
+    {
+        "name":  "Grad_wheelRx3.stl",
+        "role":  "units",
+        "path":  "content/units/Grad_wheelRx3.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/MLRS Grad/Grad_wheelRx3.stl",
+        "size":  238084
+    },
+    {
+        "name":  "Grad_whellLx3.stl",
+        "role":  "units",
+        "path":  "content/units/Grad_whellLx3.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/MLRS Grad/Grad_whellLx3.stl",
+        "size":  238184
+    },
+    {
+        "name":  "Grad_whellS.stl",
+        "role":  "units",
+        "path":  "content/units/Grad_whellS.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/MLRS Grad/Grad_whellS.stl",
+        "size":  144084
+    },
+    {
+        "name":  "pickup 02_pidvys.stl",
+        "role":  "units",
+        "path":  "content/units/pickup 02_pidvys.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Pickup/pickup 02_pidvys.stl",
+        "size":  5684
+    },
+    {
+        "name":  "pickup_01_body.stl",
+        "role":  "units",
+        "path":  "content/units/pickup_01_body.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Pickup/pickup_01_body.stl",
+        "size":  128284
+    },
+    {
+        "name":  "pickup_03_wheelL.stl",
+        "role":  "units",
+        "path":  "content/units/pickup_03_wheelL.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Pickup/pickup_03_wheelL.stl",
+        "size":  239184
+    },
+    {
+        "name":  "pickup_03_wheelR.stl",
+        "role":  "units",
+        "path":  "content/units/pickup_03_wheelR.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Pickup/pickup_03_wheelR.stl",
+        "size":  238084
+    },
+    {
+        "name":  "pickup_03_wheel_S.stl",
+        "role":  "units",
+        "path":  "content/units/pickup_03_wheel_S.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Pickup/pickup_03_wheel_S.stl",
+        "size":  17084
+    },
+    {
+        "name":  "kvadro_A.stl",
+        "role":  "units",
+        "path":  "content/units/kvadro_A.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Quad Bike/kvadro_A.stl",
+        "size":  213684
+    },
+    {
+        "name":  "kvadro_S_x2.stl",
+        "role":  "units",
+        "path":  "content/units/kvadro_S_x2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Quad Bike/kvadro_S_x2.stl",
+        "size":  22984
+    },
+    {
+        "name":  "kvadro_WL_x2.stl",
+        "role":  "units",
+        "path":  "content/units/kvadro_WL_x2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Quad Bike/kvadro_WL_x2.stl",
+        "size":  238084
+    },
+    {
+        "name":  "kvadro_WR_x2.stl",
+        "role":  "units",
+        "path":  "content/units/kvadro_WR_x2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Quad Bike/kvadro_WR_x2.stl",
+        "size":  238184
+    },
+    {
+        "name":  "Tank.stl",
+        "role":  "units",
+        "path":  "content/units/Tank.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Tank/Tank.stl",
+        "size":  349984
+    },
+    {
+        "name":  "Tank_dulo.stl",
+        "role":  "units",
+        "path":  "content/units/Tank_dulo.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Machinery/Tank/Tank_dulo.stl",
+        "size":  9684
+    },
+    {
+        "name":  "javelin.stl",
+        "role":  "units",
+        "path":  "content/units/javelin.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/ATGM Javelin/javelin.stl",
+        "size":  306284
+    },
+    {
+        "name":  "javelinA.stl",
+        "role":  "units",
+        "path":  "content/units/javelinA.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/ATGM Javelin/javelinA.stl",
+        "size":  15484
+    },
+    {
+        "name":  "javelinB.stl",
+        "role":  "units",
+        "path":  "content/units/javelinB.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/ATGM Javelin/javelinB.stl",
+        "size":  24484
+    },
+    {
+        "name":  "BPLA_operators.stl",
+        "role":  "units",
+        "path":  "content/units/BPLA_operators.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/BPLA/BPLA_operators.stl",
+        "size":  475584
+    },
+    {
+        "name":  "mavik.stl",
+        "role":  "units",
+        "path":  "content/units/mavik.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/BPLA/mavik.stl",
+        "size":  121684
+    },
+    {
+        "name":  "cressv1.stl",
+        "role":  "units",
+        "path":  "content/units/cressv1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Evacuation point/cressv1.stl",
+        "size":  2284
+    },
+    {
+        "name":  "EVAKv1.stl",
+        "role":  "units",
+        "path":  "content/units/EVAKv1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Evacuation point/EVAKv1.stl",
+        "size":  2222784
+    },
+    {
+        "name":  "RPGman.stl",
+        "role":  "units",
+        "path":  "content/units/RPGman.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Grenade launcher/RPGman.stl",
+        "size":  273984
+    },
+    {
+        "name":  "RPG_1.stl",
+        "role":  "units",
+        "path":  "content/units/RPG_1.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Grenade launcher/RPG_1.stl",
+        "size":  83584
+    },
+    {
+        "name":  "Kulemetnyk_lezhachi.stl",
+        "role":  "units",
+        "path":  "content/units/Kulemetnyk_lezhachi.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Lying machine gunner/Kulemetnyk_lezhachi.stl",
+        "size":  573384
+    },
+    {
+        "name":  "Soldat_lezhachi.stl",
+        "role":  "units",
+        "path":  "content/units/Soldat_lezhachi.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Lying soldier/Soldat_lezhachi.stl",
+        "size":  245584
+    },
+    {
+        "name":  "cressv1_2.stl",
+        "role":  "units",
+        "path":  "content/units/cressv1_2.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Medicus/cressv1.stl",
+        "size":  2284
+    },
+    {
+        "name":  "Medyk.stl",
+        "role":  "units",
+        "path":  "content/units/Medyk.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Medicus/Medyk.stl",
+        "size":  621084
+    },
+    {
+        "name":  "Zviazkivets.stl",
+        "role":  "units",
+        "path":  "content/units/Zviazkivets.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Messenger/Zviazkivets.stl",
+        "size":  338684
+    },
+    {
+        "name":  "Mynomet___3_boitsa.stl",
+        "role":  "units",
+        "path":  "content/units/Mynomet___3_boitsa.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Mortarman/Mynomet_+_3_boitsa.stl",
+        "size":  609784
+    },
+    {
+        "name":  "snajperPr.stl",
+        "role":  "units",
+        "path":  "content/units/snajperPr.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Sniper pair/snajperPr.stl",
+        "size":  12284
+    },
+    {
+        "name":  "snajperr.stl",
+        "role":  "units",
+        "path":  "content/units/snajperr.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Sniper pair/snajperr.stl",
+        "size":  396534
+    },
+    {
+        "name":  "Soldat_na_kolintsi.stl",
+        "role":  "units",
+        "path":  "content/units/Soldat_na_kolintsi.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Soldier on the knee/Soldat_na_kolintsi.stl",
+        "size":  294284
+    },
+    {
+        "name":  "Soltat_stoiachi.stl",
+        "role":  "units",
+        "path":  "content/units/Soltat_stoiachi.stl",
+        "source":  "references/W33415_DA_Набір_макетів_ОВТ_для_проведення_військової_гри/1454076_W33415_final_set/Full STL set with photos/Soldiers/Standing soldier/Soltat_stoiachi.stl",
+        "size":  276284
+    },
+    {
+        "name":  "1-1-mekhanizovane-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/1-1-mekhanizovane-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/1-1-mekhanizovane-viddilennia.stl",
+        "size":  429062
+    },
+    {
+        "name":  "1-2-peredbachaietsia-mekhanizovane-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/1-2-peredbachaietsia-mekhanizovane-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/1-2-peredbachaietsia-mekhanizovane-viddilennia.stl",
+        "size":  884141
+    },
+    {
+        "name":  "10-1-shturmove-pikhotne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/10-1-shturmove-pikhotne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/10-1-shturmove-pikhotne-viddilennia.stl",
+        "size":  353488
+    },
+    {
+        "name":  "10-2-peredbachaietsia-shturmove-pikhotne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/10-2-peredbachaietsia-shturmove-pikhotne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/10-2-peredbachaietsia-shturmove-pikhotne-viddilennia.stl",
+        "size":  808567
+    },
+    {
+        "name":  "11-1-mekhanizovanyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/11-1-mekhanizovanyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/11-1-mekhanizovanyi-vzvod.stl",
+        "size":  442838
+    },
+    {
+        "name":  "11-2-peredbachaietsia-mekhanizovanyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/11-2-peredbachaietsia-mekhanizovanyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/11-2-peredbachaietsia-mekhanizovanyi-vzvod.stl",
+        "size":  897917
+    },
+    {
+        "name":  "12-1-povitriano-desantnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/12-1-povitriano-desantnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/12-1-povitriano-desantnyi-vzvod.stl",
+        "size":  432317
+    },
+    {
+        "name":  "12-2-peredbachaietsia-povitriano-desantnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/12-2-peredbachaietsia-povitriano-desantnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/12-2-peredbachaietsia-povitriano-desantnyi-vzvod.stl",
+        "size":  887396
+    },
+    {
+        "name":  "13-1-pikhotnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/13-1-pikhotnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/13-1-pikhotnyi-vzvod.stl",
+        "size":  337997
+    },
+    {
+        "name":  "13-2-peredbachaietsia-pikhotnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/13-2-peredbachaietsia-pikhotnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/13-2-peredbachaietsia-pikhotnyi-vzvod.stl",
+        "size":  793076
+    },
+    {
+        "name":  "14-1-tankovyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/14-1-tankovyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/14-1-tankovyi-vzvod.stl",
+        "size":  374017
+    },
+    {
+        "name":  "14-2-peredbachaietsia-tankovyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/14-2-peredbachaietsia-tankovyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/14-2-peredbachaietsia-tankovyi-vzvod.stl",
+        "size":  845347
+    },
+    {
+        "name":  "15-1-minometnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/15-1-minometnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/15-1-minometnyi-vzvod.stl",
+        "size":  395600
+    },
+    {
+        "name":  "15-2-peredbachaietsia-minometnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/15-2-peredbachaietsia-minometnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/15-2-peredbachaietsia-minometnyi-vzvod.stl",
+        "size":  866930
+    },
+    {
+        "name":  "16-1-rozviduvalnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/16-1-rozviduvalnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/16-1-rozviduvalnyi-vzvod.stl",
+        "size":  303423
+    },
+    {
+        "name":  "16-2-peredbachaietsia-rozviduvalnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/16-2-peredbachaietsia-rozviduvalnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/16-2-peredbachaietsia-rozviduvalnyi-vzvod.stl",
+        "size":  766612
+    },
+    {
+        "name":  "17-1-vzvod-vohnevoi-pidtrymky.stl",
+        "role":  "units",
+        "path":  "content/units/17-1-vzvod-vohnevoi-pidtrymky.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/17-1-vzvod-vohnevoi-pidtrymky.stl",
+        "size":  348852
+    },
+    {
+        "name":  "17-2-peredbachaietsia-vzvod-vohnevoi-pidtrymky.stl",
+        "role":  "units",
+        "path":  "content/units/17-2-peredbachaietsia-vzvod-vohnevoi-pidtrymky.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/17-2-peredbachaietsia-vzvod-vohnevoi-pidtrymky.stl",
+        "size":  820182
+    },
+    {
+        "name":  "18-1-vzvod-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/18-1-vzvod-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/18-1-vzvod-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1006232
+    },
+    {
+        "name":  "18-2-peredbachaietsia-vzvod-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/18-2-peredbachaietsia-vzvod-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/18-2-peredbachaietsia-vzvod-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1459990
+    },
+    {
+        "name":  "19-1-mekhanizovanyi-shturmovyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/19-1-mekhanizovanyi-shturmovyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/19-1-mekhanizovanyi-shturmovyi-vzvod.stl",
+        "size":  472105
+    },
+    {
+        "name":  "19-2-peredbachaietsia-mekhanizovanyi-shturmovyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/19-2-peredbachaietsia-mekhanizovanyi-shturmovyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/19-2-peredbachaietsia-mekhanizovanyi-shturmovyi-vzvod.stl",
+        "size":  927184
+    },
+    {
+        "name":  "2-1-povitriano-desantne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/2-1-povitriano-desantne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/2-1-povitriano-desantne-viddilennia.stl",
+        "size":  418541
+    },
+    {
+        "name":  "2-2-peredbachaietsia-povitriano-desantne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/2-2-peredbachaietsia-povitriano-desantne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/2-2-peredbachaietsia-povitriano-desantne-viddilennia.stl",
+        "size":  873620
+    },
+    {
+        "name":  "20-1-shturmovyi-pihotnyi-vzvod-bez-tehniky.stl",
+        "role":  "units",
+        "path":  "content/units/20-1-shturmovyi-pihotnyi-vzvod-bez-tehniky.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/20-1-shturmovyi-pihotnyi-vzvod-bez-tehniky.stl",
+        "size":  367264
+    },
+    {
+        "name":  "20-2-peredbachaietsia-shturmovyi-pihotnyi-vzvod_bez-tehniky.stl",
+        "role":  "units",
+        "path":  "content/units/20-2-peredbachaietsia-shturmovyi-pihotnyi-vzvod_bez-tehniky.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/20-2-peredbachaietsia-shturmovyi-pihotnyi-vzvod_bez-tehniky.stl",
+        "size":  822343
+    },
+    {
+        "name":  "21-1-mekhanizovana-rota.stl",
+        "role":  "units",
+        "path":  "content/units/21-1-mekhanizovana-rota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/21-1-mekhanizovana-rota.stl",
+        "size":  433369
+    },
+    {
+        "name":  "21-2-peredbachaietsia-mekhanizovana-rota.stl",
+        "role":  "units",
+        "path":  "content/units/21-2-peredbachaietsia-mekhanizovana-rota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/21-2-peredbachaietsia-mekhanizovana-rota.stl",
+        "size":  888448
+    },
+    {
+        "name":  "22-1-pikhotna-rota.stl",
+        "role":  "units",
+        "path":  "content/units/22-1-pikhotna-rota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/22-1-pikhotna-rota.stl",
+        "size":  328528
+    },
+    {
+        "name":  "22-2-peredbachaietsia-pikhotna-rota.stl",
+        "role":  "units",
+        "path":  "content/units/22-2-peredbachaietsia-pikhotna-rota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/22-2-peredbachaietsia-pikhotna-rota.stl",
+        "size":  783607
+    },
+    {
+        "name":  "23-1-povitriano-desantna-rota.stl",
+        "role":  "units",
+        "path":  "content/units/23-1-povitriano-desantna-rota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/23-1-povitriano-desantna-rota.stl",
+        "size":  422848
+    },
+    {
+        "name":  "23-2-peredbachaietsia-povitriano-desantna-rota.stl",
+        "role":  "units",
+        "path":  "content/units/23-2-peredbachaietsia-povitriano-desantna-rota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/23-2-peredbachaietsia-povitriano-desantna-rota.stl",
+        "size":  877927
+    },
+    {
+        "name":  "24-1-minometna-batareia.stl",
+        "role":  "units",
+        "path":  "content/units/24-1-minometna-batareia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/24-1-minometna-batareia.stl",
+        "size":  386131
+    },
+    {
+        "name":  "24-2-peredbachaietsia-minometna-batareia.stl",
+        "role":  "units",
+        "path":  "content/units/24-2-peredbachaietsia-minometna-batareia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/24-2-peredbachaietsia-minometna-batareia.stl",
+        "size":  857461
+    },
+    {
+        "name":  "25-1-samokhidna-artyleriiska-batareia.stl",
+        "role":  "units",
+        "path":  "content/units/25-1-samokhidna-artyleriiska-batareia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/25-1-samokhidna-artyleriiska-batareia.stl",
+        "size":  383731
+    },
+    {
+        "name":  "25-2-peredbachaietsia-samokhidna-artyleriiska-batareia.stl",
+        "role":  "units",
+        "path":  "content/units/25-2-peredbachaietsia-samokhidna-artyleriiska-batareia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/25-2-peredbachaietsia-samokhidna-artyleriiska-batareia.stl",
+        "size":  855061
+    },
+    {
+        "name":  "26-1-rota-vohnevoi-pidtrymky.stl",
+        "role":  "units",
+        "path":  "content/units/26-1-rota-vohnevoi-pidtrymky.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/26-1-rota-vohnevoi-pidtrymky.stl",
+        "size":  339383
+    },
+    {
+        "name":  "26-2-peredbachaietsia-rota-vohnevoi-pidtrymky.stl",
+        "role":  "units",
+        "path":  "content/units/26-2-peredbachaietsia-rota-vohnevoi-pidtrymky.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/26-2-peredbachaietsia-rota-vohnevoi-pidtrymky.stl",
+        "size":  810713
+    },
+    {
+        "name":  "27-1-rota-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/27-1-rota-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/27-1-rota-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  996763
+    },
+    {
+        "name":  "27-2-peredbachaietsia-rota-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/27-2-peredbachaietsia-rota-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/27-2-peredbachaietsia-rota-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1450521
+    },
+    {
+        "name":  "28-1-shturmova-rota-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/28-1-shturmova-rota-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/28-1-shturmova-rota-z-tekhnikoiu.stl",
+        "size":  462636
+    },
+    {
+        "name":  "28-2-peredbachaietsia-shturmova-rota-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/28-2-peredbachaietsia-shturmova-rota-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/28-2-peredbachaietsia-shturmova-rota-z-tekhnikoiu.stl",
+        "size":  917715
+    },
+    {
+        "name":  "29-1-shturmova-pihotna-rota.stl",
+        "role":  "units",
+        "path":  "content/units/29-1-shturmova-pihotna-rota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/29-1-shturmova-pihotna-rota.stl",
+        "size":  357795
+    },
+    {
+        "name":  "29-2-peredbachaietsia-shturmova-pihotna-rota.stl",
+        "role":  "units",
+        "path":  "content/units/29-2-peredbachaietsia-shturmova-pihotna-rota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/29-2-peredbachaietsia-shturmova-pihotna-rota.stl",
+        "size":  812874
+    },
+    {
+        "name":  "3-1-pikhotne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/3-1-pikhotne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/3-1-pikhotne-viddilennia.stl",
+        "size":  324221
+    },
+    {
+        "name":  "3-2-peredbachaietsia-pikhotne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/3-2-peredbachaietsia-pikhotne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/3-2-peredbachaietsia-pikhotne-viddilennia.stl",
+        "size":  779300
+    },
+    {
+        "name":  "30-1-mekhanizovanyi-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/30-1-mekhanizovanyi-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/30-1-mekhanizovanyi-batalion.stl",
+        "size":  456417
+    },
+    {
+        "name":  "30-2-peredbachaietsia-mekhanizovanyi-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/30-2-peredbachaietsia-mekhanizovanyi-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/30-2-peredbachaietsia-mekhanizovanyi-batalion.stl",
+        "size":  911496
+    },
+    {
+        "name":  "31-1-pikhotnyi-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/31-1-pikhotnyi-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/31-1-pikhotnyi-batalion.stl",
+        "size":  351576
+    },
+    {
+        "name":  "31-2-peredbachaietsia-pikhotnyi-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/31-2-peredbachaietsia-pikhotnyi-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/31-2-peredbachaietsia-pikhotnyi-batalion.stl",
+        "size":  806655
+    },
+    {
+        "name":  "32-1-povitriano-desantnyi-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/32-1-povitriano-desantnyi-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/32-1-povitriano-desantnyi-batalion.stl",
+        "size":  445896
+    },
+    {
+        "name":  "32-2-peredbachaietsia-povitriano-desantnyi-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/32-2-peredbachaietsia-povitriano-desantnyi-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/32-2-peredbachaietsia-povitriano-desantnyi-batalion.stl",
+        "size":  900975
+    },
+    {
+        "name":  "33-1-samokhidna-artyleriiskyi-dyvizion.stl",
+        "role":  "units",
+        "path":  "content/units/33-1-samokhidna-artyleriiskyi-dyvizion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/33-1-samokhidna-artyleriiskyi-dyvizion.stl",
+        "size":  406779
+    },
+    {
+        "name":  "33-2-peredbachaietsia-samokhidna-artyleriiskyi-dyvizion.stl",
+        "role":  "units",
+        "path":  "content/units/33-2-peredbachaietsia-samokhidna-artyleriiskyi-dyvizion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/33-2-peredbachaietsia-samokhidna-artyleriiskyi-dyvizion.stl",
+        "size":  878109
+    },
+    {
+        "name":  "34-1-batalion-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/34-1-batalion-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/34-1-batalion-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1019811
+    },
+    {
+        "name":  "34-2-peredbachaietsia-batalion-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/34-2-peredbachaietsia-batalion-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/34-2-peredbachaietsia-batalion-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1473569
+    },
+    {
+        "name":  "35-1-shturmovyi-batalion-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/35-1-shturmovyi-batalion-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/35-1-shturmovyi-batalion-z-tekhnikoiu.stl",
+        "size":  485684
+    },
+    {
+        "name":  "35-2-peredbachaietsia-shturmovyi-batalion-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/35-2-peredbachaietsia-shturmovyi-batalion-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/35-2-peredbachaietsia-shturmovyi-batalion-z-tekhnikoiu.stl",
+        "size":  940763
+    },
+    {
+        "name":  "36-1-shturmovyi-pihotnyi-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/36-1-shturmovyi-pihotnyi-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/36-1-shturmovyi-pihotnyi-batalion.stl",
+        "size":  380843
+    },
+    {
+        "name":  "36-2-peredbachaietsia-shturmovyi-pihotnyi-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/36-2-peredbachaietsia-shturmovyi-pihotnyi-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/36-2-peredbachaietsia-shturmovyi-pihotnyi-batalion.stl",
+        "size":  835922
+    },
+    {
+        "name":  "37-1-ksp-mekhanizovanoho-batalionu.stl",
+        "role":  "units",
+        "path":  "content/units/37-1-ksp-mekhanizovanoho-batalionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/37-1-ksp-mekhanizovanoho-batalionu.stl",
+        "size":  467176
+    },
+    {
+        "name":  "37-2-peredbachaietsia-ksp-mekhanizovanoho-batalionu.stl",
+        "role":  "units",
+        "path":  "content/units/37-2-peredbachaietsia-ksp-mekhanizovanoho-batalionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/37-2-peredbachaietsia-ksp-mekhanizovanoho-batalionu.stl",
+        "size":  989504
+    },
+    {
+        "name":  "38-1-ksp-pikhotnoho-batalionu.stl",
+        "role":  "units",
+        "path":  "content/units/38-1-ksp-pikhotnoho-batalionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/38-1-ksp-pikhotnoho-batalionu.stl",
+        "size":  362335
+    },
+    {
+        "name":  "38-2-peredbachaietsia-ksp-pikhotnoho-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/38-2-peredbachaietsia-ksp-pikhotnoho-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/38-2-peredbachaietsia-ksp-pikhotnoho-batalion.stl",
+        "size":  884663
+    },
+    {
+        "name":  "39-1-ksp-povitriano-desantnoho-batalionu.stl",
+        "role":  "units",
+        "path":  "content/units/39-1-ksp-povitriano-desantnoho-batalionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/39-1-ksp-povitriano-desantnoho-batalionu.stl",
+        "size":  456655
+    },
+    {
+        "name":  "39-2-peredbachaietsia-ksp-povitriano-desantnoho-batalionu.stl",
+        "role":  "units",
+        "path":  "content/units/39-2-peredbachaietsia-ksp-povitriano-desantnoho-batalionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/39-2-peredbachaietsia-ksp-povitriano-desantnoho-batalionu.stl",
+        "size":  978983
+    },
+    {
+        "name":  "4-1-minometnyi-rozrakhunok.stl",
+        "role":  "units",
+        "path":  "content/units/4-1-minometnyi-rozrakhunok.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/4-1-minometnyi-rozrakhunok.stl",
+        "size":  381824
+    },
+    {
+        "name":  "4-2-peredbachaietsia-minometnyi-rozrakhunok.stl",
+        "role":  "units",
+        "path":  "content/units/4-2-peredbachaietsia-minometnyi-rozrakhunok.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/4-2-peredbachaietsia-minometnyi-rozrakhunok.stl",
+        "size":  853154
+    },
+    {
+        "name":  "40-1-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "role":  "units",
+        "path":  "content/units/40-1-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/40-1-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "size":  432638
+    },
+    {
+        "name":  "40-2-peredbachaietsia-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "role":  "units",
+        "path":  "content/units/40-2-peredbachaietsia-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/40-2-peredbachaietsia-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "size":  956488
+    },
+    {
+        "name":  "41-1-ksp-batalionu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/41-1-ksp-batalionu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/41-1-ksp-batalionu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1030564
+    },
+    {
+        "name":  "41-2-peredbachaietsia-ksp-batalionu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/41-2-peredbachaietsia-ksp-batalionu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/41-2-peredbachaietsia-ksp-batalionu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1551577
+    },
+    {
+        "name":  "42-1-ksp-shturmovoho-batalionu-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/42-1-ksp-shturmovoho-batalionu-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/42-1-ksp-shturmovoho-batalionu-z-tekhnikoiu.stl",
+        "size":  496443
+    },
+    {
+        "name":  "42-2-peredbachaietsia-ksp-shturmovoho-batalionu-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/42-2-peredbachaietsia-ksp-shturmovoho-batalionu-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/42-2-peredbachaietsia-ksp-shturmovoho-batalionu-z-tekhnikoiu.stl",
+        "size":  1018771
+    },
+    {
+        "name":  "43-1-ksp-shturmovoho-pihotnoho-batalionu.stl",
+        "role":  "units",
+        "path":  "content/units/43-1-ksp-shturmovoho-pihotnoho-batalionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/43-1-ksp-shturmovoho-pihotnoho-batalionu.stl",
+        "size":  391602
+    },
+    {
+        "name":  "43-2-peredbachaietsia-ksp-shturmovoho-pihotnoho-batalionu.stl",
+        "role":  "units",
+        "path":  "content/units/43-2-peredbachaietsia-ksp-shturmovoho-pihotnoho-batalionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/43-2-peredbachaietsia-ksp-shturmovoho-pihotnoho-batalionu.stl",
+        "size":  913930
+    },
+    {
+        "name":  "45-1-ksp-mekhanizovanoi-roty.stl",
+        "role":  "units",
+        "path":  "content/units/45-1-ksp-mekhanizovanoi-roty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/45-1-ksp-mekhanizovanoi-roty.stl",
+        "size":  444128
+    },
+    {
+        "name":  "45-2-peredbachaietsia-ksp-mekhanizovanoi-roty.stl",
+        "role":  "units",
+        "path":  "content/units/45-2-peredbachaietsia-ksp-mekhanizovanoi-roty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/45-2-peredbachaietsia-ksp-mekhanizovanoi-roty.stl",
+        "size":  966456
+    },
+    {
+        "name":  "46-1-ksp-rota-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/46-1-ksp-rota-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/46-1-ksp-rota-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1007516
+    },
+    {
+        "name":  "46-2-peredbachaietsia-ksp-roty-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/46-2-peredbachaietsia-ksp-roty-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/46-2-peredbachaietsia-ksp-roty-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1528529
+    },
+    {
+        "name":  "47-1-ksp-shturmovoi-roty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/47-1-ksp-shturmovoi-roty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/47-1-ksp-shturmovoi-roty-z-tekhnikoiu.stl",
+        "size":  473395
+    },
+    {
+        "name":  "47-2-peredbachaietsia-ksp-shturmovoi-roty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/47-2-peredbachaietsia-ksp-shturmovoi-roty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/47-2-peredbachaietsia-ksp-shturmovoi-roty-z-tekhnikoiu.stl",
+        "size":  995723
+    },
+    {
+        "name":  "48-1-ksp-shturmovoi-pihotnoi-roty.stl",
+        "role":  "units",
+        "path":  "content/units/48-1-ksp-shturmovoi-pihotnoi-roty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/48-1-ksp-shturmovoi-pihotnoi-roty.stl",
+        "size":  368554
+    },
+    {
+        "name":  "48-2-peredbachaietsia-ksp-shturmovoi-pihotnoi-roty.stl",
+        "role":  "units",
+        "path":  "content/units/48-2-peredbachaietsia-ksp-shturmovoi-pihotnoi-roty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/48-2-peredbachaietsia-ksp-shturmovoi-pihotnoi-roty.stl",
+        "size":  890882
+    },
+    {
+        "name":  "49-1-ksp-pihotnoi-roty.stl",
+        "role":  "units",
+        "path":  "content/units/49-1-ksp-pihotnoi-roty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/49-1-ksp-pihotnoi-roty.stl",
+        "size":  339287
+    },
+    {
+        "name":  "49-2-peredbachaietsia-ksp-pihotnoi-roty.stl",
+        "role":  "units",
+        "path":  "content/units/49-2-peredbachaietsia-ksp-pihotnoi-roty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/49-2-peredbachaietsia-ksp-pihotnoi-roty.stl",
+        "size":  861615
+    },
+    {
+        "name":  "5-1-protytankove-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/5-1-protytankove-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/5-1-protytankove-viddilennia.stl",
+        "size":  363181
+    },
+    {
+        "name":  "50-1-ksp-povitriano-desantnoi-roty.stl",
+        "role":  "units",
+        "path":  "content/units/50-1-ksp-povitriano-desantnoi-roty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/50-1-ksp-povitriano-desantnoi-roty.stl",
+        "size":  433607
+    },
+    {
+        "name":  "50-2-peredbachaietsia-ksp-povitriano-desantnoi-roty.stl",
+        "role":  "units",
+        "path":  "content/units/50-2-peredbachaietsia-ksp-povitriano-desantnoi-roty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/50-2-peredbachaietsia-ksp-povitriano-desantnoi-roty.stl",
+        "size":  955935
+    },
+    {
+        "name":  "51-1-ksp-mekhanizovanoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/51-1-ksp-mekhanizovanoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/51-1-ksp-mekhanizovanoho-vzvodu.stl",
+        "size":  453586
+    },
+    {
+        "name":  "51-2-peredbachaietsia-ksp-mekhanizovanoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/51-2-peredbachaietsia-ksp-mekhanizovanoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/51-2-peredbachaietsia-ksp-mekhanizovanoho-vzvodu.stl",
+        "size":  975914
+    },
+    {
+        "name":  "52-1-ksp-povitriano-desantnoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/52-1-ksp-povitriano-desantnoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/52-1-ksp-povitriano-desantnoho-vzvodu.stl",
+        "size":  443065
+    },
+    {
+        "name":  "52-2-peredbachaietsia-ksp-povitriano-desantnoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/52-2-peredbachaietsia-ksp-povitriano-desantnoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/52-2-peredbachaietsia-ksp-povitriano-desantnoho-vzvodu.stl",
+        "size":  965393
+    },
+    {
+        "name":  "53-1-ksp-pikhotnoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/53-1-ksp-pikhotnoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/53-1-ksp-pikhotnoho-vzvodu.stl",
+        "size":  348745
+    },
+    {
+        "name":  "53-2-peredbachaietsia-ksp-pikhotnoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/53-2-peredbachaietsia-ksp-pikhotnoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/53-2-peredbachaietsia-ksp-pikhotnoho-vzvodu.stl",
+        "size":  871073
+    },
+    {
+        "name":  "54-1-ksp-tankovoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/54-1-ksp-tankovoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/54-1-ksp-tankovoho-vzvodu.stl",
+        "size":  399865
+    },
+    {
+        "name":  "54-2-peredbachaietsia-ksp-tankovoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/54-2-peredbachaietsia-ksp-tankovoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/54-2-peredbachaietsia-ksp-tankovoho-vzvodu.stl",
+        "size":  923715
+    },
+    {
+        "name":  "55-1-ksp-vzvodu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/55-1-ksp-vzvodu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/55-1-ksp-vzvodu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1016974
+    },
+    {
+        "name":  "55-2-peredbachaietsia-ksp-vzvodu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/55-2-peredbachaietsia-ksp-vzvodu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/55-2-peredbachaietsia-ksp-vzvodu-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1537987
+    },
+    {
+        "name":  "56-1-ksp-mekhanizovanoho-shturmovoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/56-1-ksp-mekhanizovanoho-shturmovoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/56-1-ksp-mekhanizovanoho-shturmovoho-vzvodu.stl",
+        "size":  482853
+    },
+    {
+        "name":  "56-2-peredbachaietsia-ksp-mekhanizovanoho-shturmovoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/56-2-peredbachaietsia-ksp-mekhanizovanoho-shturmovoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/56-2-peredbachaietsia-ksp-mekhanizovanoho-shturmovoho-vzvodu.stl",
+        "size":  1005181
+    },
+    {
+        "name":  "57-1-ksp-shturmovoho-pihotnoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/57-1-ksp-shturmovoho-pihotnoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/57-1-ksp-shturmovoho-pihotnoho-vzvodu.stl",
+        "size":  378012
+    },
+    {
+        "name":  "57-2-peredbachaietsia-ksp-shturmovoho-pihotnoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/57-2-peredbachaietsia-ksp-shturmovoho-pihotnoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/57-2-peredbachaietsia-ksp-shturmovoho-pihotnoho-vzvodu.stl",
+        "size":  900340
+    },
+    {
+        "name":  "6-1-hranatomete-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/6-1-hranatomete-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/6-1-hranatomete-viddilennia.stl",
+        "size":  465262
+    },
+    {
+        "name":  "7-1-rozviduvalne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/7-1-rozviduvalne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/7-1-rozviduvalne-viddilennia.stl",
+        "size":  289647
+    },
+    {
+        "name":  "7-2-peredbachaietsia-rozviduvalne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/7-2-peredbachaietsia-rozviduvalne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/7-2-peredbachaietsia-rozviduvalne-viddilennia.stl",
+        "size":  752836
+    },
+    {
+        "name":  "8-1-viddilennia-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/8-1-viddilennia-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/8-1-viddilennia-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  992456
+    },
+    {
+        "name":  "8-2-peredbachaietsia-viddilennia-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "role":  "units",
+        "path":  "content/units/8-2-peredbachaietsia-viddilennia-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/8-2-peredbachaietsia-viddilennia-morskoi-pikhoty-z-tekhnikoiu.stl",
+        "size":  1446214
+    },
+    {
+        "name":  "9-1-shturmove-mekhanizovane-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/9-1-shturmove-mekhanizovane-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/9-1-shturmove-mekhanizovane-viddilennia.stl",
+        "size":  458329
+    },
+    {
+        "name":  "9-2-peredbachaietsia-shturmove-mekhanizovane-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/9-2-peredbachaietsia-shturmove-mekhanizovane-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/01 Союзні підрозділи/9-2-peredbachaietsia-shturmove-mekhanizovane-viddilennia.stl",
+        "size":  913408
+    },
+    {
+        "name":  "58-1-strilets.stl",
+        "role":  "units",
+        "path":  "content/units/58-1-strilets.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/58-1-strilets.stl",
+        "size":  309092
+    },
+    {
+        "name":  "58-2-peredbachaietsia-strilets.stl",
+        "role":  "units",
+        "path":  "content/units/58-2-peredbachaietsia-strilets.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/58-2-peredbachaietsia-strilets.stl",
+        "size":  556965
+    },
+    {
+        "name":  "59-1-kulemetnyk.stl",
+        "role":  "units",
+        "path":  "content/units/59-1-kulemetnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/59-1-kulemetnyk.stl",
+        "size":  369310
+    },
+    {
+        "name":  "59-2-peredbachaietsia-kulemetnyk.stl",
+        "role":  "units",
+        "path":  "content/units/59-2-peredbachaietsia-kulemetnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/59-2-peredbachaietsia-kulemetnyk.stl",
+        "size":  617200
+    },
+    {
+        "name":  "60-1-krupnokalibernyi-kulemetnyk.stl",
+        "role":  "units",
+        "path":  "content/units/60-1-krupnokalibernyi-kulemetnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/60-1-krupnokalibernyi-kulemetnyk.stl",
+        "size":  392982
+    },
+    {
+        "name":  "60-2-peredbachaietsia-krupnokalibernyi-kulemetnyk.stl",
+        "role":  "units",
+        "path":  "content/units/60-2-peredbachaietsia-krupnokalibernyi-kulemetnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/60-2-peredbachaietsia-krupnokalibernyi-kulemetnyk.stl",
+        "size":  640870
+    },
+    {
+        "name":  "61-1-lehkyi-hranatomet.stl",
+        "role":  "units",
+        "path":  "content/units/61-1-lehkyi-hranatomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/61-1-lehkyi-hranatomet.stl",
+        "size":  413271
+    },
+    {
+        "name":  "61-2-peredbachaietsia-lehkyi-hranatomet.stl",
+        "role":  "units",
+        "path":  "content/units/61-2-peredbachaietsia-lehkyi-hranatomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/61-2-peredbachaietsia-lehkyi-hranatomet.stl",
+        "size":  661234
+    },
+    {
+        "name":  "62-1-avtomatychnyi-hranatomet.stl",
+        "role":  "units",
+        "path":  "content/units/62-1-avtomatychnyi-hranatomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/62-1-avtomatychnyi-hranatomet.stl",
+        "size":  461383
+    },
+    {
+        "name":  "62-2-peredbachaietsia-avtomatychnyi-hranatomet.stl",
+        "role":  "units",
+        "path":  "content/units/62-2-peredbachaietsia-avtomatychnyi-hranatomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/62-2-peredbachaietsia-avtomatychnyi-hranatomet.stl",
+        "size":  709292
+    },
+    {
+        "name":  "63-1-hranatometnyk.stl",
+        "role":  "units",
+        "path":  "content/units/63-1-hranatometnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/63-1-hranatometnyk.stl",
+        "size":  382742
+    },
+    {
+        "name":  "63-2-peredbachaietsia-hranatometnyk.stl",
+        "role":  "units",
+        "path":  "content/units/63-2-peredbachaietsia-hranatometnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/63-2-peredbachaietsia-hranatometnyk.stl",
+        "size":  630641
+    },
+    {
+        "name":  "64-1-ptrk.stl",
+        "role":  "units",
+        "path":  "content/units/64-1-ptrk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/64-1-ptrk.stl",
+        "size":  358309
+    },
+    {
+        "name":  "64-2-peredbachaietsia-ptrk.stl",
+        "role":  "units",
+        "path":  "content/units/64-2-peredbachaietsia-ptrk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/64-2-peredbachaietsia-ptrk.stl",
+        "size":  606083
+    },
+    {
+        "name":  "65-1-minomet.stl",
+        "role":  "units",
+        "path":  "content/units/65-1-minomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/65-1-minomet.stl",
+        "size":  455458
+    },
+    {
+        "name":  "65-2-peredbachaietsia-minomet.stl",
+        "role":  "units",
+        "path":  "content/units/65-2-peredbachaietsia-minomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/02 Союзна зброя/65-2-peredbachaietsia-minomet.stl",
+        "size":  703377
+    },
+    {
+        "name":  "66-1-tank.stl",
+        "role":  "units",
+        "path":  "content/units/66-1-tank.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/66-1-tank.stl",
+        "size":  302504
+    },
+    {
+        "name":  "66-2-peredbachaietsia-tank.stl",
+        "role":  "units",
+        "path":  "content/units/66-2-peredbachaietsia-tank.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/66-2-peredbachaietsia-tank.stl",
+        "size":  550230
+    },
+    {
+        "name":  "67-1-bmp.stl",
+        "role":  "units",
+        "path":  "content/units/67-1-bmp.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/67-1-bmp.stl",
+        "size":  313504
+    },
+    {
+        "name":  "67-2-peredbachaietsia-bmp.stl",
+        "role":  "units",
+        "path":  "content/units/67-2-peredbachaietsia-bmp.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/67-2-peredbachaietsia-bmp.stl",
+        "size":  561261
+    },
+    {
+        "name":  "68-1-avto.stl",
+        "role":  "units",
+        "path":  "content/units/68-1-avto.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/68-1-avto.stl",
+        "size":  523178
+    },
+    {
+        "name":  "68-2-peredbachaietsia-avto.stl",
+        "role":  "units",
+        "path":  "content/units/68-2-peredbachaietsia-avto.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/68-2-peredbachaietsia-avto.stl",
+        "size":  770944
+    },
+    {
+        "name":  "69-1-btr.stl",
+        "role":  "units",
+        "path":  "content/units/69-1-btr.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/69-1-btr.stl",
+        "size":  325879
+    },
+    {
+        "name":  "69-2-peredbachaietsia-btr.stl",
+        "role":  "units",
+        "path":  "content/units/69-2-peredbachaietsia-btr.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/69-2-peredbachaietsia-btr.stl",
+        "size":  573637
+    },
+    {
+        "name":  "70-1-bpla.stl",
+        "role":  "units",
+        "path":  "content/units/70-1-bpla.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/70-1-bpla.stl",
+        "size":  361729
+    },
+    {
+        "name":  "71-1-udarnyi-hvyntokryl.stl",
+        "role":  "units",
+        "path":  "content/units/71-1-udarnyi-hvyntokryl.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/71-1-udarnyi-hvyntokryl.stl",
+        "size":  240832
+    },
+    {
+        "name":  "72-1-transportnyi-hvyntokryl.stl",
+        "role":  "units",
+        "path":  "content/units/72-1-transportnyi-hvyntokryl.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/72-1-transportnyi-hvyntokryl.stl",
+        "size":  286289
+    },
+    {
+        "name":  "73-1-litak.stl",
+        "role":  "units",
+        "path":  "content/units/73-1-litak.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/03 Союзна техніка/73-1-litak.stl",
+        "size":  256588
+    },
+    {
+        "name":  "74-1-voroh-mekhanizovane-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/74-1-voroh-mekhanizovane-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/74-1-voroh-mekhanizovane-viddilennia.stl",
+        "size":  356969
+    },
+    {
+        "name":  "74-2-voroh-pidozra-mekhanizovane-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/74-2-voroh-pidozra-mekhanizovane-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/74-2-voroh-pidozra-mekhanizovane-viddilennia.stl",
+        "size":  719900
+    },
+    {
+        "name":  "75-1-voroh-pikhotne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/75-1-voroh-pikhotne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/75-1-voroh-pikhotne-viddilennia.stl",
+        "size":  252135
+    },
+    {
+        "name":  "75-2-voroh-pidozra-pikhotne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/75-2-voroh-pidozra-pikhotne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/75-2-voroh-pidozra-pikhotne-viddilennia.stl",
+        "size":  615069
+    },
+    {
+        "name":  "76-1-voroh-minometnyi-rozrakhunok.stl",
+        "role":  "units",
+        "path":  "content/units/76-1-voroh-minometnyi-rozrakhunok.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/76-1-voroh-minometnyi-rozrakhunok.stl",
+        "size":  358256
+    },
+    {
+        "name":  "76-2-voroh-pidozra-minometnyi-rozrakhunok.stl",
+        "role":  "units",
+        "path":  "content/units/76-2-voroh-pidozra-minometnyi-rozrakhunok.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/76-2-voroh-pidozra-minometnyi-rozrakhunok.stl",
+        "size":  753259
+    },
+    {
+        "name":  "77-1-voroh-hranatomete-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/77-1-voroh-hranatomete-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/77-1-voroh-hranatomete-viddilennia.stl",
+        "size":  441694
+    },
+    {
+        "name":  "78-1-voroh-rozviduvalne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/78-1-voroh-rozviduvalne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/78-1-voroh-rozviduvalne-viddilennia.stl",
+        "size":  241822
+    },
+    {
+        "name":  "78-2-voroh-pidozra-rozviduvalne-viddilennia.stl",
+        "role":  "units",
+        "path":  "content/units/78-2-voroh-pidozra-rozviduvalne-viddilennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/78-2-voroh-pidozra-rozviduvalne-viddilennia.stl",
+        "size":  620799
+    },
+    {
+        "name":  "79-1-voroh-mekhanizovanyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/79-1-voroh-mekhanizovanyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/79-1-voroh-mekhanizovanyi-vzvod.stl",
+        "size":  394148
+    },
+    {
+        "name":  "79-2-voroh-pidozra-mekhanizovanyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/79-2-voroh-pidozra-mekhanizovanyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/79-2-voroh-pidozra-mekhanizovanyi-vzvod.stl",
+        "size":  759596
+    },
+    {
+        "name":  "80-1-voroh-tankovyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/80-1-voroh-tankovyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/80-1-voroh-tankovyi-vzvod.stl",
+        "size":  373862
+    },
+    {
+        "name":  "80-2-voroh-pidozra-tankovyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/80-2-voroh-pidozra-tankovyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/80-2-voroh-pidozra-tankovyi-vzvod.stl",
+        "size":  771372
+    },
+    {
+        "name":  "81-1-voroh-minometnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/81-1-voroh-minometnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/81-1-voroh-minometnyi-vzvod.stl",
+        "size":  395445
+    },
+    {
+        "name":  "81-2-voroh-pidozra-minometnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/81-2-voroh-pidozra-minometnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/81-2-voroh-pidozra-minometnyi-vzvod.stl",
+        "size":  792955
+    },
+    {
+        "name":  "82-1-voroh-rozviduvalnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/82-1-voroh-rozviduvalnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/82-1-voroh-rozviduvalnyi-vzvod.stl",
+        "size":  279006
+    },
+    {
+        "name":  "82-2-voroh-pidozra-rozviduvalnyi-vzvod.stl",
+        "role":  "units",
+        "path":  "content/units/82-2-voroh-pidozra-rozviduvalnyi-vzvod.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/82-2-voroh-pidozra-rozviduvalnyi-vzvod.stl",
+        "size":  660495
+    },
+    {
+        "name":  "83-1-voroh-mekhanizovana-rota.stl",
+        "role":  "units",
+        "path":  "content/units/83-1-voroh-mekhanizovana-rota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/83-1-voroh-mekhanizovana-rota.stl",
+        "size":  361276
+    },
+    {
+        "name":  "83-2-voroh-pidozra-mekhanizovana-rota.stl",
+        "role":  "units",
+        "path":  "content/units/83-2-voroh-pidozra-mekhanizovana-rota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/83-2-voroh-pidozra-mekhanizovana-rota.stl",
+        "size":  724207
+    },
+    {
+        "name":  "84-1-voroh-minometna-batareia.stl",
+        "role":  "units",
+        "path":  "content/units/84-1-voroh-minometna-batareia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/84-1-voroh-minometna-batareia.stl",
+        "size":  362563
+    },
+    {
+        "name":  "84-2-voroh-pidozra-minometna-batareia.stl",
+        "role":  "units",
+        "path":  "content/units/84-2-voroh-pidozra-minometna-batareia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/84-2-voroh-pidozra-minometna-batareia.stl",
+        "size":  757566
+    },
+    {
+        "name":  "85-1-voroh-samokhidna-artyleriiska-batareia.stl",
+        "role":  "units",
+        "path":  "content/units/85-1-voroh-samokhidna-artyleriiska-batareia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/85-1-voroh-samokhidna-artyleriiska-batareia.stl",
+        "size":  360163
+    },
+    {
+        "name":  "85-2-voroh-pidozra-samokhidna-artyleriiska-batareia.stl",
+        "role":  "units",
+        "path":  "content/units/85-2-voroh-pidozra-samokhidna-artyleriiska-batareia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/85-2-voroh-pidozra-samokhidna-artyleriiska-batareia.stl",
+        "size":  755166
+    },
+    {
+        "name":  "86-1-voroh-mekhanizovanyi-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/86-1-voroh-mekhanizovanyi-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/86-1-voroh-mekhanizovanyi-batalion.stl",
+        "size":  384324
+    },
+    {
+        "name":  "86-2-voroh-pidozra-mekhanizovanyi-batalion.stl",
+        "role":  "units",
+        "path":  "content/units/86-2-voroh-pidozra-mekhanizovanyi-batalion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/86-2-voroh-pidozra-mekhanizovanyi-batalion.stl",
+        "size":  747255
+    },
+    {
+        "name":  "87-1-voroh-samokhidna-artyleriiskyi-dyvizion.stl",
+        "role":  "units",
+        "path":  "content/units/87-1-voroh-samokhidna-artyleriiskyi-dyvizion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/87-1-voroh-samokhidna-artyleriiskyi-dyvizion.stl",
+        "size":  383211
+    },
+    {
+        "name":  "87-2-voroh-pidozra-samokhidna-artyleriiskyi-dyvizion.stl",
+        "role":  "units",
+        "path":  "content/units/87-2-voroh-pidozra-samokhidna-artyleriiskyi-dyvizion.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/87-2-voroh-pidozra-samokhidna-artyleriiskyi-dyvizion.stl",
+        "size":  778214
+    },
+    {
+        "name":  "88-1-voroh-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "role":  "units",
+        "path":  "content/units/88-1-voroh-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/88-1-voroh-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "size":  409594
+    },
+    {
+        "name":  "88-2-voroh-pidozra-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "role":  "units",
+        "path":  "content/units/88-2-voroh-pidozra-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/88-2-voroh-pidozra-ksp-samokhidnoho-artyleriiskoho-dyvizionu.stl",
+        "size":  858192
+    },
+    {
+        "name":  "89-1-voroh-ksp-mekhanizovanoho-batalionu.stl",
+        "role":  "units",
+        "path":  "content/units/89-1-voroh-ksp-mekhanizovanoho-batalionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/89-1-voroh-ksp-mekhanizovanoho-batalionu.stl",
+        "size":  410724
+    },
+    {
+        "name":  "89-2-voroh-pidozra-ksp-mekhanizovanoho-batalionu.stl",
+        "role":  "units",
+        "path":  "content/units/89-2-voroh-pidozra-ksp-mekhanizovanoho-batalionu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/89-2-voroh-pidozra-ksp-mekhanizovanoho-batalionu.stl",
+        "size":  827233
+    },
+    {
+        "name":  "90-1-voroh-ksp-mekhanizovanoi-roty.stl",
+        "role":  "units",
+        "path":  "content/units/90-1-voroh-ksp-mekhanizovanoi-roty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/90-1-voroh-ksp-mekhanizovanoi-roty.stl",
+        "size":  387676
+    },
+    {
+        "name":  "90-2-voroh-pidozra-ksp-mekhanizovanoi-roty.stl",
+        "role":  "units",
+        "path":  "content/units/90-2-voroh-pidozra-ksp-mekhanizovanoi-roty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/90-2-voroh-pidozra-ksp-mekhanizovanoi-roty.stl",
+        "size":  804185
+    },
+    {
+        "name":  "91-1-voroh-kps-tankovoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/91-1-voroh-kps-tankovoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/91-1-voroh-kps-tankovoho-vzvodu.stl",
+        "size":  400230
+    },
+    {
+        "name":  "91-2-voroh-pidozra-kps-tankovoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/91-2-voroh-pidozra-kps-tankovoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/91-2-voroh-pidozra-kps-tankovoho-vzvodu.stl",
+        "size":  851335
+    },
+    {
+        "name":  "92-1-voroh-ksp-mekhanizovanoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/92-1-voroh-ksp-mekhanizovanoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/92-1-voroh-ksp-mekhanizovanoho-vzvodu.stl",
+        "size":  420533
+    },
+    {
+        "name":  "92-2-voroh-pidozra-ksp-mekhanizovanoho-vzvodu.stl",
+        "role":  "units",
+        "path":  "content/units/92-2-voroh-pidozra-ksp-mekhanizovanoho-vzvodu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/04 Ворожі підрозділи/92-2-voroh-pidozra-ksp-mekhanizovanoho-vzvodu.stl",
+        "size":  839559
+    },
+    {
+        "name":  "100-1-voroh-litak.stl",
+        "role":  "units",
+        "path":  "content/units/100-1-voroh-litak.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/100-1-voroh-litak.stl",
+        "size":  218790
+    },
+    {
+        "name":  "93-1-voroh-avto.stl",
+        "role":  "units",
+        "path":  "content/units/93-1-voroh-avto.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/93-1-voroh-avto.stl",
+        "size":  472473
+    },
+    {
+        "name":  "93-2-voroh-pidozra-avto.stl",
+        "role":  "units",
+        "path":  "content/units/93-2-voroh-pidozra-avto.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/93-2-voroh-pidozra-avto.stl",
+        "size":  869983
+    },
+    {
+        "name":  "94-1-voroh-bmp.stl",
+        "role":  "units",
+        "path":  "content/units/94-1-voroh-bmp.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/94-1-voroh-bmp.stl",
+        "size":  262303
+    },
+    {
+        "name":  "94-2-voroh-pidozra-bmp.stl",
+        "role":  "units",
+        "path":  "content/units/94-2-voroh-pidozra-bmp.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/94-2-voroh-pidozra-bmp.stl",
+        "size":  659813
+    },
+    {
+        "name":  "95-1-voroh-tank.stl",
+        "role":  "units",
+        "path":  "content/units/95-1-voroh-tank.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/95-1-voroh-tank.stl",
+        "size":  251328
+    },
+    {
+        "name":  "95-2-voroh-pidozra-tank.stl",
+        "role":  "units",
+        "path":  "content/units/95-2-voroh-pidozra-tank.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/95-2-voroh-pidozra-tank.stl",
+        "size":  648838
+    },
+    {
+        "name":  "96-1-voroh-btr.stl",
+        "role":  "units",
+        "path":  "content/units/96-1-voroh-btr.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/96-1-voroh-btr.stl",
+        "size":  274942
+    },
+    {
+        "name":  "96-2-voroh-pidozra-btr.stl",
+        "role":  "units",
+        "path":  "content/units/96-2-voroh-pidozra-btr.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/96-2-voroh-pidozra-btr.stl",
+        "size":  672452
+    },
+    {
+        "name":  "97-1-voroh-bpla.stl",
+        "role":  "units",
+        "path":  "content/units/97-1-voroh-bpla.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/97-1-voroh-bpla.stl",
+        "size":  323898
+    },
+    {
+        "name":  "98-1-voroh-udarnyi-hvyntokryl.stl",
+        "role":  "units",
+        "path":  "content/units/98-1-voroh-udarnyi-hvyntokryl.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/98-1-voroh-udarnyi-hvyntokryl.stl",
+        "size":  202945
+    },
+    {
+        "name":  "99-1-voroh-transportnyi-hvyntokryl.stl",
+        "role":  "units",
+        "path":  "content/units/99-1-voroh-transportnyi-hvyntokryl.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/05 Ворожа техніка/99-1-voroh-transportnyi-hvyntokryl.stl",
+        "size":  248381
+    },
+    {
+        "name":  "101-1-voroh-strilets.stl",
+        "role":  "units",
+        "path":  "content/units/101-1-voroh-strilets.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/101-1-voroh-strilets.stl",
+        "size":  257493
+    },
+    {
+        "name":  "101-2-voroh-pidozra-strilets.stl",
+        "role":  "units",
+        "path":  "content/units/101-2-voroh-pidozra-strilets.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/101-2-voroh-pidozra-strilets.stl",
+        "size":  655003
+    },
+    {
+        "name":  "102-1-voroh-kulemetnyk.stl",
+        "role":  "units",
+        "path":  "content/units/102-1-voroh-kulemetnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/102-1-voroh-kulemetnyk.stl",
+        "size":  317812
+    },
+    {
+        "name":  "102-2-voroh-pidozra-kulemetnyk.stl",
+        "role":  "units",
+        "path":  "content/units/102-2-voroh-pidozra-kulemetnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/102-2-voroh-pidozra-kulemetnyk.stl",
+        "size":  715322
+    },
+    {
+        "name":  "103-1-voroh-krupnokalibernyi-kulemetnyk.stl",
+        "role":  "units",
+        "path":  "content/units/103-1-voroh-krupnokalibernyi-kulemetnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/103-1-voroh-krupnokalibernyi-kulemetnyk.stl",
+        "size":  341454
+    },
+    {
+        "name":  "103-2-voroh-pidozra-krupnokalibernyi-kulemetnyk.stl",
+        "role":  "units",
+        "path":  "content/units/103-2-voroh-pidozra-krupnokalibernyi-kulemetnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/103-2-voroh-pidozra-krupnokalibernyi-kulemetnyk.stl",
+        "size":  738964
+    },
+    {
+        "name":  "104-1-voroh-lehkyi-hranatomet.stl",
+        "role":  "units",
+        "path":  "content/units/104-1-voroh-lehkyi-hranatomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/104-1-voroh-lehkyi-hranatomet.stl",
+        "size":  363297
+    },
+    {
+        "name":  "104-2-voroh-pidozra-lehkyi-hranatomet.stl",
+        "role":  "units",
+        "path":  "content/units/104-2-voroh-pidozra-lehkyi-hranatomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/104-2-voroh-pidozra-lehkyi-hranatomet.stl",
+        "size":  760807
+    },
+    {
+        "name":  "105-1-voroh-avtomatychnyi-hranatomet.stl",
+        "role":  "units",
+        "path":  "content/units/105-1-voroh-avtomatychnyi-hranatomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/105-1-voroh-avtomatychnyi-hranatomet.stl",
+        "size":  411431
+    },
+    {
+        "name":  "105-2-voroh-pidozra-avtomatychnyi-hranatomet.stl",
+        "role":  "units",
+        "path":  "content/units/105-2-voroh-pidozra-avtomatychnyi-hranatomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/105-2-voroh-pidozra-avtomatychnyi-hranatomet.stl",
+        "size":  808941
+    },
+    {
+        "name":  "106-1-voroh-hranatometnyk.stl",
+        "role":  "units",
+        "path":  "content/units/106-1-voroh-hranatometnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/106-1-voroh-hranatometnyk.stl",
+        "size":  330572
+    },
+    {
+        "name":  "106-2-voroh-pidozra-hranatometnyk.stl",
+        "role":  "units",
+        "path":  "content/units/106-2-voroh-pidozra-hranatometnyk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/106-2-voroh-pidozra-hranatometnyk.stl",
+        "size":  728082
+    },
+    {
+        "name":  "107-1-voroh-sph.stl",
+        "role":  "units",
+        "path":  "content/units/107-1-voroh-sph.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/107-1-voroh-sph.stl",
+        "size":  354222
+    },
+    {
+        "name":  "107-2-voroh-pidozra-sph.stl",
+        "role":  "units",
+        "path":  "content/units/107-2-voroh-pidozra-sph.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/107-2-voroh-pidozra-sph.stl",
+        "size":  751732
+    },
+    {
+        "name":  "108-1-voroh-ptrk.stl",
+        "role":  "units",
+        "path":  "content/units/108-1-voroh-ptrk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/108-1-voroh-ptrk.stl",
+        "size":  309350
+    },
+    {
+        "name":  "108-2-voroh-pidozra-ptrk.stl",
+        "role":  "units",
+        "path":  "content/units/108-2-voroh-pidozra-ptrk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/108-2-voroh-pidozra-ptrk.stl",
+        "size":  706860
+    },
+    {
+        "name":  "109-1-voroh-minomet.stl",
+        "role":  "units",
+        "path":  "content/units/109-1-voroh-minomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/109-1-voroh-minomet.stl",
+        "size":  404771
+    },
+    {
+        "name":  "109-2-voroh-pidozra-minomet.stl",
+        "role":  "units",
+        "path":  "content/units/109-2-voroh-pidozra-minomet.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/06 Ворожа зброя/109-2-voroh-pidozra-minomet.stl",
+        "size":  802281
+    },
+    {
+        "name":  "1 Napriam na pivnich.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/1 Napriam na pivnich.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/1 Napriam na pivnich.STL",
+        "size":  49184
+    },
+    {
+        "name":  "110-1-orientyr-1.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/110-1-orientyr-1.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/110-1-orientyr-1.stl",
+        "size":  366688
+    },
+    {
+        "name":  "111-1-orientyr-2.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/111-1-orientyr-2.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/111-1-orientyr-2.stl",
+        "size":  403753
+    },
+    {
+        "name":  "112-1-orientyr-3.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/112-1-orientyr-3.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/112-1-orientyr-3.stl",
+        "size":  424831
+    },
+    {
+        "name":  "113-1-orientyr-4.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/113-1-orientyr-4.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/113-1-orientyr-4.stl",
+        "size":  364785
+    },
+    {
+        "name":  "114-1-orientyr-5.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/114-1-orientyr-5.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/114-1-orientyr-5.stl",
+        "size":  398132
+    },
+    {
+        "name":  "115-1-orientyr-6.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/115-1-orientyr-6.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/115-1-orientyr-6.stl",
+        "size":  418121
+    },
+    {
+        "name":  "116-1-vidmitka-vysoty.stl",
+        "role":  "reference",
+        "path":  "content/reference/116-1-vidmitka-vysoty.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/116-1-vidmitka-vysoty.stl",
+        "size":  304597
+    },
+    {
+        "name":  "117-1-vysota.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/117-1-vysota.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/117-1-vysota.stl",
+        "size":  327225
+    },
+    {
+        "name":  "118-1-plashka-dlia-naselenoho-punktu.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/118-1-plashka-dlia-naselenoho-punktu.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/118-1-plashka-dlia-naselenoho-punktu.stl",
+        "size":  200968
+    },
+    {
+        "name":  "141 Zmishane minne pole.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/141 Zmishane minne pole.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/141 Zmishane minne pole.STL",
+        "size":  213884
+    },
+    {
+        "name":  "142 Protytankove minne pole.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/142 Protytankove minne pole.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/142 Protytankove minne pole.STL",
+        "size":  183884
+    },
+    {
+        "name":  "143 Spiralne drotiane zahorodzhennia.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/143 Spiralne drotiane zahorodzhennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/143 Spiralne drotiane zahorodzhennia.STL",
+        "size":  227184
+    },
+    {
+        "name":  "144 Dvoriadne drotiane zahorodzhennia.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/144 Dvoriadne drotiane zahorodzhennia.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/144 Dvoriadne drotiane zahorodzhennia.STL",
+        "size":  228084
+    },
+    {
+        "name":  "147 Sposterezhnii punkt.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/147 Sposterezhnii punkt.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/147 Sposterezhnii punkt.STL",
+        "size":  24084
+    },
+    {
+        "name":  "154 - Styk.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/154 - Styk.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/154 - Styk.STL",
+        "size":  91884
+    },
+    {
+        "name":  "155 Rubizh.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/155 Rubizh.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/155 Rubizh.STL",
+        "size":  73684
+    },
+    {
+        "name":  "156 Rubizh punktir.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/156 Rubizh punktir.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/156 Rubizh punktir.STL",
+        "size":  173084
+    },
+    {
+        "name":  "157 Perednii kray.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/157 Perednii kray.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/157 Perednii kray.STL",
+        "size":  139884
+    },
+    {
+        "name":  "162 Prohid v minno-vibuhovomu zagorodgenni 100.stl",
+        "role":  "reference",
+        "path":  "content/reference/162 Prohid v minno-vibuhovomu zagorodgenni 100.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/162 Prohid v minno-vibuhovomu zagorodgenni 100.STL",
+        "size":  82684
+    },
+    {
+        "name":  "162 Prohid v minno-vibuhovomu zagorodgenni 200.stl",
+        "role":  "reference",
+        "path":  "content/reference/162 Prohid v minno-vibuhovomu zagorodgenni 200.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/162 Prohid v minno-vibuhovomu zagorodgenni 200.STL",
+        "size":  82684
+    },
+    {
+        "name":  "201 Systema transhey.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/201 Systema transhey.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/201 Systema transhey.stl",
+        "size":  173684
+    },
+    {
+        "name":  "202 Liniya zahorodzhen.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/202 Liniya zahorodzhen.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/202 Liniya zahorodzhen.stl",
+        "size":  166284
+    },
+    {
+        "name":  "203 Blindazh.stl",
+        "role":  "terrain",
+        "path":  "content/terrain/203 Blindazh.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/07 Інше (other)/203 Blindazh.stl",
+        "size":  71984
+    },
+    {
+        "name":  "145 Nastup.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/145 Nastup.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/145 Nastup.STL",
+        "size":  82084
+    },
+    {
+        "name":  "146 Nastup punktir.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/146 Nastup punktir.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/146 Nastup punktir.STL",
+        "size":  432684
+    },
+    {
+        "name":  "148 Ataka vohnem.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/148 Ataka vohnem.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/148 Ataka vohnem.STL",
+        "size":  100284
+    },
+    {
+        "name":  "149 Planuiema ataka vohnem.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/149 Planuiema ataka vohnem.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/149 Planuiema ataka vohnem.STL",
+        "size":  147984
+    },
+    {
+        "name":  "150 vohnevyi rubizh.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/150 vohnevyi rubizh.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/150 vohnevyi rubizh.stl",
+        "size":  161884
+    },
+    {
+        "name":  "151 planuvalnyy rubizh.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/151 planuvalnyy rubizh.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/151 planuvalnyy rubizh.stl",
+        "size":  220284
+    },
+    {
+        "name":  "152 Ataka.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/152 Ataka.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/152 Ataka.STL",
+        "size":  78184
+    },
+    {
+        "name":  "153 Planuema ataka.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/153 Planuema ataka.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/153 Planuema ataka.STL",
+        "size":  188584
+    },
+    {
+        "name":  "163 Zasidka.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/163 Zasidka.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/163 Zasidka.STL",
+        "size":  182584
+    },
+    {
+        "name":  "164-1 Khybnyi napriamok nastupu _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/164-1 Khybnyi napriamok nastupu _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/164-1 Khybnyi napriamok nastupu (na bilomu plastyku).stl",
+        "size":  222184
+    },
+    {
+        "name":  "164-2 Khybnyi napriamok nastupu _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/164-2 Khybnyi napriamok nastupu _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/164-2 Khybnyi napriamok nastupu (na bilomu plastyku).stl",
+        "size":  222184
+    },
+    {
+        "name":  "165-1 Khybnyi napriamok nastupu _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/165-1 Khybnyi napriamok nastupu _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/165-1 Khybnyi napriamok nastupu (na bilomu plastyku).stl",
+        "size":  222284
+    },
+    {
+        "name":  "165-2 Khybnyi napriamok nastupu _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/165-2 Khybnyi napriamok nastupu _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/165-2 Khybnyi napriamok nastupu (na bilomu plastyku).stl",
+        "size":  222284
+    },
+    {
+        "name":  "166-1 Napriamok nastupu_ shcho planuietsia _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/166-1 Napriamok nastupu_ shcho planuietsia _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/166-1 Napriamok nastupu, shcho planuietsia (na bilomu plastyku).stl",
+        "size":  321784
+    },
+    {
+        "name":  "166-2 Napriamok nastupu_ shcho planuietsia _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/166-2 Napriamok nastupu_ shcho planuietsia _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/166-2 Napriamok nastupu, shcho planuietsia (na bilomu plastyku).stl",
+        "size":  321784
+    },
+    {
+        "name":  "167-1 Napriamok nastupu_ shcho planuietsia _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/167-1 Napriamok nastupu_ shcho planuietsia _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/167-1 Napriamok nastupu, shcho planuietsia (na bilomu plastyku).stl",
+        "size":  321784
+    },
+    {
+        "name":  "167-2 Napriamok nastupu_ shcho planuietsia _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/167-2 Napriamok nastupu_ shcho planuietsia _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/167-2 Napriamok nastupu, shcho planuietsia (na bilomu plastyku).stl",
+        "size":  321784
+    },
+    {
+        "name":  "168-1 Napriamok holovnoho udaru _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/168-1 Napriamok holovnoho udaru _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/168-1 Napriamok holovnoho udaru (na bilomu plastyku).stl",
+        "size":  178284
+    },
+    {
+        "name":  "168-2 Napriamok holovnoho udaru _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/168-2 Napriamok holovnoho udaru _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/168-2 Napriamok holovnoho udaru (na bilomu plastyku).stl",
+        "size":  178284
+    },
+    {
+        "name":  "169-1 Napriamok holovnoho udaru _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/169-1 Napriamok holovnoho udaru _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/169-1 Napriamok holovnoho udaru (na bilomu plastyku).stl",
+        "size":  178284
+    },
+    {
+        "name":  "169-2 Napriamok holovnoho udaru _na bilomu plastyku_.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/169-2 Napriamok holovnoho udaru _na bilomu plastyku_.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/169-2 Napriamok holovnoho udaru (na bilomu plastyku).stl",
+        "size":  178284
+    },
+    {
+        "name":  "170 Rozvidka boiem.stl",
+        "role":  "arrows",
+        "path":  "content/arrows/170 Rozvidka boiem.stl",
+        "source":  "references/W79861_DA_Набір_знаків_APP_6_140_наказ_для_нанесення_тактичних_обставин/1734504_W79861_app6_updated/08 Стрілки (arrows)/170 Rozvidka boiem.STL",
+        "size":  214284
+    }
+]
