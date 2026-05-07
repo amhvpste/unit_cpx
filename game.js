@@ -1293,26 +1293,75 @@ class AdmiralGame {
 
         ui.style.display = 'block';
         ui2.style.display = 'block';
-        player1Panel.style.display = 'none';
+        player1Panel.style.display = 'block';
         player2Panel.style.display = 'none';
         unitDetailRight.classList.remove('active');
         unitDetailLeft.classList.remove('active');
 
-        if (isOrder || isInstructor) {
-            player1Panel.style.display = 'block';
+        if (isOrder) {
+            player1Panel.innerHTML = this.renderSidePanel(1);
+            player2Panel.innerHTML = this.renderSidePanel(2);
             player2Panel.style.display = 'block';
-        } else if (activeSide === 1) {
-            player1Panel.style.display = 'block';
-            unitDetailRight.classList.add('active');
+            player1Panel.className = 'player-info player1';
+            player2Panel.className = 'player-info player2';
+        } else if (isInstructor) {
+            player1Panel.innerHTML = this.renderInstructorSessionPanel();
+            player1Panel.className = 'player-info active-player';
+            player1Panel.style.borderColor = '#FFD700';
         } else {
-            unitDetailLeft.classList.add('active');
-            player2Panel.style.display = 'block';
+            player1Panel.innerHTML = this.renderSidePanel(activeSide, `Сторона ${activeSide}`);
+            player1Panel.className = `player-info player${activeSide} active-player`;
+            player1Panel.style.borderColor = activeSide === 1 ? '#4CAF50' : '#FF9800';
+            unitDetailRight.classList.add('active');
         }
 
-        player1Panel.classList.toggle('active-player', !isOrder && this.currentPlayer === 1);
-        player2Panel.classList.toggle('active-player', !isOrder && this.currentPlayer === 2);
-        player1Panel.style.borderColor = !isOrder && activeSide === 1 ? '#4CAF50' : '';
-        player2Panel.style.borderColor = !isOrder && activeSide === 2 ? '#FF9800' : '';
+        if (isOrder) {
+            player1Panel.classList.toggle('active-player', false);
+            player2Panel.classList.toggle('active-player', false);
+            player1Panel.style.borderColor = '';
+            player2Panel.style.borderColor = '';
+        }
+    }
+
+    renderSidePanel(side, title = `Гравець ${side}`) {
+        return `
+            <h4 style="margin: 0 0 5px 0;">${title}</h4>
+            <div class="unit-info">Ресурс штабу: <span id="player${side}Money">базовий</span></div>
+            <div class="unit-info">Підрозділів на карті: <span id="player${side}Units">${this.units.filter((unit) => unit.userData.player === side).length}</span></div>
+            <div class="unit-info">Рухів: <span id="player${side}Moves">${this.playerMoves[side]}</span></div>
+            <div class="loss-info" id="player${side}Losses">Втрати: ${this.losses[side]}</div>
+            <div class="units-list">
+                <div class="units-list-title">Склад / ORBAT</div>
+                <div id="player${side}PurchasedList" class="units-list-empty">Склад ще не визначено</div>
+            </div>
+        `;
+    }
+
+    renderInstructorSessionPanel() {
+        const taskCount = this.sessionOrder.tasks.length;
+        const endStateCount = this.sessionOrder.endState.length;
+        const rows = [1, 2].map((side) => {
+            const units = this.units.filter((unit) => unit.userData.player === side);
+            const ready = this.sessionOrder.readinessByRole[side] ? 'наказ готовий' : 'наказ не готовий';
+            return `
+                <div class="order-field">
+                    <strong>Сторона ${side}</strong><br>
+                    ${ready}<br>
+                    На карті: ${units.length}<br>
+                    Втрати: ${this.losses[side]}<br>
+                    Рухів: ${this.playerMoves[side]}
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <h4 style="margin: 0 0 5px 0; color: #FFD700;">Інструктор</h4>
+            <div class="unit-info">Огляд сесії без туману війни</div>
+            <div class="unit-info">Поточний хід: Сторона ${this.currentPlayer}</div>
+            <div class="unit-info">Номер ходу: ${this.turnNumber}</div>
+            <div class="unit-info">Завдань: ${taskCount}; кінцевих станів: ${endStateCount}</div>
+            <div class="order-grid-two" style="grid-template-columns: 1fr; margin-top: 8px;">${rows}</div>
+        `;
     }
     
     updateUI() {
@@ -1324,16 +1373,21 @@ class AdmiralGame {
         const player1Units = this.units.filter(u => u.userData.player === 1).length;
         const player2Units = this.units.filter(u => u.userData.player === 2).length;
         
-        document.getElementById('player1Units').textContent = player1Units;
-        document.getElementById('player2Units').textContent = player2Units;
-        document.getElementById('player1Moves').textContent = this.playerMoves[1];
-        document.getElementById('player2Moves').textContent = this.playerMoves[2];
-        document.getElementById('player1Losses').textContent = `Втрати: ${this.losses[1]}`;
-        document.getElementById('player2Losses').textContent = `Втрати: ${this.losses[2]}`;
+        const setText = (id, text) => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = text;
+        };
+
+        setText('player1Units', player1Units);
+        setText('player2Units', player2Units);
+        setText('player1Moves', this.playerMoves[1]);
+        setText('player2Moves', this.playerMoves[2]);
+        setText('player1Losses', `Втрати: ${this.losses[1]}`);
+        setText('player2Losses', `Втрати: ${this.losses[2]}`);
         
         // Оновлення ресурсного стану сторін
-        document.getElementById('player1Money').textContent = 'базовий';
-        document.getElementById('player2Money').textContent = 'базовий';
+        setText('player1Money', 'базовий');
+        setText('player2Money', 'базовий');
         
         document.getElementById('unitShop').style.display = this.phase === 'order' ? 'block' : 'none';
         document.getElementById('centerInfo').style.display = 'block';
