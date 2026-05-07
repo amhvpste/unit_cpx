@@ -4,7 +4,8 @@ Last updated: 2026-05-06 23:38 +03:00
 
 ## Current Branch
 
-- Active work branch: `codex/nato-order-ui`
+- Active deploy branch: `air-version`
+- Feature source branch: `codex/nato-order-ui`
 - Checkpoint branch with physical 3D model prototype: `codex/physical-models-checkpoint`
 - Checkpoint commit: `6501d46` (`Checkpoint physical model prototype`)
 - Do not push unless explicitly requested.
@@ -246,6 +247,17 @@ Task object target:
   - end-state toggles work;
   - support controls work;
   - no console errors.
+- [x] Add global role switch for order setup:
+  - `Сторона 1`;
+  - `Сторона 2`;
+  - `Інструктор`.
+- [x] Remove side selection controls from lower task/end-state panels.
+- [x] Add side readiness flow:
+  - side 1 marks ready;
+  - side 2 marks ready;
+  - instructor starts the game after both are ready.
+- [x] Scope player editing by active global role.
+- [x] Keep instructor-only setup for situation and enemy information visibility.
 
 ## Event Log
 
@@ -257,6 +269,10 @@ Task object target:
 - 2026-05-06 23:55 +03:00 - Moved NATO / APP-6 unit cards into ORBAT and moved PCC into Support / Readiness.
 - 2026-05-06 23:55 +03:00 - Added enemy information percent sliders, end-state tags, support controls, and geometry-aware task data.
 - 2026-05-06 23:55 +03:00 - Verified `npm.cmd run check` and browser flow: tabs render, ORBAT visible, `Маршрут` task assigns to map, situation area assigns to map, support tab renders, no console errors.
+- 2026-05-07 - Added global role switch in the battle order header: `Сторона 1`, `Сторона 2`, `Інструктор`.
+- 2026-05-07 - Removed lower side selector rendering from task/end-state tabs; tasks now use the active global side role.
+- 2026-05-07 - Added readiness flow: sides press `Готовий`; instructor can press `Стартувати гру` only after both sides are ready.
+- 2026-05-07 - Browser-verified role flow: role buttons render, no lower side handlers render, both sides can mark ready, instructor start button enables, no console errors.
 
 ## Resume Point
 
@@ -264,10 +280,14 @@ The tabbed battle order editor is implemented and verified at a basic level.
 
 Next concrete coding step:
 
-1. Make geometry assignment real:
+1. Add proper per-role visibility and permissions:
+   - player sees only own editable data;
+   - instructor sees both sides and scenario controls;
+   - future network accounts can map directly to these roles.
+2. Make geometry assignment real:
    - point: one click;
    - line: two or more cells;
    - area: rectangular or multi-cell area.
-2. Add named map objects inside `situation.objects`.
-3. Allow tasks and end states to bind to named objects, not only cells.
-4. Improve generated execution text so it reads like a battle-order fragment.
+3. Add named map objects inside `situation.objects`.
+4. Allow tasks and end states to bind to named objects, not only cells.
+5. Improve generated execution text so it reads like a battle-order fragment.

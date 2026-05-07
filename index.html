@@ -398,6 +398,55 @@
             line-height: 1.35;
         }
 
+        .order-role-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0 10px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.12);
+        }
+
+        .order-role-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .order-role-btn {
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.08);
+            color: #f8fbff;
+            border-radius: 5px;
+            padding: 8px 11px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .order-role-btn.active {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+        }
+
+        .order-ready-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 28px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #f8fbff;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
         .order-actions {
             display: flex;
             gap: 8px;
@@ -627,6 +676,10 @@
                 <h3>Бойовий наказ / налаштування сесії</h3>
                 <div class="unit-info" id="shopCurrentPlayer">Локальний прототип: гравці працюють по черзі з одного акаунту</div>
                 <div class="unit-info" id="shopMoneyInfo">Сформуйте склад сторін і затвердьте наказ перед розміщенням</div>
+                <div class="order-role-bar">
+                    <div class="order-role-buttons" id="orderRoleSwitch"></div>
+                    <div class="order-ready-pill" id="orderReadyStatus">Очікування налаштувань</div>
+                </div>
                 <div class="order-summary">
                     <div class="order-field"><strong>Обстановка</strong><br><span id="orderSituationSummary">Зони ще не задані</span></div>
                     <div class="order-field"><strong>Завдання</strong><br><span id="orderTasksSummary">Задачі ще не призначені</span></div>
@@ -698,7 +751,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260506-order-tabs"></script>
+    <script src="game.js?v=20260507-role-switch"></script>
 </body>
 
 </html>
