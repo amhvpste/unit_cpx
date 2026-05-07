@@ -258,6 +258,10 @@ Task object target:
   - instructor starts the game after both are ready.
 - [x] Scope player editing by active global role.
 - [x] Keep instructor-only setup for situation and enemy information visibility.
+- [x] Split instructor interface from commander interface:
+  - instructor sees `Обстановка`, `Сценарій`, `Інформація`, `Контроль`;
+  - commanders see `ORBAT`, `Завдання`, `Кінцевий стан`, `Забезпечення`;
+  - instructor no longer has unit-add / commander task panels in the main order flow.
 
 ## Event Log
 
@@ -273,6 +277,7 @@ Task object target:
 - 2026-05-07 - Removed lower side selector rendering from task/end-state tabs; tasks now use the active global side role.
 - 2026-05-07 - Added readiness flow: sides press `Готовий`; instructor can press `Стартувати гру` only after both sides are ready.
 - 2026-05-07 - Browser-verified role flow: role buttons render, no lower side handlers render, both sides can mark ready, instructor start button enables, no console errors.
+- 2026-05-07 - Separated instructor battle-order controls from commander controls: instructor now manages scenario frame, enemy information, and readiness control instead of acting as a third unit-owning side.
 
 ## Resume Point
 
@@ -280,14 +285,10 @@ The tabbed battle order editor is implemented and verified at a basic level.
 
 Next concrete coding step:
 
-1. Add proper per-role visibility and permissions:
-   - player sees only own editable data;
-   - instructor sees both sides and scenario controls;
-   - future network accounts can map directly to these roles.
-2. Make geometry assignment real:
+1. Make geometry assignment real:
    - point: one click;
    - line: two or more cells;
    - area: rectangular or multi-cell area.
-3. Add named map objects inside `situation.objects`.
-4. Allow tasks and end states to bind to named objects, not only cells.
-5. Improve generated execution text so it reads like a battle-order fragment.
+2. Add named map objects inside `situation.objects`.
+3. Allow tasks and end states to bind to named objects, not only cells.
+4. Improve generated execution text so it reads like a battle-order fragment.

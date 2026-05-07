@@ -84,7 +84,10 @@ class AdmiralGame {
             { key: 'orbat', label: 'ORBAT' },
             { key: 'tasks', label: 'Завдання' },
             { key: 'endState', label: 'Кінцевий стан' },
-            { key: 'support', label: 'Забезпечення' }
+            { key: 'support', label: 'Забезпечення' },
+            { key: 'scenario', label: 'Сценарій' },
+            { key: 'intelligence', label: 'Інформація' },
+            { key: 'control', label: 'Контроль' }
         ];
 
         this.orderGeometryTypes = {
@@ -1389,6 +1392,32 @@ class AdmiralGame {
         const activeRole = this.orderRoles[this.sessionOrder.ui.activeRole];
         readyStatus.textContent = `${activeRole ? activeRole.label : 'Інструктор'} | ${p1}; ${p2}`;
     }
+
+    getVisibleOrderTabs() {
+        if (this.isInstructorRole()) {
+            return [
+                { key: 'situation', label: 'Обстановка' },
+                { key: 'scenario', label: 'Сценарій' },
+                { key: 'intelligence', label: 'Інформація' },
+                { key: 'control', label: 'Контроль' }
+            ];
+        }
+
+        return [
+            { key: 'orbat', label: 'ORBAT' },
+            { key: 'tasks', label: 'Завдання' },
+            { key: 'endState', label: 'Кінцевий стан' },
+            { key: 'support', label: 'Забезпечення' }
+        ];
+    }
+
+    ensureActiveOrderTab() {
+        const visibleTabs = this.getVisibleOrderTabs();
+        if (!visibleTabs.some((tab) => tab.key === this.sessionOrder.ui.activeTab)) {
+            this.sessionOrder.ui.activeTab = visibleTabs[0].key;
+        }
+        return visibleTabs;
+    }
     
     updateOrderSummaryHeader() {
         const situationSummary = document.getElementById('orderSituationSummary');
@@ -1398,7 +1427,7 @@ class AdmiralGame {
         if (!situationSummary || !tasksSummary || !supportSummary || !commandSummary) return;
 
         const situation = this.sessionOrder.situation;
-        const activeTab = this.orderTabs.find((tab) => tab.key === this.sessionOrder.ui.activeTab);
+        const activeTab = this.getVisibleOrderTabs().find((tab) => tab.key === this.sessionOrder.ui.activeTab);
         const activeRole = this.orderRoles[this.sessionOrder.ui.activeRole];
         situationSummary.textContent = `ЗІ: ${this.formatOrderPoint(situation.areaOfInterest)}; РВЗ: ${this.formatOrderPoint(situation.executionArea)}`;
         tasksSummary.textContent = `Задач: ${this.sessionOrder.tasks.length}; кінцевих станів: ${this.sessionOrder.endState.length}`;
@@ -1413,13 +1442,17 @@ class AdmiralGame {
             return;
         }
 
+        const visibleTabs = this.ensureActiveOrderTab();
         const activeTab = this.sessionOrder.ui.activeTab;
-        const tabButtons = this.orderTabs.map((tab) => {
+        const tabButtons = visibleTabs.map((tab) => {
             const activeClass = activeTab === tab.key ? ' active' : '';
             return `<button class="order-tab${activeClass}" onclick="game.setOrderTab('${tab.key}')">${tab.label}</button>`;
         }).join('');
         const tabRenderers = {
             situation: () => this.renderSituationTab(),
+            scenario: () => this.renderInstructorScenarioTab(),
+            intelligence: () => this.renderInstructorIntelligenceTab(),
+            control: () => this.renderInstructorControlTab(),
             orbat: () => this.renderOrbatTab(),
             tasks: () => this.renderTasksTab(),
             endState: () => this.renderEndStateTab(),
@@ -1442,7 +1475,6 @@ class AdmiralGame {
 
     renderSituationTab() {
         const situation = this.sessionOrder.situation;
-        const enemyInfo = situation.enemyInfoPercentBySide;
         const instructorMode = this.isInstructorRole();
         const toolButtons = [
             { key: 'areaOfInterest', label: 'Зона інтересу' },
@@ -1465,19 +1497,88 @@ class AdmiralGame {
                         <div class="order-field"><strong>Зона інтересу</strong><br>${this.formatOrderPoint(situation.areaOfInterest)}</div>
                         <div class="order-field"><strong>Район виконання</strong><br>${this.formatOrderPoint(situation.executionArea)}</div>
                     </div>
-                    ${instructorMode ? `<div class="order-grid-two">
-                        ${[1, 2].map((side) => `
-                            <label class="order-field">
-                                <strong>Інформація про противника для сторони ${side}</strong><br>
-                                <input class="order-range" type="range" min="0" max="100" value="${enemyInfo[side]}" oninput="game.setEnemyInfoPercent(${side}, this.value)">
-                                <span>${enemyInfo[side]}%</span>
-                            </label>
-                        `).join('')}
-                    </div>` : `<div class="order-field"><strong>Інформація про противника</strong><br>Для сторони ${this.getActiveOrderSide()}: ${enemyInfo[this.getActiveOrderSide()]}%</div>`}
                     <div class="units-list">
                         <div class="units-list-title">Об’єкти району виконання</div>
                         <div>${objectList}</div>
                     </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderInstructorScenarioTab() {
+        const sideSummaries = [1, 2].map((side) => {
+            const units = this.purchasedUnits[side] || [];
+            const taskCount = this.sessionOrder.tasks.filter((task) => task.side === side).length;
+            const endStateCount = this.sessionOrder.endState.filter((item) => item.side === side).length;
+            return `
+                <div class="order-field">
+                    <strong>Сторона ${side}</strong><br>
+                    ORBAT: ${units.length}<br>
+                    Завдань: ${taskCount}<br>
+                    Кінцевих станів: ${endStateCount}
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Сценарій інструктора</h5>
+                <div class="details">
+                    <div class="order-note">Інструктор задає рамку заняття і контролює повноту наказів. Війська виставляють тільки сторони.</div>
+                    <div class="order-grid-two">
+                        <div class="order-field"><strong>Зона інтересу</strong><br>${this.formatOrderPoint(this.sessionOrder.situation.areaOfInterest)}</div>
+                        <div class="order-field"><strong>Район виконання</strong><br>${this.formatOrderPoint(this.sessionOrder.situation.executionArea)}</div>
+                    </div>
+                    <div class="order-grid-two">${sideSummaries}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderInstructorIntelligenceTab() {
+        const enemyInfo = this.sessionOrder.situation.enemyInfoPercentBySide;
+        const ranges = [1, 2].map((side) => `
+            <label class="order-field">
+                <strong>Інформація про противника для сторони ${side}</strong><br>
+                <input class="order-range" type="range" min="0" max="100" value="${enemyInfo[side]}" oninput="game.setEnemyInfoPercent(${side}, this.value)">
+                <span>${enemyInfo[side]}%</span>
+            </label>
+        `).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Інформація про противника</h5>
+                <div class="details">
+                    <div class="order-note">Це інструкторський шар: різним сторонам можна дати різний обсяг відомостей про противника.</div>
+                    <div class="order-grid-two">${ranges}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderInstructorControlTab() {
+        const readiness = this.sessionOrder.readinessByRole;
+        const rows = [1, 2].map((side) => {
+            const units = this.purchasedUnits[side] || [];
+            const placedUnits = units.filter((unit) => unit.placed).length;
+            return `
+                <div class="order-field">
+                    <strong>Сторона ${side}</strong><br>
+                    Статус наказу: ${readiness[side] ? 'готово' : 'не готово'}<br>
+                    Підрозділів: ${units.length}<br>
+                    Розміщено: ${placedUnits}
+                </div>
+            `;
+        }).join('');
+        const canStart = readiness[1] && readiness[2];
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Контроль готовності</h5>
+                <div class="details">
+                    <div class="order-note">${canStart ? 'Обидві сторони готові. Інструктор може стартувати гру нижньою кнопкою.' : 'Старт гри відкривається після готовності обох сторін.'}</div>
+                    <div class="order-grid-two">${rows}</div>
                 </div>
             </div>
         `;
@@ -1914,6 +2015,7 @@ class AdmiralGame {
         if (normalizedRole === 1 || normalizedRole === 2) {
             this.sessionOrder.ui.activeSide = normalizedRole;
         }
+        this.ensureActiveOrderTab();
         this.addLog(`Активна роль налаштування: ${this.orderRoles[normalizedRole].label}`, 'place-log');
         this.updateUI();
     }
@@ -1933,7 +2035,7 @@ class AdmiralGame {
     }
 
     setOrderTab(tab) {
-        if (!this.orderTabs.some((item) => item.key === tab)) return;
+        if (!this.getVisibleOrderTabs().some((item) => item.key === tab)) return;
         this.sessionOrder.ui.activeTab = tab;
         this.updateUI();
     }
