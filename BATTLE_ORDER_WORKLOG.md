@@ -281,6 +281,7 @@ Task object target:
 - 2026-05-07 - Changed task authoring to draft-and-save: map clicks build one current task, `Зберегти завдання` commits task 1/2/3, saved tasks render numbered labels on the map.
 - 2026-05-07 - Started active-session UI refactor: side view shows only the active side panel plus selected-unit detail panel; instructor view sees both side panels. Instructor delete/move tools are explicitly backlog.
 - 2026-05-07 - Corrected active-session UI: there is now one side panel whose content/color changes by active side; instructor mode uses one overview panel instead of two player panels.
+- 2026-05-07 - Fixed grid picking on relief: map clicks now raycast against the actual terrain mesh before falling back to the flat plane, reducing cell-offset placement on raised terrain.
 
 ## Resume Point
 

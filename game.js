@@ -3212,28 +3212,30 @@ class AdmiralGame {
             return { kind: 'unit', object: this.getUnitRoot(unitHits[0].object) };
         }
 
-        const point = new THREE.Vector3();
-        if (this.raycaster.ray.intersectPlane(this.mapPlane, point)) {
-            const coords = this.worldPointToCell(point);
-            if (coords) {
-                return {
-                    kind: 'cell',
-                    object: {
-                        userData: {
-                            type: 'cell',
-                            x: coords.x,
-                            z: coords.z
-                        }
-                    }
-                };
-            }
-        }
-
         if (this.groundMesh) {
             const groundHits = this.raycaster.intersectObject(this.groundMesh, false);
             if (groundHits.length > 0) {
                 const coords = this.worldPointToCell(groundHits[0].point);
-                if (!coords) return null;
+                if (coords) {
+                    return {
+                        kind: 'cell',
+                        object: {
+                            userData: {
+                                type: 'cell',
+                                x: coords.x,
+                                z: coords.z
+                            }
+                        }
+                    };
+                }
+                return null;
+            }
+        }
+
+        const point = new THREE.Vector3();
+        if (this.raycaster.ray.intersectPlane(this.mapPlane, point)) {
+            const coords = this.worldPointToCell(point);
+            if (coords) {
                 return {
                     kind: 'cell',
                     object: {
@@ -3252,8 +3254,9 @@ class AdmiralGame {
 
     worldPointToCell(point) {
         const half = (this.gridSize * this.cellSize) / 2;
-        const x = Math.floor((point.x + half) / this.cellSize);
-        const z = Math.floor((point.z + half) / this.cellSize);
+        const epsilon = 1e-6;
+        const x = Math.floor((point.x + half + epsilon) / this.cellSize);
+        const z = Math.floor((point.z + half + epsilon) / this.cellSize);
         if (x < 0 || z < 0 || x >= this.gridSize || z >= this.gridSize) {
             return null;
         }
