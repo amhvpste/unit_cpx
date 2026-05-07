@@ -279,6 +279,7 @@ Task object target:
 - 2026-05-07 - Browser-verified role flow: role buttons render, no lower side handlers render, both sides can mark ready, instructor start button enables, no console errors.
 - 2026-05-07 - Separated instructor battle-order controls from commander controls: instructor now manages scenario frame, enemy information, and readiness control instead of acting as a third unit-owning side.
 - 2026-05-07 - Changed task authoring to draft-and-save: map clicks build one current task, `Зберегти завдання` commits task 1/2/3, saved tasks render numbered labels on the map.
+- 2026-05-07 - Started active-session UI refactor: side view shows only the active side panel plus selected-unit detail panel; instructor view sees both side panels. Instructor delete/move tools are explicitly backlog.
 
 ## Resume Point
 
@@ -314,10 +315,14 @@ Next concrete coding step:
 7. Replace opponent side panel during active play with selected-unit information:
    - selected unit type, side, status, movement, combat stats;
    - no permanent display of the other player panel during a side turn.
-8. Make geometry assignment real:
+8. Add instructor session console backlog:
+   - instructor view sees both player panels and all activity on the map;
+   - future instructor tools can delete units;
+   - future instructor tools can move units for scenario correction.
+9. Make geometry assignment real:
    - point: one click;
    - line: two or more cells;
    - area: rectangular or multi-cell area.
-9. Add named map objects inside `situation.objects`.
-10. Allow tasks and end states to bind to named objects, not only cells.
-11. Improve generated execution text so it reads like a battle-order fragment.
+10. Add named map objects inside `situation.objects`.
+11. Allow tasks and end states to bind to named objects, not only cells.
+12. Improve generated execution text so it reads like a battle-order fragment.

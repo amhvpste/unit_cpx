@@ -173,6 +173,46 @@
             max-width: 200px;
         }
 
+        .session-role-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .session-role-btn {
+            flex: 1;
+            min-width: 72px;
+            padding: 7px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            color: #f7fbff;
+        }
+
+        .session-role-btn.active {
+            border-color: #FFD700;
+            color: #FFD700;
+            background: rgba(255, 215, 0, 0.18);
+        }
+
+        .unit-detail-panel {
+            display: none;
+            padding: 8px;
+            border-radius: 5px;
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            background: rgba(15, 31, 39, 0.34);
+        }
+
+        .unit-detail-panel.active {
+            display: block;
+        }
+
+        .unit-detail-title {
+            margin: 0 0 8px 0;
+            color: #FFD700;
+            font-size: 15px;
+        }
+
         .camera-controls {
             position: absolute;
             top: 20px;
@@ -709,6 +749,10 @@
                     <div id="player1PurchasedList" class="units-list-empty">Склад ще не визначено</div>
                 </div>
             </div>
+            <div id="unitDetailPanelLeft" class="unit-detail-panel">
+                <h4 class="unit-detail-title">Юніт не вибрано</h4>
+                <div class="unit-info">Оберіть підрозділ на карті, щоб бачити його стан.</div>
+            </div>
         </div>
 
         <div id="centerInfo">
@@ -735,12 +779,17 @@
                     <div id="player2PurchasedList" class="units-list-empty">Склад ще не визначено</div>
                 </div>
             </div>
+            <div id="unitDetailPanel" class="unit-detail-panel">
+                <h4 class="unit-detail-title">Юніт не вибрано</h4>
+                <div class="unit-info">Оберіть підрозділ на карті, щоб бачити його стан.</div>
+            </div>
         </div>
 
         <div id="ui3">
             <div id="gameStatus">
                 <h4 style="margin: 0 0 5px 0;">Стан сесії:</h4>
                 <div class="unit-info" id="currentPhase">Розміщення фішок</div>
+                <div class="session-role-buttons" id="sessionRoleSwitch"></div>
             </div>
         </div>
 
@@ -751,7 +800,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260507-task-drafts"></script>
+    <script src="game.js?v=20260507-session-panels"></script>
 </body>
 
 </html>

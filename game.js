@@ -41,6 +41,7 @@ class AdmiralGame {
         
         // Стани гри
         this.currentPlayer = 1;
+        this.sessionViewRole = 1;
         this.phase = 'order'; // 'order', 'placement', 'battle', 'gameOver'
         this.playerMoney = { 1: 1000, 2: 1000 };
         this.playerMoves = { 1: 3, 2: 3 };
@@ -1140,6 +1141,7 @@ class AdmiralGame {
         
         // Скидання станів гри
         this.currentPlayer = 1;
+        this.sessionViewRole = 1;
         this.phase = 'order';
         this.playerMoney = { 1: 1000, 2: 1000 };
         this.playerMoves = { 1: 3, 2: 3 };
@@ -1205,44 +1207,112 @@ class AdmiralGame {
     }
     
     showUnitInfo(unit) {
-        const unitType = unit.userData.type;
-        const unitConfig = this.config.unitTypes[unitType];
-        const isOwnUnit = unit.userData.player === this.currentPlayer;
-        
-        let infoText = `
-            <div style="background: rgba(0,0,0,0.9); color: white; padding: 10px; border-radius: 5px; 
-                        border: 2px solid ${isOwnUnit ? '#4CAF50' : '#ff6b6b'}; 
-                        position: absolute; top: 10px; left: 50%; transform: translateX(-50%); 
-                        z-index: 1000; min-width: 200px;">
-                <h4 style="margin: 0 0 10px 0; color: ${isOwnUnit ? '#4CAF50' : '#ff6b6b'};">
-                    ${unitConfig.name} ${isOwnUnit ? '(Ваша)' : '(Ворожа)'}
-                </h4>
-                <div><strong>Гравець:</strong> ${unit.userData.player}</div>
-                <div><strong>Хітпоінти:</strong> ${unitConfig.hitpoints}</div>
-                <div><strong>Сила:</strong> ${unitConfig.strength}</div>
-                <div><strong>Швидкість:</strong> ${unitConfig.movement} клітинок</div>
-                <div><strong>Опис:</strong> ${unitConfig.description}</div>
-                ${isOwnUnit && unit.userData.moved ? '<div style="color: #ff9800;"><strong>Статус:</strong> Уже ходив</div>' : ''}
-            </div>
-        `;
-        
-        // Створюємо або оновлюємо елемент інформації
-        let infoElement = document.getElementById('unitInfoTooltip');
-        if (!infoElement) {
-            infoElement = document.createElement('div');
-            infoElement.id = 'unitInfoTooltip';
-            document.body.appendChild(infoElement);
-        }
-        
-        infoElement.innerHTML = infoText;
-        infoElement.style.display = 'block';
+        this.inspectedUnit = unit;
+        this.updateUnitDetailPanel();
     }
     
     hideUnitInfo() {
-        const infoElement = document.getElementById('unitInfoTooltip');
-        if (infoElement) {
-            infoElement.style.display = 'none';
+        this.inspectedUnit = null;
+        this.updateUnitDetailPanel();
+    }
+
+    updateUnitDetailPanel() {
+        const panels = [document.getElementById('unitDetailPanel'), document.getElementById('unitDetailPanelLeft')].filter(Boolean);
+        if (panels.length === 0) return;
+
+        if (!this.inspectedUnit || !this.config) {
+            const emptyHtml = `
+                <h4 class="unit-detail-title">Юніт не вибрано</h4>
+                <div class="unit-info">Оберіть підрозділ на карті, щоб бачити його стан.</div>
+            `;
+            panels.forEach((panel) => {
+                panel.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+                panel.innerHTML = emptyHtml;
+            });
+            return;
         }
+
+        const unit = this.inspectedUnit;
+        const unitConfig = this.config.unitTypes[unit.userData.type];
+        const palette = this.getUnitPalette(unit.userData.player);
+        const relation = unit.userData.player === this.currentPlayer ? 'поточна сторона' : 'інша сторона';
+        const detailHtml = `
+            <h4 class="unit-detail-title" style="color:${palette.accent}">${this.escapeHtml(unitConfig.name)}</h4>
+            <div class="unit-info"><strong>Сторона:</strong> ${unit.userData.player} (${relation})</div>
+            <div class="unit-info"><strong>Клітинка:</strong> (${unit.userData.x}, ${unit.userData.z})</div>
+            <div class="unit-info"><strong>Живучість:</strong> ${unitConfig.hitpoints}</div>
+            <div class="unit-info"><strong>Вогнева потужність:</strong> ${unitConfig.strength}</div>
+            <div class="unit-info"><strong>Маневреність:</strong> ${unitConfig.movement} кл.</div>
+            <div class="unit-info"><strong>Статус:</strong> ${unit.userData.moved ? 'хід використано' : 'готовий до дії'}</div>
+            <div class="unit-info">${this.escapeHtml(unitConfig.description)}</div>
+        `;
+        panels.forEach((panel) => {
+            panel.style.borderColor = unit.userData.player === 1 ? '#4CAF50' : '#FF9800';
+            panel.innerHTML = detailHtml;
+        });
+    }
+
+    setSessionViewRole(role) {
+        const normalizedRole = role === '1' || role === 1 ? 1 : (role === '2' || role === 2 ? 2 : 'instructor');
+        this.sessionViewRole = normalizedRole;
+        this.updateUI();
+    }
+
+    updateSessionRoleSwitch() {
+        const container = document.getElementById('sessionRoleSwitch');
+        if (!container) return;
+
+        if (this.phase === 'order') {
+            container.innerHTML = '';
+            return;
+        }
+
+        const roles = [
+            { key: 1, label: 'Сторона 1' },
+            { key: 2, label: 'Сторона 2' },
+            { key: 'instructor', label: 'Інструктор' }
+        ];
+        container.innerHTML = roles.map((role) => {
+            const activeClass = String(this.sessionViewRole) === String(role.key) ? ' active' : '';
+            return `<button class="session-role-btn${activeClass}" onclick="game.setSessionViewRole('${role.key}')">${role.label}</button>`;
+        }).join('');
+    }
+
+    updatePlayPanels() {
+        const player1Panel = document.getElementById('player1Info');
+        const player2Panel = document.getElementById('player2Info');
+        const unitDetailRight = document.getElementById('unitDetailPanel');
+        const unitDetailLeft = document.getElementById('unitDetailPanelLeft');
+        const ui = document.getElementById('ui');
+        const ui2 = document.getElementById('ui2');
+        if (!player1Panel || !player2Panel || !unitDetailRight || !unitDetailLeft || !ui || !ui2) return;
+
+        const isOrder = this.phase === 'order';
+        const isInstructor = this.sessionViewRole === 'instructor';
+        const activeSide = this.sessionViewRole === 2 ? 2 : 1;
+
+        ui.style.display = 'block';
+        ui2.style.display = 'block';
+        player1Panel.style.display = 'none';
+        player2Panel.style.display = 'none';
+        unitDetailRight.classList.remove('active');
+        unitDetailLeft.classList.remove('active');
+
+        if (isOrder || isInstructor) {
+            player1Panel.style.display = 'block';
+            player2Panel.style.display = 'block';
+        } else if (activeSide === 1) {
+            player1Panel.style.display = 'block';
+            unitDetailRight.classList.add('active');
+        } else {
+            unitDetailLeft.classList.add('active');
+            player2Panel.style.display = 'block';
+        }
+
+        player1Panel.classList.toggle('active-player', !isOrder && this.currentPlayer === 1);
+        player2Panel.classList.toggle('active-player', !isOrder && this.currentPlayer === 2);
+        player1Panel.style.borderColor = !isOrder && activeSide === 1 ? '#4CAF50' : '';
+        player2Panel.style.borderColor = !isOrder && activeSide === 2 ? '#FF9800' : '';
     }
     
     updateUI() {
@@ -1265,34 +1335,11 @@ class AdmiralGame {
         document.getElementById('player1Money').textContent = 'базовий';
         document.getElementById('player2Money').textContent = 'базовий';
         
-        // Показуємо/ховаємо панелі залежно від фази
-        if (this.phase === 'order') {
-            document.getElementById('player1Info').style.display = 'block';
-            document.getElementById('player2Info').style.display = 'block';
-            document.getElementById('unitShop').style.display = 'block';
-            document.getElementById('centerInfo').style.display = 'block';
-        } else if (this.phase === 'placement') {
-            document.getElementById('player1Info').style.display = 'block';
-            document.getElementById('player2Info').style.display = 'block';
-            document.getElementById('unitShop').style.display = 'none';
-            document.getElementById('centerInfo').style.display = 'block';
-        } else if (this.phase === 'battle') {
-            document.getElementById('player1Info').style.display = 'block';
-            document.getElementById('player2Info').style.display = 'block';
-            document.getElementById('unitShop').style.display = 'none';
-            document.getElementById('centerInfo').style.display = 'block';
-        } else {
-            document.getElementById('player1Info').style.display = 'block';
-            document.getElementById('player2Info').style.display = 'block';
-            document.getElementById('unitShop').style.display = 'none';
-            document.getElementById('centerInfo').style.display = 'block';
-        }
-        
-        // Оновлення активного гравця (тільки візуальне підсвічування)
-        if (this.phase !== 'order') {
-            document.getElementById('player1Info').classList.toggle('active-player', this.currentPlayer === 1);
-            document.getElementById('player2Info').classList.toggle('active-player', this.currentPlayer === 2);
-        }
+        document.getElementById('unitShop').style.display = this.phase === 'order' ? 'block' : 'none';
+        document.getElementById('centerInfo').style.display = 'block';
+        this.updateSessionRoleSwitch();
+        this.updateUnitDetailPanel();
+        this.updatePlayPanels();
         
         // Оновлення стану гри
         const phaseText = this.phase === 'order' ? 'Бойовий наказ' : 
@@ -3008,6 +3055,7 @@ class AdmiralGame {
 
             this.sessionOrder.readinessByRole.instructor = true;
             this.currentPlayer = 1;
+            this.sessionViewRole = 1;
             this.addLog('Інструктор стартує гру. Починається розміщення сторони 1.', 'place-log');
             this.startPlacement();
             return;
@@ -3019,12 +3067,14 @@ class AdmiralGame {
 
             if (this.currentPlayer === 1) {
                 this.currentPlayer = 2;
+                this.sessionViewRole = 2;
                 this.phase = 'placement';
                 this.placementPhase[2] = true;
                 this.addLog('Player 2 starts placement from the approved battle order.', 'place-log');
             } else {
                 this.phase = 'battle';
                 this.currentPlayer = 1;
+                this.sessionViewRole = 1;
                 this.units.forEach((unit) => {
                     unit.userData.moved = false;
                 });
@@ -3040,6 +3090,7 @@ class AdmiralGame {
             this.addLog(`Player ${finishedPlayer} finished the turn.`, 'move-log');
             if (finishedPlayer === 1) {
                 this.currentPlayer = 2;
+                this.sessionViewRole = 2;
                 this.units
                     .filter((unit) => unit.userData.player === 2)
                     .forEach((unit) => {
@@ -3048,6 +3099,7 @@ class AdmiralGame {
             } else {
                 this.turnNumber += 1;
                 this.currentPlayer = 1;
+                this.sessionViewRole = 1;
                 this.startBattleAnimations();
             }
             this.updateUI();
@@ -3188,6 +3240,7 @@ class AdmiralGame {
     selectUnit(unit) {
         this.selectedUnit = unit;
         this.selectedCell = null;
+        this.showUnitInfo(unit);
         this.showMovementHighlights(unit);
         this.addLog(`Вибрано: ${this.config.unitTypes[unit.userData.type].name}`, 'move-log');
     }
@@ -3330,6 +3383,12 @@ class AdmiralGame {
             return;
         }
 
+        if (this.sessionViewRole === 'instructor') {
+            this.showUnitInfo(unit);
+            this.addLog(`Інструктор переглядає: ${this.config.unitTypes[unit.userData.type].name}`, 'move-log');
+            return;
+        }
+
         if (unit.userData.player !== this.currentPlayer) {
             this.showUnitInfo(unit);
             this.addLog('Ця фішка належить іншому гравцю!', 'combat-log');
@@ -3406,6 +3465,7 @@ class AdmiralGame {
         if (this.battleAnimations.length === 0) {
             this.isAnimatingBattles = false;
             this.currentPlayer = 1;
+            this.sessionViewRole = 1;
             this.units.forEach((unit) => {
                 unit.userData.moved = false;
             });
