@@ -28,7 +28,16 @@ class AdmiralGame {
         this.orderTaskMarkerMeshes = [];
         this.units = [];
         this.selectedUnit = null;
+        this.inspectedUnit = null;
         this.selectedCell = null;
+        this.gridHelper = null;
+        this.mapLayers = {
+            grid: true,
+            tasks: true,
+            support: false,
+            comms: false,
+            fog: false
+        };
         
         // Стани гри
         this.currentPlayer = 1;
@@ -64,7 +73,8 @@ class AdmiralGame {
                 activeTaskTag: 'seize',
                 activeGeometry: 'point',
                 activeSituationTool: 'areaOfInterest',
-                activeEndStateTag: 'areaControlled'
+                activeEndStateTag: 'areaControlled',
+                draftTask: null
             },
             readinessByRole: {
                 1: false,
@@ -1149,6 +1159,7 @@ class AdmiralGame {
         this.sessionOrder.ui.activeTab = 'situation';
         this.sessionOrder.ui.activeRole = 'instructor';
         this.sessionOrder.ui.activeSide = 1;
+        this.sessionOrder.ui.draftTask = null;
         this.sessionOrder.readinessByRole = { 1: false, 2: false, instructor: false };
         this.renderOrderTaskMarkers();
         this.selectedUnit = null;
@@ -1643,6 +1654,7 @@ class AdmiralGame {
 
     renderTasksTab() {
         const activeSide = this.sessionOrder.ui.activeSide;
+        const draftTask = this.sessionOrder.ui.draftTask;
         const roleNotice = this.isInstructorRole()
             ? 'Інструктор бачить задачі, але бойові задачі сторін задаються в ролі Сторона 1 або Сторона 2.'
             : `Зараз налаштовується сторона ${activeSide}.`;
@@ -1659,17 +1671,29 @@ class AdmiralGame {
             : this.sessionOrder.tasks.map((task, index) => `
                 <span class="unit-badge">${index + 1}. Сторона ${task.side}: ${this.orderTaskTags[task.tag].label}, ${this.orderGeometryTypes[task.geometry].label}: ${this.formatTaskCells(task)}</span>
             `).join('');
+        const draftText = draftTask && draftTask.cells.length > 0
+            ? `Чернетка завдання ${this.sessionOrder.tasks.length + 1}: ${this.orderTaskTags[draftTask.tag].label}, ${this.orderGeometryTypes[draftTask.geometry].label}: ${this.formatTaskCells(draftTask)}`
+            : 'Клікніть по карті, щоб задати точку / лінію / район поточного завдання.';
+        const saveDisabled = !draftTask || draftTask.cells.length === 0 ? ' disabled' : '';
 
         return `
             <div class="shop-item order-planner">
                 <h5>Завдання</h5>
                 <div class="details">
-                    <div class="order-note">Завдання формуються через теги і прив’язуються до точки, лінії або району на мапі.</div>
+                    <div class="order-note">Кліки по карті збирають геометрію одного поточного завдання. Новий номер створюється тільки після кнопки "Зберегти завдання".</div>
                     <div class="order-note">${roleNotice}</div>
                     <div class="units-list-title">Дія</div>
                     <div class="order-tags">${tagButtons}</div>
                     <div class="units-list-title">Геометрія</div>
                     <div class="order-tags">${geometryButtons}</div>
+                    <div class="order-field">
+                        <strong>Поточне завдання</strong><br>
+                        ${draftText}
+                        <div class="order-actions">
+                            <button class="${activeSide === 1 ? 'player1-btn' : 'player2-btn'}"${saveDisabled} onclick="event.stopPropagation(); game.saveCurrentOrderTask()">Зберегти завдання</button>
+                            <button class="neutral-btn" onclick="event.stopPropagation(); game.clearCurrentOrderTask()">Очистити чернетку</button>
+                        </div>
+                    </div>
                     <div class="units-list">
                         <div class="units-list-title">Прив’язані задачі</div>
                         <div>${taskList}</div>
@@ -1997,6 +2021,17 @@ class AdmiralGame {
         if (!this.orderTaskTags[tag]) return;
         this.sessionOrder.ui.activeTaskTag = tag;
         this.sessionOrder.ui.activeGeometry = this.orderTaskTags[tag].geometry || this.sessionOrder.ui.activeGeometry;
+        if (this.sessionOrder.ui.draftTask) {
+            this.sessionOrder.ui.draftTask.tag = tag;
+            this.sessionOrder.ui.draftTask.geometry = this.sessionOrder.ui.activeGeometry;
+            this.sessionOrder.ui.draftTask.generatedText = this.generateTaskText(
+                this.sessionOrder.ui.draftTask.side,
+                this.sessionOrder.ui.draftTask.tag,
+                this.sessionOrder.ui.draftTask.geometry,
+                this.sessionOrder.ui.draftTask.cells || []
+            );
+            this.renderOrderTaskMarkers();
+        }
         this.addLog(`Активний тег завдання: ${this.orderTaskTags[tag].label}`, 'place-log');
         this.updateUI();
     }
@@ -2043,6 +2078,16 @@ class AdmiralGame {
     setOrderGeometry(geometry) {
         if (!this.orderGeometryTypes[geometry]) return;
         this.sessionOrder.ui.activeGeometry = geometry;
+        if (this.sessionOrder.ui.draftTask) {
+            this.sessionOrder.ui.draftTask.geometry = geometry;
+            this.sessionOrder.ui.draftTask.generatedText = this.generateTaskText(
+                this.sessionOrder.ui.draftTask.side,
+                this.sessionOrder.ui.draftTask.tag,
+                this.sessionOrder.ui.draftTask.geometry,
+                this.sessionOrder.ui.draftTask.cells || []
+            );
+            this.renderOrderTaskMarkers();
+        }
         this.updateUI();
     }
 
@@ -2135,30 +2180,68 @@ class AdmiralGame {
         const side = this.getActiveOrderSide();
         const geometry = this.sessionOrder.ui.activeGeometry;
         const taskConfig = this.orderTaskTags[tag];
-        const existingTask = this.sessionOrder.tasks.find((task) => task.x === x && task.z === z && task.side === side);
-        if (existingTask) {
-            existingTask.tag = tag;
-            existingTask.geometry = geometry;
-            existingTask.cells = [{ x, z }];
-            existingTask.generatedText = this.generateTaskText(side, tag, geometry, [{ x, z }]);
-        } else {
-            const cells = [{ x, z }];
-            this.sessionOrder.tasks.push({
-                id: `task-${Date.now()}-${this.sessionOrder.tasks.length}`,
+        let draftTask = this.sessionOrder.ui.draftTask;
+        if (!draftTask || draftTask.side !== side) {
+            draftTask = {
                 side,
                 tag,
                 geometry,
-                cells,
-                x,
-                z,
-                objectId: null,
-                generatedText: this.generateTaskText(side, tag, geometry, cells)
-            });
+                cells: []
+            };
+            this.sessionOrder.ui.draftTask = draftTask;
         }
+        draftTask.tag = tag;
+        draftTask.geometry = geometry;
+
+        if (geometry === 'point') {
+            draftTask.cells = [{ x, z }];
+        } else {
+            const exists = draftTask.cells.some((cell) => cell.x === x && cell.z === z);
+            if (!exists) {
+                draftTask.cells.push({ x, z });
+            }
+        }
+        draftTask.x = draftTask.cells[0].x;
+        draftTask.z = draftTask.cells[0].z;
+        draftTask.generatedText = this.generateTaskText(side, tag, geometry, draftTask.cells);
 
         this.markOrderRoleDirty(side);
         this.renderOrderTaskMarkers();
-        this.addLog(`Сторона ${side}: ${taskConfig.label} прив'язано до (${x}, ${z})`, 'place-log');
+        this.addLog(`Сторона ${side}: додано точку до чернетки "${taskConfig.label}" (${x}, ${z})`, 'place-log');
+        this.updateUI();
+    }
+
+    saveCurrentOrderTask() {
+        const draftTask = this.sessionOrder.ui.draftTask;
+        if (!draftTask || !draftTask.cells || draftTask.cells.length === 0) {
+            this.addLog('Немає чернетки завдання для збереження.', 'place-log');
+            return;
+        }
+
+        const side = draftTask.side;
+        const savedCells = draftTask.cells.map((cell) => ({ x: cell.x, z: cell.z }));
+        const savedTask = {
+            id: `task-${Date.now()}-${this.sessionOrder.tasks.length}`,
+            side,
+            tag: draftTask.tag,
+            geometry: draftTask.geometry,
+            cells: savedCells,
+            x: savedCells[0].x,
+            z: savedCells[0].z,
+            objectId: null,
+            generatedText: this.generateTaskText(side, draftTask.tag, draftTask.geometry, savedCells)
+        };
+        this.sessionOrder.tasks.push(savedTask);
+        this.sessionOrder.ui.draftTask = null;
+        this.markOrderRoleDirty(side);
+        this.renderOrderTaskMarkers();
+        this.addLog(`Сторона ${side}: збережено завдання ${this.sessionOrder.tasks.length}`, 'place-log');
+        this.updateUI();
+    }
+
+    clearCurrentOrderTask() {
+        this.sessionOrder.ui.draftTask = null;
+        this.renderOrderTaskMarkers();
         this.updateUI();
     }
 
@@ -2183,7 +2266,11 @@ class AdmiralGame {
             this.orderTaskMarkerMeshes.push(marker);
         });
 
-        this.sessionOrder.tasks.forEach((task) => {
+        if (!this.mapLayers.tasks) {
+            return;
+        }
+
+        this.sessionOrder.tasks.forEach((task, index) => {
             const color = (this.orderTaskTags[task.tag] && this.orderTaskTags[task.tag].color) || this.getUnitPalette(task.side).base;
             const cells = task.cells || [{ x: task.x, z: task.z }];
             cells.forEach((cell) => {
@@ -2191,13 +2278,30 @@ class AdmiralGame {
                 marker.userData.orderTask = task;
                 this.orderTaskMarkerMeshes.push(marker);
             });
+            const labelCell = cells[Math.floor(cells.length / 2)] || cells[0];
+            if (labelCell) {
+                this.orderTaskMarkerMeshes.push(this.addMapTextLabel(labelCell.x, labelCell.z, `Завд. ${index + 1}`, color, 0.72));
+            }
         });
 
-        this.sessionOrder.endState.forEach((item) => {
+        const draftTask = this.sessionOrder.ui.draftTask;
+        if (draftTask && draftTask.cells && draftTask.cells.length > 0) {
+            const color = (this.orderTaskTags[draftTask.tag] && this.orderTaskTags[draftTask.tag].color) || this.getUnitPalette(draftTask.side).base;
+            draftTask.cells.forEach((cell) => {
+                const marker = this.addCellHighlight(cell.x, cell.z, color, 0.32, 4.3, false);
+                marker.userData.draftTask = draftTask;
+                this.orderTaskMarkerMeshes.push(marker);
+            });
+            const labelCell = draftTask.cells[Math.floor(draftTask.cells.length / 2)] || draftTask.cells[0];
+            this.orderTaskMarkerMeshes.push(this.addMapTextLabel(labelCell.x, labelCell.z, `Чернетка ${this.sessionOrder.tasks.length + 1}`, color, 0.72));
+        }
+
+        this.sessionOrder.endState.forEach((item, index) => {
             const color = (this.endStateTags[item.tag] && this.endStateTags[item.tag].color) || this.getUnitPalette(item.side).base;
             const marker = this.addCellHighlight(item.x, item.z, color, 0.62, 6, false);
             marker.userData.endState = item;
             this.orderTaskMarkerMeshes.push(marker);
+            this.orderTaskMarkerMeshes.push(this.addMapTextLabel(item.x, item.z, `КС ${index + 1}`, color, 1.0));
         });
     }
     
@@ -3130,6 +3234,56 @@ class AdmiralGame {
             this.cellHighlightMeshes.push(mesh);
         }
         return mesh;
+    }
+
+    addMapTextLabel(x, z, text, color, yOffset = 0.75) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 96;
+        const ctx = canvas.getContext('2d');
+        const cssColor = `#${new THREE.Color(color).getHexString()}`;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(10, 24, 30, 0.82)';
+        ctx.strokeStyle = cssColor;
+        ctx.lineWidth = 5;
+        this.roundRect(ctx, 10, 16, 236, 64, 12);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#f7fbff';
+        ctx.font = 'bold 28px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, 128, 49);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        const material = new THREE.SpriteMaterial({
+            map: texture,
+            transparent: true,
+            depthWrite: false,
+            depthTest: false
+        });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(2.6, 0.95, 1);
+        sprite.position.set(this.toWorldCoord(x), this.getSurfaceYAtCell(x, z) + yOffset, this.toWorldCoord(z));
+        sprite.renderOrder = 20;
+        this.scene.add(sprite);
+        return sprite;
+    }
+
+    roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
     }
 
     onMouseMove(event) {

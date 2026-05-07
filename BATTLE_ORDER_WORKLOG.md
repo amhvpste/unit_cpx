@@ -278,6 +278,7 @@ Task object target:
 - 2026-05-07 - Added readiness flow: sides press `Готовий`; instructor can press `Стартувати гру` only after both sides are ready.
 - 2026-05-07 - Browser-verified role flow: role buttons render, no lower side handlers render, both sides can mark ready, instructor start button enables, no console errors.
 - 2026-05-07 - Separated instructor battle-order controls from commander controls: instructor now manages scenario frame, enemy information, and readiness control instead of acting as a third unit-owning side.
+- 2026-05-07 - Changed task authoring to draft-and-save: map clicks build one current task, `Зберегти завдання` commits task 1/2/3, saved tasks render numbered labels on the map.
 
 ## Resume Point
 
@@ -285,10 +286,38 @@ The tabbed battle order editor is implemented and verified at a basic level.
 
 Next concrete coding step:
 
-1. Make geometry assignment real:
+1. Finish task authoring workflow:
+   - clicks in `Завдання` build a draft task;
+   - `Зберегти завдання` commits it as task 1, 2, 3;
+   - saved tasks render their number on the map.
+2. Define `Кінцевий стан` as victory assessment, not just another task:
+   - percent of required area captured;
+   - enemy forces suppressed/destroyed;
+   - scenario decision on who receives victory.
+3. Add map layer controls during the game:
+   - show/hide grid;
+   - show/hide tasks;
+   - show/hide supply;
+   - show/hide communications;
+   - show/hide fog of war.
+4. Add future supply mechanic:
+   - bases provide supply in a configured radius;
+   - radius is configured in the battle order;
+   - units inside base radius receive supply.
+5. Add future communications mechanic:
+   - radio-equipped units project a command/control radius;
+   - units outside communication radius lose control;
+   - control returns when another radio unit moves into range.
+6. Add future fog-of-war mechanic:
+   - visible area depends on own unit observation radius;
+   - enemy and map information outside visible area is hidden or degraded.
+7. Replace opponent side panel during active play with selected-unit information:
+   - selected unit type, side, status, movement, combat stats;
+   - no permanent display of the other player panel during a side turn.
+8. Make geometry assignment real:
    - point: one click;
    - line: two or more cells;
    - area: rectangular or multi-cell area.
-2. Add named map objects inside `situation.objects`.
-3. Allow tasks and end states to bind to named objects, not only cells.
-4. Improve generated execution text so it reads like a battle-order fragment.
+9. Add named map objects inside `situation.objects`.
+10. Allow tasks and end states to bind to named objects, not only cells.
+11. Improve generated execution text so it reads like a battle-order fragment.
