@@ -213,6 +213,39 @@
             font-size: 15px;
         }
 
+        .map-layer-controls {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .map-layer-title {
+            color: #FFD700;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .map-layer-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+
+        .map-layer-btn {
+            padding: 7px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            color: #f7fbff;
+            text-align: left;
+        }
+
+        .map-layer-btn.active {
+            border-color: #52d273;
+            background: rgba(82, 210, 115, 0.18);
+            color: #dfffe4;
+        }
+
         .camera-controls {
             position: absolute;
             top: 20px;
@@ -790,6 +823,10 @@
                 <h4 style="margin: 0 0 5px 0;">Стан сесії:</h4>
                 <div class="unit-info" id="currentPhase">Розміщення фішок</div>
                 <div class="session-role-buttons" id="sessionRoleSwitch"></div>
+                <div class="map-layer-controls" id="mapLayerControls">
+                    <div class="map-layer-title">Шари карти</div>
+                    <div class="map-layer-buttons" id="mapLayerButtons"></div>
+                </div>
             </div>
         </div>
 
@@ -800,7 +837,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260507-session-panels"></script>
+    <script src="game.js?v=20260507-map-layers"></script>
 </body>
 
 </html>

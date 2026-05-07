@@ -282,6 +282,7 @@ Task object target:
 - 2026-05-07 - Started active-session UI refactor: side view shows only the active side panel plus selected-unit detail panel; instructor view sees both side panels. Instructor delete/move tools are explicitly backlog.
 - 2026-05-07 - Corrected active-session UI: there is now one side panel whose content/color changes by active side; instructor mode uses one overview panel instead of two player panels.
 - 2026-05-07 - Fixed grid picking on relief: map clicks now raycast against the actual terrain mesh before falling back to the flat plane, reducing cell-offset placement on raised terrain.
+- 2026-05-07 - Added active-session map layer controls: grid and task layers can be shown/hidden; support, communications, and fog controls are present as UI anchors for upcoming mechanics.
 
 ## Resume Point
 
@@ -297,12 +298,10 @@ Next concrete coding step:
    - percent of required area captured;
    - enemy forces suppressed/destroyed;
    - scenario decision on who receives victory.
-3. Add map layer controls during the game:
-   - show/hide grid;
-   - show/hide tasks;
-   - show/hide supply;
-   - show/hide communications;
-   - show/hide fog of war.
+3. Finish map layer mechanics behind the controls:
+   - support layer needs real base radius geometry;
+   - communications layer needs real radio radius geometry;
+   - fog-of-war layer needs real side-limited visibility, not only visual fog.
 4. Add future supply mechanic:
    - bases provide supply in a configured radius;
    - radius is configured in the battle order;

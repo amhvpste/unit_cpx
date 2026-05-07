@@ -1278,6 +1278,62 @@ class AdmiralGame {
         }).join('');
     }
 
+    updateMapLayerControls() {
+        const wrapper = document.getElementById('mapLayerControls');
+        const container = document.getElementById('mapLayerButtons');
+        if (!wrapper || !container) return;
+
+        wrapper.style.display = this.phase === 'order' ? 'none' : 'block';
+        if (this.phase === 'order') {
+            container.innerHTML = '';
+            return;
+        }
+
+        const layers = [
+            { key: 'grid', label: 'Сітка' },
+            { key: 'tasks', label: 'Завдання' },
+            { key: 'support', label: 'Забезпечення' },
+            { key: 'comms', label: 'Зв’язок' },
+            { key: 'fog', label: 'Туман війни' }
+        ];
+
+        container.innerHTML = layers.map((layer) => {
+            const activeClass = this.mapLayers[layer.key] ? ' active' : '';
+            return `<button class="map-layer-btn${activeClass}" onclick="game.toggleMapLayer('${layer.key}')">${this.mapLayers[layer.key] ? '✓' : '○'} ${layer.label}</button>`;
+        }).join('');
+    }
+
+    toggleMapLayer(layer) {
+        if (!Object.prototype.hasOwnProperty.call(this.mapLayers, layer)) return;
+        this.mapLayers[layer] = !this.mapLayers[layer];
+        this.applyMapLayerVisibility(layer);
+        this.updateMapLayerControls();
+        const labels = {
+            grid: 'сітка',
+            tasks: 'завдання',
+            support: 'забезпечення',
+            comms: 'зв’язок',
+            fog: 'туман війни'
+        };
+        this.addLog(`Шар "${labels[layer] || layer}": ${this.mapLayers[layer] ? 'показано' : 'приховано'}`, 'place-log');
+    }
+
+    applyMapLayerVisibility(layer = null) {
+        if (!layer || layer === 'grid') {
+            if (this.gridHelper) {
+                this.gridHelper.visible = this.mapLayers.grid;
+            }
+        }
+
+        if (!layer || layer === 'tasks') {
+            this.renderOrderTaskMarkers();
+        }
+
+        if (!layer || layer === 'fog') {
+            this.scene.fog = this.mapLayers.fog ? new THREE.FogExp2(0x718ea1, 0.018) : null;
+        }
+    }
+
     updatePlayPanels() {
         const player1Panel = document.getElementById('player1Info');
         const player2Panel = document.getElementById('player2Info');
@@ -1392,6 +1448,7 @@ class AdmiralGame {
         document.getElementById('unitShop').style.display = this.phase === 'order' ? 'block' : 'none';
         document.getElementById('centerInfo').style.display = 'block';
         this.updateSessionRoleSwitch();
+        this.updateMapLayerControls();
         this.updateUnitDetailPanel();
         this.updatePlayPanels();
         
@@ -2722,6 +2779,9 @@ class AdmiralGame {
 
         const boardSize = this.gridSize * this.cellSize;
         this.cellPickPlane = null;
+        if (this.gridHelper) {
+            this.scene.remove(this.gridHelper);
+        }
 
         const gridHelper = new THREE.GridHelper(boardSize, this.gridSize, 0x1f3a45, 0x355866);
         gridHelper.position.set(this.getBoardCenterOffset(), 0.04, this.getBoardCenterOffset());
@@ -2733,6 +2793,8 @@ class AdmiralGame {
             material.depthTest = false;
         });
         gridHelper.renderOrder = 3;
+        gridHelper.visible = this.mapLayers.grid;
+        this.gridHelper = gridHelper;
         this.scene.add(gridHelper);
     }
 
