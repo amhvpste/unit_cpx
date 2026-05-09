@@ -285,6 +285,7 @@ Task object target:
 - 2026-05-07 - Added active-session map layer controls: grid and task layers can be shown/hidden; support, communications, and fog controls are present as UI anchors for upcoming mechanics.
 - 2026-05-09 - Added instructor unit catalog editor: edit unit name, combat parameters, symbol, description, card image, and add a new unit for the current prototype session.
 - 2026-05-09 - Reworked task authoring into a map-first mode: the large order panel hides, a compact bottom task editor appears, and area tasks use two-click rectangular zones.
+- 2026-05-09 - Added saved-task control: select a task to highlight it on the map, return it to draft for editing, or delete it from the order.
 
 ## Resume Point
 

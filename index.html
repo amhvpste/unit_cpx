@@ -289,6 +289,14 @@
             background: #e68900;
         }
 
+        .danger-btn {
+            background: #d94a4a;
+        }
+
+        .danger-btn:hover {
+            background: #b93a3a;
+        }
+
         .neutral-btn {
             background: #2196F3;
         }
@@ -429,6 +437,66 @@
             border-radius: 5px;
             color: #fff;
             cursor: pointer;
+            font-weight: 700;
+        }
+
+        .task-map-list {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.14);
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .task-list-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: stretch;
+            margin-top: 6px;
+            padding: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .task-list-item.active {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.13);
+        }
+
+        .task-list-main {
+            min-width: 0;
+            border: none;
+            background: transparent;
+            color: #f8fbff;
+            text-align: left;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        .task-list-main span {
+            display: block;
+            margin-top: 2px;
+            color: rgba(248, 251, 255, 0.72);
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-list-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .task-list-actions button {
+            min-width: 54px;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 11px;
             font-weight: 700;
         }
 
@@ -922,7 +990,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260509-task-map-editor"></script>
+    <script src="game.js?v=20260509-task-list-editor"></script>
 </body>
 
 </html>

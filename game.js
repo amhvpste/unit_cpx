@@ -75,7 +75,8 @@ class AdmiralGame {
                 activeGeometry: 'area',
                 activeSituationTool: 'areaOfInterest',
                 activeEndStateTag: 'areaControlled',
-                draftTask: null
+                draftTask: null,
+                activeTaskId: null
             },
             readinessByRole: {
                 1: false,
@@ -1163,6 +1164,7 @@ class AdmiralGame {
         this.sessionOrder.ui.activeRole = 'instructor';
         this.sessionOrder.ui.activeSide = 1;
         this.sessionOrder.ui.draftTask = null;
+        this.sessionOrder.ui.activeTaskId = null;
         this.sessionOrder.readinessByRole = { 1: false, 2: false, instructor: false };
         this.renderOrderTaskMarkers();
         this.selectedUnit = null;
@@ -1675,6 +1677,7 @@ class AdmiralGame {
         }).join('');
         const saveDisabled = !draftTask || !draftTask.cells || draftTask.cells.length === 0 ? ' disabled' : '';
         const sideClass = activeSide === 1 ? 'player1-btn' : 'player2-btn';
+        const taskList = this.renderTaskEditorList();
 
         return `
             <div class="task-map-section">
@@ -1698,6 +1701,10 @@ class AdmiralGame {
                 <div class="task-map-actions">
                     <button class="${sideClass}"${saveDisabled} onclick="game.saveCurrentOrderTask()">Зберегти завдання</button>
                     <button class="neutral-btn" onclick="game.setOrderTab('endState')">Кінцевий стан</button>
+                </div>
+                <div class="task-map-list">
+                    <div class="task-map-title">Збережені завдання</div>
+                    ${taskList}
                 </div>
             </div>
         `;
@@ -2118,6 +2125,30 @@ class AdmiralGame {
         return cells.map((cell) => `(${cell.x}, ${cell.z})`).join(' - ');
     }
 
+    renderTaskEditorList() {
+        if (this.sessionOrder.tasks.length === 0) {
+            return '<div class="units-list-empty">Ще немає збережених завдань.</div>';
+        }
+
+        return this.sessionOrder.tasks.map((task, index) => {
+            const tag = this.orderTaskTags[task.tag] || { label: task.tag };
+            const geometry = this.orderGeometryTypes[task.geometry] || { label: task.geometry };
+            const activeClass = this.sessionOrder.ui.activeTaskId === task.id ? ' active' : '';
+            return `
+                <div class="task-list-item${activeClass}">
+                    <button class="task-list-main" onclick="game.selectOrderTask('${this.escapeAttribute(task.id)}')">
+                        <strong>${index + 1}. Сторона ${task.side}: ${this.escapeHtml(tag.label)}</strong>
+                        <span>${this.escapeHtml(geometry.label)}: ${this.escapeHtml(this.formatTaskCells(task))}</span>
+                    </button>
+                    <div class="task-list-actions">
+                        <button class="neutral-btn" onclick="game.editOrderTask('${this.escapeAttribute(task.id)}')">Ред.</button>
+                        <button class="danger-btn" onclick="game.deleteOrderTask('${this.escapeAttribute(task.id)}')">Видалити</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
     getDraftTaskText() {
         const draftTask = this.sessionOrder.ui.draftTask;
         if (!draftTask || !draftTask.cells || draftTask.cells.length === 0) {
@@ -2471,6 +2502,57 @@ class AdmiralGame {
         this.updateUI();
     }
 
+    selectOrderTask(taskId) {
+        const task = this.sessionOrder.tasks.find((item) => item.id === taskId);
+        if (!task) return;
+        this.sessionOrder.ui.activeTaskId = this.sessionOrder.ui.activeTaskId === taskId ? null : taskId;
+        this.renderOrderTaskMarkers();
+        this.updateUI();
+    }
+
+    editOrderTask(taskId) {
+        const taskIndex = this.sessionOrder.tasks.findIndex((item) => item.id === taskId);
+        if (taskIndex < 0) return;
+
+        const task = this.sessionOrder.tasks[taskIndex];
+        this.sessionOrder.tasks.splice(taskIndex, 1);
+        this.sessionOrder.ui.activeTaskId = null;
+        this.sessionOrder.ui.activeRole = task.side;
+        this.sessionOrder.ui.activeSide = task.side;
+        this.sessionOrder.ui.activeTab = 'tasks';
+        this.sessionOrder.ui.activeTaskTag = task.tag;
+        this.sessionOrder.ui.activeGeometry = task.geometry;
+        this.sessionOrder.ui.draftTask = {
+            side: task.side,
+            tag: task.tag,
+            geometry: task.geometry,
+            cells: (task.cells || [{ x: task.x, z: task.z }]).map((cell) => ({ x: cell.x, z: cell.z })),
+            x: task.x,
+            z: task.z,
+            generatedText: task.generatedText || ''
+        };
+        if (task.geometry === 'area' && this.sessionOrder.ui.draftTask.cells.length > 0) {
+            this.sessionOrder.ui.draftTask.areaAnchor = { ...this.sessionOrder.ui.draftTask.cells[0] };
+        }
+        this.markOrderRoleDirty(task.side);
+        this.renderOrderTaskMarkers();
+        this.addLog(`Завдання ${taskIndex + 1} повернуто в чернетку для редагування.`, 'place-log');
+        this.updateUI();
+    }
+
+    deleteOrderTask(taskId) {
+        const taskIndex = this.sessionOrder.tasks.findIndex((item) => item.id === taskId);
+        if (taskIndex < 0) return;
+        const [task] = this.sessionOrder.tasks.splice(taskIndex, 1);
+        if (this.sessionOrder.ui.activeTaskId === taskId) {
+            this.sessionOrder.ui.activeTaskId = null;
+        }
+        this.markOrderRoleDirty(task.side);
+        this.renderOrderTaskMarkers();
+        this.addLog(`Видалено завдання ${taskIndex + 1} сторони ${task.side}.`, 'place-log');
+        this.updateUI();
+    }
+
     setUnitEditorSelectedType(unitType) {
         if (!this.config.unitTypes[unitType]) return;
         this.unitEditorSelectedType = unitType;
@@ -2719,6 +2801,7 @@ class AdmiralGame {
         };
         this.sessionOrder.tasks.push(savedTask);
         this.sessionOrder.ui.draftTask = null;
+        this.sessionOrder.ui.activeTaskId = savedTask.id;
         this.markOrderRoleDirty(side);
         this.renderOrderTaskMarkers();
         this.addLog(`Сторона ${side}: збережено завдання ${this.sessionOrder.tasks.length}`, 'place-log');
@@ -2756,17 +2839,22 @@ class AdmiralGame {
             return;
         }
 
+        const activeTaskId = this.sessionOrder.ui.activeTaskId;
         this.sessionOrder.tasks.forEach((task, index) => {
             const color = (this.orderTaskTags[task.tag] && this.orderTaskTags[task.tag].color) || this.getUnitPalette(task.side).base;
             const cells = task.cells || [{ x: task.x, z: task.z }];
+            const isActive = activeTaskId === task.id;
+            const hasActive = Boolean(activeTaskId);
+            const opacity = isActive ? 0.76 : (hasActive ? 0.2 : 0.48);
+            const size = isActive ? 5.8 : (hasActive ? 4.5 : 5);
             cells.forEach((cell) => {
-                const marker = this.addCellHighlight(cell.x, cell.z, color, 0.48, 5, false);
+                const marker = this.addCellHighlight(cell.x, cell.z, color, opacity, size, false);
                 marker.userData.orderTask = task;
                 this.orderTaskMarkerMeshes.push(marker);
             });
             const labelCell = cells[Math.floor(cells.length / 2)] || cells[0];
             if (labelCell) {
-                this.orderTaskMarkerMeshes.push(this.addMapTextLabel(labelCell.x, labelCell.z, `Завд. ${index + 1}`, color, 0.72));
+                this.orderTaskMarkerMeshes.push(this.addMapTextLabel(labelCell.x, labelCell.z, `${isActive ? '>> ' : ''}Завд. ${index + 1}`, color, isActive ? 1.0 : 0.72));
             }
         });
 
