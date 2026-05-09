@@ -179,6 +179,7 @@ class AdmiralGame {
         this.gltfModelCache = {};
         this.unitPreviewCache = {};
         this.unitPreviewLoading = new Set();
+        this.unitEditorSelectedType = null;
         this.referenceModelUnitsLoaded = false;
         this.referenceModelUnitsLoading = false;
         this.referenceTaskModels = [];
@@ -1568,7 +1569,8 @@ class AdmiralGame {
                 { key: 'situation', label: 'Обстановка' },
                 { key: 'scenario', label: 'Сценарій' },
                 { key: 'intelligence', label: 'Інформація' },
-                { key: 'control', label: 'Контроль' }
+                { key: 'control', label: 'Контроль' },
+                { key: 'unitEditor', label: 'Юніти' }
             ];
         }
 
@@ -1622,6 +1624,7 @@ class AdmiralGame {
             scenario: () => this.renderInstructorScenarioTab(),
             intelligence: () => this.renderInstructorIntelligenceTab(),
             control: () => this.renderInstructorControlTab(),
+            unitEditor: () => this.renderUnitEditorTab(),
             orbat: () => this.renderOrbatTab(),
             tasks: () => this.renderTasksTab(),
             endState: () => this.renderEndStateTab(),
@@ -1750,6 +1753,113 @@ class AdmiralGame {
                     <div class="order-grid-two">${rows}</div>
                 </div>
             </div>
+        `;
+    }
+
+    renderUnitEditorTab() {
+        const unitEntries = Object.entries(this.config.unitTypes);
+        if (unitEntries.length === 0) {
+            return '<div class="shop-item order-planner"><h5>Редактор юнітів</h5><div class="details">Юнітів ще немає.</div></div>';
+        }
+
+        if (!this.unitEditorSelectedType || !this.config.unitTypes[this.unitEditorSelectedType]) {
+            this.unitEditorSelectedType = unitEntries[0][0];
+        }
+
+        const selectedType = this.unitEditorSelectedType;
+        const selectedConfig = this.config.unitTypes[selectedType];
+        const symbolKinds = [
+            ['infantry', 'Піхота'],
+            ['armor', 'Бронетехніка'],
+            ['artillery', 'Артилерія'],
+            ['command', 'Командування'],
+            ['scout', 'Розвідка'],
+            ['sniper', 'Снайпер'],
+            ['antitank', 'ПТРК'],
+            ['mortar', 'Міномет'],
+            ['medical', 'Медичний'],
+            ['vehicle', 'Транспорт'],
+            ['support', 'Забезпечення']
+        ];
+
+        const unitButtons = unitEntries.map(([unitType, unitConfig]) => {
+            const activeClass = unitType === selectedType ? ' active' : '';
+            return `<button class="order-check${activeClass}" onclick="game.setUnitEditorSelectedType('${this.escapeAttribute(unitType)}')">${this.escapeHtml(unitConfig.name)}</button>`;
+        }).join('');
+
+        const symbolOptions = symbolKinds.map(([value, label]) => {
+            const selected = this.getUnitSymbolKind(selectedType, selectedConfig) === value ? ' selected' : '';
+            return `<option value="${value}"${selected}>${label}</option>`;
+        }).join('');
+
+        const currentImage = selectedConfig.imageDataUrl
+            ? `<img alt="Unit custom preview" src="${this.escapeHtml(selectedConfig.imageDataUrl)}">`
+            : `<img alt="Unit symbol preview" src="${this.createUnitSymbolDataUrl(selectedType, 1, selectedConfig)}">`;
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Редактор юнітів</h5>
+                <div class="details">
+                    <div class="order-note">Редагування діє в межах поточної сесії прототипу. Збереження в файл/бекенд винесено наступним кроком.</div>
+                    <div class="order-actions">
+                        <button class="neutral-btn" onclick="event.stopPropagation(); game.addCustomUnit()">Додати нового юніта</button>
+                    </div>
+                    <div class="order-grid-two">
+                        <div class="order-check-group">
+                            <div class="order-check-title">Наявні юніти</div>
+                            <div class="order-tags">${unitButtons}</div>
+                        </div>
+                        <div class="order-check-group">
+                            <div class="order-check-title">Картка / символ</div>
+                            <div class="unit-model-preview" style="width: 160px; height: 116px;">${currentImage}</div>
+                        </div>
+                    </div>
+                    <div class="order-grid-two">
+                        ${this.renderUnitEditorTextField(selectedType, 'name', 'Назва', selectedConfig.name)}
+                        ${this.renderUnitEditorNumberField(selectedType, 'cost', 'Вартість', selectedConfig.cost)}
+                        ${this.renderUnitEditorNumberField(selectedType, 'hitpoints', 'Живучість', selectedConfig.hitpoints)}
+                        ${this.renderUnitEditorNumberField(selectedType, 'strength', 'Вогнева потужність', selectedConfig.strength)}
+                        ${this.renderUnitEditorNumberField(selectedType, 'movement', 'Маневреність', selectedConfig.movement)}
+                        <label class="order-field">
+                            <strong>Тип символу</strong><br>
+                            <select onchange="game.updateUnitConfigField('${this.escapeAttribute(selectedType)}', 'symbolKind', this.value)">
+                                ${symbolOptions}
+                            </select>
+                        </label>
+                        ${this.renderUnitEditorTextField(selectedType, 'symbolLabel', 'Підпис на символі', selectedConfig.symbolLabel || this.getUnitSymbolLabel(selectedType, selectedConfig))}
+                        ${this.renderUnitEditorTextField(selectedType, 'model', 'Модель / тип', selectedConfig.model)}
+                    </div>
+                    <label class="order-field">
+                        <strong>Опис</strong><br>
+                        <textarea rows="3" onchange="game.updateUnitConfigField('${this.escapeAttribute(selectedType)}', 'description', this.value)">${this.escapeHtml(selectedConfig.description || '')}</textarea>
+                    </label>
+                    <div class="order-grid-two">
+                        <label class="order-field">
+                            <strong>Картинка картки</strong><br>
+                            <input type="file" accept="image/*" onchange="game.handleUnitImageUpload('${this.escapeAttribute(selectedType)}', this)">
+                        </label>
+                        ${this.renderUnitEditorTextField(selectedType, 'imageDataUrl', 'URL / data URL картинки', selectedConfig.imageDataUrl || '')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderUnitEditorTextField(unitType, field, label, value = '') {
+        return `
+            <label class="order-field">
+                <strong>${label}</strong><br>
+                <input type="text" value="${this.escapeHtml(value || '')}" onchange="game.updateUnitConfigField('${this.escapeAttribute(unitType)}', '${field}', this.value)">
+            </label>
+        `;
+    }
+
+    renderUnitEditorNumberField(unitType, field, label, value = 0) {
+        return `
+            <label class="order-field">
+                <strong>${label}</strong><br>
+                <input type="number" min="0" step="1" value="${Number(value) || 0}" onchange="game.updateUnitConfigField('${this.escapeAttribute(unitType)}', '${field}', this.value)">
+            </label>
         `;
     }
 
@@ -2008,7 +2118,13 @@ class AdmiralGame {
             return;
         }
 
-        const cacheKey = `symbol:${unitType}:${this.getUnitSymbolKind(unitType, unitConfig)}`;
+        if (unitConfig && unitConfig.imageDataUrl) {
+            element.innerHTML = `<img alt="Unit custom preview" src="${this.escapeHtml(unitConfig.imageDataUrl)}">`;
+            element.dataset.rendered = '1';
+            return;
+        }
+
+        const cacheKey = `symbol:${unitType}:${this.getUnitSymbolKind(unitType, unitConfig)}:${this.getUnitSymbolLabel(unitType, unitConfig)}`;
         if (this.unitPreviewCache[cacheKey]) {
             element.innerHTML = `<img alt="NATO symbol preview" src="${this.unitPreviewCache[cacheKey]}">`;
             element.dataset.rendered = '1';
@@ -2231,6 +2347,76 @@ class AdmiralGame {
         if (!this.getVisibleOrderTabs().some((item) => item.key === tab)) return;
         this.sessionOrder.ui.activeTab = tab;
         this.updateUI();
+    }
+
+    setUnitEditorSelectedType(unitType) {
+        if (!this.config.unitTypes[unitType]) return;
+        this.unitEditorSelectedType = unitType;
+        this.updateUI();
+    }
+
+    updateUnitConfigField(unitType, field, value) {
+        const unitConfig = this.config.unitTypes[unitType];
+        if (!unitConfig) return;
+
+        const numericFields = new Set(['cost', 'hitpoints', 'strength', 'movement']);
+        unitConfig[field] = numericFields.has(field) ? Math.max(0, Number(value) || 0) : String(value ?? '');
+        if (field === 'imageDataUrl' && !unitConfig.imageDataUrl.trim()) {
+            delete unitConfig.imageDataUrl;
+        }
+        this.unitPreviewCache = {};
+        this.refreshPurchasedUnitConfigs(unitType);
+        this.markOrderRoleDirty('instructor');
+        this.updateUI();
+    }
+
+    addCustomUnit() {
+        const id = `custom_${Date.now()}`;
+        this.config.unitTypes[id] = {
+            name: 'Новий юніт',
+            cost: 100,
+            hitpoints: 2,
+            strength: 2,
+            movement: 1,
+            description: 'Опис нового підрозділу',
+            model: 'custom',
+            symbolKind: 'infantry',
+            symbolLabel: 'Н'
+        };
+        this.unitModelPaths[id] = null;
+        this.unitEditorSelectedType = id;
+        this.unitPreviewCache = {};
+        this.markOrderRoleDirty('instructor');
+        this.updateUI();
+    }
+
+    handleUnitImageUpload(unitType, input) {
+        const file = input && input.files ? input.files[0] : null;
+        if (!file || !this.config.unitTypes[unitType]) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            this.config.unitTypes[unitType].imageDataUrl = String(reader.result || '');
+            this.unitPreviewCache = {};
+            this.markOrderRoleDirty('instructor');
+            this.updateUI();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    refreshPurchasedUnitConfigs(unitType) {
+        [1, 2].forEach((side) => {
+            (this.purchasedUnits[side] || []).forEach((unit) => {
+                if (unit.type === unitType) {
+                    unit.config = this.config.unitTypes[unitType];
+                }
+            });
+            this.sessionOrder.orbat[side] = (this.purchasedUnits[side] || []).map((unit) => ({
+                type: unit.type,
+                name: unit.config.name,
+                placed: unit.placed
+            }));
+        });
     }
 
     setOrderGeometry(geometry) {
@@ -2822,6 +3008,7 @@ class AdmiralGame {
 
     getUnitSymbolKind(type, unitConfig = null) {
         const config = unitConfig || (this.config && this.config.unitTypes ? this.config.unitTypes[type] : null) || {};
+        if (config.symbolKind) return config.symbolKind;
         const key = `${type} ${config.name || ''} ${config.description || ''} ${config.referencePath || ''}`.toLowerCase();
 
         if (/armor|tank|btr|bmp|брон|танк|бтр|бмп/.test(key)) return 'armor';
@@ -2839,6 +3026,7 @@ class AdmiralGame {
 
     getUnitSymbolLabel(type, unitConfig = null) {
         const config = unitConfig || (this.config && this.config.unitTypes ? this.config.unitTypes[type] : null) || {};
+        if (config.symbolLabel) return config.symbolLabel;
         const kind = this.getUnitSymbolKind(type, config);
         const labels = {
             infantry: 'ПХ',

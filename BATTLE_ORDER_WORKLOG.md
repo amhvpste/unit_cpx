@@ -283,6 +283,7 @@ Task object target:
 - 2026-05-07 - Corrected active-session UI: there is now one side panel whose content/color changes by active side; instructor mode uses one overview panel instead of two player panels.
 - 2026-05-07 - Fixed grid picking on relief: map clicks now raycast against the actual terrain mesh before falling back to the flat plane, reducing cell-offset placement on raised terrain.
 - 2026-05-07 - Added active-session map layer controls: grid and task layers can be shown/hidden; support, communications, and fog controls are present as UI anchors for upcoming mechanics.
+- 2026-05-09 - Added instructor unit catalog editor: edit unit name, combat parameters, symbol, description, card image, and add a new unit for the current prototype session.
 
 ## Resume Point
 
@@ -327,3 +328,5 @@ Next concrete coding step:
 10. Add named map objects inside `situation.objects`.
 11. Allow tasks and end states to bind to named objects, not only cells.
 12. Improve generated execution text so it reads like a battle-order fragment.
+13. Persist edited unit catalog to config/backend instead of keeping it only in browser session state.
+14. Optionally use custom unit images as map tokens, not only as unit-card previews.

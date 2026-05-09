@@ -302,6 +302,25 @@
             cursor: not-allowed;
         }
 
+        input,
+        select,
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 5px;
+            background: rgba(12, 28, 36, 0.62);
+            color: #f7fbff;
+            padding: 7px 8px;
+            font: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 68px;
+        }
+
         #gameLog {
             position: absolute;
             bottom: 20px;
@@ -837,7 +856,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260507-map-layers"></script>
+    <script src="game.js?v=20260509-unit-editor"></script>
 </body>
 
 </html>
