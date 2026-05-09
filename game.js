@@ -72,7 +72,7 @@ class AdmiralGame {
                 activeRole: 'instructor',
                 activeSide: 1,
                 activeTaskTag: 'seize',
-                activeGeometry: 'point',
+                activeGeometry: 'area',
                 activeSituationTool: 'areaOfInterest',
                 activeEndStateTag: 'areaControlled',
                 draftTask: null
@@ -1446,10 +1446,12 @@ class AdmiralGame {
         setText('player1Money', 'базовий');
         setText('player2Money', 'базовий');
         
-        document.getElementById('unitShop').style.display = this.phase === 'order' ? 'block' : 'none';
-        document.getElementById('centerInfo').style.display = 'block';
+        const taskMapMode = this.isTaskMapEditorActive();
+        document.getElementById('unitShop').style.display = this.phase === 'order' && !taskMapMode ? 'block' : 'none';
+        document.getElementById('centerInfo').style.display = taskMapMode ? 'none' : 'block';
         this.updateSessionRoleSwitch();
         this.updateMapLayerControls();
+        this.updateTaskMapEditor();
         this.updateUnitDetailPanel();
         this.updatePlayPanels();
         
@@ -1636,6 +1638,69 @@ class AdmiralGame {
             ${tabRenderers[activeTab] ? tabRenderers[activeTab]() : this.renderSituationTab()}
         `;
         this.setupUnitCardPreviews();
+    }
+
+    isTaskMapEditorActive() {
+        return this.phase === 'order' && this.sessionOrder.ui.activeTab === 'tasks' && !this.isInstructorRole();
+    }
+
+    updateTaskMapEditor() {
+        const editor = document.getElementById('taskMapEditor');
+        if (!editor) return;
+
+        if (!this.isTaskMapEditorActive()) {
+            editor.style.display = 'none';
+            editor.innerHTML = '';
+            return;
+        }
+
+        editor.style.display = 'grid';
+        editor.innerHTML = this.renderTaskMapEditor();
+    }
+
+    renderTaskMapEditor() {
+        const activeSide = this.getActiveOrderSide();
+        const draftTask = this.sessionOrder.ui.draftTask;
+        const tagButtons = Object.entries(this.orderTaskTags).map(([tag, config]) => {
+            const activeClass = this.sessionOrder.ui.activeTaskTag === tag ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setOrderTaskTag('${tag}')">${config.label}</button>`;
+        }).join('');
+        const geometryButtons = Object.entries(this.orderGeometryTypes).map(([geometry, config]) => {
+            const activeClass = this.sessionOrder.ui.activeGeometry === geometry ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setOrderGeometry('${geometry}')">${config.label}</button>`;
+        }).join('');
+        const sideButtons = [1, 2].map((side) => {
+            const activeClass = activeSide === side ? ' active' : '';
+            return `<button class="order-role-btn${activeClass}" onclick="game.setOrderRole('${side}')">Сторона ${side}</button>`;
+        }).join('');
+        const saveDisabled = !draftTask || !draftTask.cells || draftTask.cells.length === 0 ? ' disabled' : '';
+        const sideClass = activeSide === 1 ? 'player1-btn' : 'player2-btn';
+
+        return `
+            <div class="task-map-section">
+                <div class="task-map-title">Режим завдань</div>
+                <div class="order-role-buttons">${sideButtons}</div>
+                <div class="task-map-status" style="margin-top:8px;">Карта відкрита для вибору клітинок. Для району: перший клік - перший кут, другий клік - протилежний кут.</div>
+                <div class="task-map-actions">
+                    <button class="neutral-btn" onclick="game.setOrderTab('orbat')">До наказу</button>
+                    <button class="neutral-btn" onclick="game.clearCurrentOrderTask()">Очистити</button>
+                </div>
+            </div>
+            <div class="task-map-section">
+                <div class="task-map-title">Дія</div>
+                <div class="order-tags">${tagButtons}</div>
+                <div class="task-map-title" style="margin-top:10px;">Геометрія</div>
+                <div class="order-tags">${geometryButtons}</div>
+            </div>
+            <div class="task-map-section">
+                <div class="task-map-title">Поточне завдання</div>
+                <div class="task-map-status">${this.getDraftTaskText()}</div>
+                <div class="task-map-actions">
+                    <button class="${sideClass}"${saveDisabled} onclick="game.saveCurrentOrderTask()">Зберегти завдання</button>
+                    <button class="neutral-btn" onclick="game.setOrderTab('endState')">Кінцевий стан</button>
+                </div>
+            </div>
+        `;
     }
 
     renderSideButtons() {
@@ -1939,9 +2004,7 @@ class AdmiralGame {
             : this.sessionOrder.tasks.map((task, index) => `
                 <span class="unit-badge">${index + 1}. Сторона ${task.side}: ${this.orderTaskTags[task.tag].label}, ${this.orderGeometryTypes[task.geometry].label}: ${this.formatTaskCells(task)}</span>
             `).join('');
-        const draftText = draftTask && draftTask.cells.length > 0
-            ? `Чернетка завдання ${this.sessionOrder.tasks.length + 1}: ${this.orderTaskTags[draftTask.tag].label}, ${this.orderGeometryTypes[draftTask.geometry].label}: ${this.formatTaskCells(draftTask)}`
-            : 'Клікніть по карті, щоб задати точку / лінію / район поточного завдання.';
+        const draftText = this.getDraftTaskText();
         const saveDisabled = !draftTask || draftTask.cells.length === 0 ? ' disabled' : '';
 
         return `
@@ -2053,6 +2116,64 @@ class AdmiralGame {
     formatTaskCells(task) {
         const cells = task.cells || [{ x: task.x, z: task.z }];
         return cells.map((cell) => `(${cell.x}, ${cell.z})`).join(' - ');
+    }
+
+    getDraftTaskText() {
+        const draftTask = this.sessionOrder.ui.draftTask;
+        if (!draftTask || !draftTask.cells || draftTask.cells.length === 0) {
+            const geometry = this.sessionOrder.ui.activeGeometry;
+            if (geometry === 'area') {
+                return 'Оберіть район: перший клік задає один кут, другий клік задає протилежний кут зони.';
+            }
+            if (geometry === 'line') {
+                return 'Оберіть лінію або маршрут: кліки додають точки по порядку; повторний клік по точці прибирає її.';
+            }
+            return 'Клікніть по карті, щоб задати точку поточного завдання.';
+        }
+
+        const tag = this.orderTaskTags[draftTask.tag] || { label: draftTask.tag };
+        const geometry = this.orderGeometryTypes[draftTask.geometry] || { label: draftTask.geometry };
+        const areaHint = draftTask.geometry === 'area' && draftTask.cells.length === 1
+            ? ' Натисніть другу клітинку, щоб розтягнути район.'
+            : '';
+        return `Чернетка завдання ${this.sessionOrder.tasks.length + 1}: ${tag.label}, ${geometry.label}: ${this.formatTaskCells(draftTask)}.${areaHint}`;
+    }
+
+    buildRectCells(start, end) {
+        const minX = Math.min(start.x, end.x);
+        const maxX = Math.max(start.x, end.x);
+        const minZ = Math.min(start.z, end.z);
+        const maxZ = Math.max(start.z, end.z);
+        const cells = [];
+        for (let x = minX; x <= maxX; x++) {
+            for (let z = minZ; z <= maxZ; z++) {
+                cells.push({ x, z });
+            }
+        }
+        return cells;
+    }
+
+    normalizeDraftTaskForGeometry(draftTask) {
+        if (!draftTask || !draftTask.cells) return;
+        if (draftTask.geometry === 'point' && draftTask.cells.length > 1) {
+            draftTask.cells = [draftTask.cells[0]];
+            delete draftTask.areaAnchor;
+        }
+        if (draftTask.geometry === 'area') {
+            const first = draftTask.cells[0];
+            const last = draftTask.cells[draftTask.cells.length - 1] || first;
+            if (first) {
+                draftTask.areaAnchor = draftTask.areaAnchor || { x: first.x, z: first.z };
+                draftTask.cells = this.buildRectCells(draftTask.areaAnchor, last);
+            }
+        }
+        if (draftTask.geometry !== 'area') {
+            delete draftTask.areaAnchor;
+        }
+        if (draftTask.cells.length > 0) {
+            draftTask.x = draftTask.cells[0].x;
+            draftTask.z = draftTask.cells[0].z;
+        }
     }
 
     renderReadinessSections() {
@@ -2298,6 +2419,7 @@ class AdmiralGame {
         if (this.sessionOrder.ui.draftTask) {
             this.sessionOrder.ui.draftTask.tag = tag;
             this.sessionOrder.ui.draftTask.geometry = this.sessionOrder.ui.activeGeometry;
+            this.normalizeDraftTaskForGeometry(this.sessionOrder.ui.draftTask);
             this.sessionOrder.ui.draftTask.generatedText = this.generateTaskText(
                 this.sessionOrder.ui.draftTask.side,
                 this.sessionOrder.ui.draftTask.tag,
@@ -2424,6 +2546,7 @@ class AdmiralGame {
         this.sessionOrder.ui.activeGeometry = geometry;
         if (this.sessionOrder.ui.draftTask) {
             this.sessionOrder.ui.draftTask.geometry = geometry;
+            this.normalizeDraftTaskForGeometry(this.sessionOrder.ui.draftTask);
             this.sessionOrder.ui.draftTask.generatedText = this.generateTaskText(
                 this.sessionOrder.ui.draftTask.side,
                 this.sessionOrder.ui.draftTask.tag,
@@ -2539,11 +2662,30 @@ class AdmiralGame {
 
         if (geometry === 'point') {
             draftTask.cells = [{ x, z }];
+            delete draftTask.areaAnchor;
+        } else if (geometry === 'area') {
+            if (!draftTask.areaAnchor || draftTask.cells.length === 0) {
+                draftTask.areaAnchor = { x, z };
+                draftTask.cells = [{ x, z }];
+            } else {
+                draftTask.cells = this.buildRectCells(draftTask.areaAnchor, { x, z });
+            }
         } else {
-            const exists = draftTask.cells.some((cell) => cell.x === x && cell.z === z);
-            if (!exists) {
+            delete draftTask.areaAnchor;
+            const existingIndex = draftTask.cells.findIndex((cell) => cell.x === x && cell.z === z);
+            if (existingIndex >= 0) {
+                draftTask.cells.splice(existingIndex, 1);
+            } else {
                 draftTask.cells.push({ x, z });
             }
+        }
+        if (draftTask.cells.length === 0) {
+            delete draftTask.x;
+            delete draftTask.z;
+            draftTask.generatedText = '';
+            this.renderOrderTaskMarkers();
+            this.updateUI();
+            return;
         }
         draftTask.x = draftTask.cells[0].x;
         draftTask.z = draftTask.cells[0].z;

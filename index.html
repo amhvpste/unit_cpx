@@ -375,6 +375,63 @@
             display: none;
         }
 
+        #taskMapEditor {
+            position: absolute;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%);
+            z-index: 5;
+            width: min(980px, calc(100vw - 260px));
+            display: none;
+            grid-template-columns: minmax(160px, 0.75fr) minmax(320px, 1.6fr) minmax(240px, 1fr);
+            gap: 10px;
+            align-items: stretch;
+            padding: 12px;
+            box-sizing: border-box;
+            color: #f8fbff;
+            background: linear-gradient(180deg, rgba(48, 70, 84, 0.86), rgba(31, 49, 61, 0.82));
+            border: 1px solid rgba(214, 232, 243, 0.24);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .task-map-section {
+            min-width: 0;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.12);
+        }
+
+        .task-map-title {
+            color: #FFD700;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .task-map-status {
+            font-size: 12px;
+            line-height: 1.35;
+            color: rgba(248, 251, 255, 0.86);
+        }
+
+        .task-map-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .task-map-actions button {
+            min-height: 34px;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
         #shopHeader {
             margin-bottom: 12px;
         }
@@ -743,6 +800,13 @@
                 max-height: 260px;
             }
 
+            #taskMapEditor {
+                width: calc(100vw - 24px);
+                grid-template-columns: 1fr;
+                max-height: 42vh;
+                overflow-y: auto;
+            }
+
             #ui,
             #ui2,
             #ui3 {
@@ -781,6 +845,8 @@
             </div>
             <div id="shopContent"></div>
         </div>
+
+        <div id="taskMapEditor"></div>
 
         <div id="ui">
             <div id="logoContainer" style="text-align: center; margin-bottom: 15px;">
@@ -856,7 +922,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260509-unit-editor"></script>
+    <script src="game.js?v=20260509-task-map-editor"></script>
 </body>
 
 </html>
