@@ -2900,28 +2900,35 @@ class AdmiralGame {
             z: this.clampCell(objective.z + 5)
         };
         const objectiveCells = this.buildRectCells(objectiveStart, objectiveEnd);
-        const attackerHomeZ = attacker === 1 ? this.randomInt(8, 16) : this.randomInt(83, 91);
-        const defenderRearZ = defender === 1 ? this.randomInt(18, 28) : this.randomInt(72, 82);
+        const attackAxis = Math.random() > 0.5 ? 1 : -1;
+        const attackerHome = {
+            x: this.clampCell(objective.x + this.randomInt(-8, 8)),
+            z: this.clampCell(objective.z + attackAxis * this.randomInt(16, 22))
+        };
+        const defenderRear = {
+            x: this.clampCell(objective.x + this.randomInt(-5, 5)),
+            z: this.clampCell(objective.z - attackAxis * this.randomInt(5, 9))
+        };
 
         this.sessionOrder.situation.areaOfInterest = { ...objective };
         this.sessionOrder.situation.executionArea = { ...objective };
         this.sessionOrder.situation.objects = [
             { id: `obj-${Date.now()}-settlement`, label: 'Опорний пункт', x: objective.x, z: objective.z },
-            { id: `obj-${Date.now()}-road`, label: 'Маршрут висування', x: objective.x, z: Math.round((objective.z + attackerHomeZ) / 2) }
+            { id: `obj-${Date.now()}-road`, label: 'Маршрут висування', x: objective.x, z: Math.round((objective.z + attackerHome.z) / 2) }
         ];
         this.sessionOrder.situation.enemyInfoPercentBySide = { 1: 65, 2: 65 };
 
         const attackTypes = this.pickExistingUnitTypes(['infantry', 'infantry', 'armor', 'scout', 'artillery', 'command', 'droneScout', 'droneKamikaze']);
         const defenseTypes = this.pickExistingUnitTypes(['infantry', 'infantry', 'infantry', 'armor', 'artillery', 'command', 'scout', 'sniper']);
-        this.placeDemoForce(attacker, attackTypes, { x: objective.x, z: attackerHomeZ }, 9, attacker === 1 ? -1 : 1);
-        this.placeDemoForce(defender, defenseTypes, { x: objective.x, z: defenderRearZ }, 7, defender === 1 ? -1 : 1);
+        this.placeDemoForce(attacker, attackTypes, attackerHome, 9, -attackAxis);
+        this.placeDemoForce(defender, defenseTypes, defenderRear, 7, attackAxis);
 
         const routeCells = [
-            { x: objective.x, z: attackerHomeZ },
-            { x: this.clampCell(objective.x + this.randomInt(-8, 8)), z: this.clampCell(Math.round((attackerHomeZ + objective.z) / 2)) },
+            { x: attackerHome.x, z: attackerHome.z },
+            { x: this.clampCell(objective.x + this.randomInt(-8, 8)), z: this.clampCell(Math.round((attackerHome.z + objective.z) / 2)) },
             { x: objective.x, z: objective.z }
         ];
-        const blockLineZ = this.clampCell(objective.z + (defender === 1 ? -7 : 7));
+        const blockLineZ = this.clampCell(objective.z - attackAxis * 7);
         const blockCells = [
             { x: this.clampCell(objective.x - 8), z: blockLineZ },
             { x: this.clampCell(objective.x + 8), z: blockLineZ }
@@ -2953,6 +2960,10 @@ class AdmiralGame {
         this.turnNumber = 1;
         this.playerMoves = { 1: 3, 2: 3 };
         this.mapLayers.tasks = true;
+        this.cameraDistance = 58;
+        this.cameraHeight = 72;
+        this.cameraAngle = attackAxis > 0 ? -0.55 : 0.55;
+        this.updateCameraPosition();
         this.units.forEach((unit) => {
             unit.userData.moved = false;
         });
@@ -3003,6 +3014,8 @@ class AdmiralGame {
         const orderUnit = { type, config: unitConfig, placed: true };
         this.purchasedUnits[side].push(orderUnit);
         const unit = this.createUnit(type, cell.x, cell.z, side);
+        unit.scale.setScalar(1.45);
+        unit.userData.demoGenerated = true;
         this.getGridCell(cell.x, cell.z).unit = unit;
         this.units.push(unit);
     }
@@ -3422,9 +3435,13 @@ class AdmiralGame {
         return this.getTerrainHeightAtWorld(this.toWorldCoord(x), this.toWorldCoord(z)) + 0.03;
     }
 
+    getUnitYAtCell(x, z) {
+        return this.getSurfaceYAtCell(x, z) + 0.12;
+    }
+
     reseatMapObjects() {
         this.units.forEach((unit) => {
-            unit.position.y = this.getSurfaceYAtCell(unit.userData.x, unit.userData.z);
+            unit.position.y = this.getUnitYAtCell(unit.userData.x, unit.userData.z);
         });
         this.renderOrderTaskMarkers();
         if (this.selectedUnit) {
@@ -3719,12 +3736,14 @@ class AdmiralGame {
             new THREE.MeshBasicMaterial({
                 map: this.createUnitSymbolTexture(type, player, unitConfig),
                 transparent: false,
-                side: THREE.DoubleSide
+                side: THREE.DoubleSide,
+                depthTest: false,
+                depthWrite: false
             })
         );
         symbol.rotation.x = -Math.PI / 2;
-        symbol.position.y = 0.05;
-        symbol.renderOrder = 8;
+        symbol.position.y = 0.09;
+        symbol.renderOrder = 30;
         symbol.userData.isNatoSymbol = true;
         group.add(symbol);
 
@@ -3768,7 +3787,7 @@ class AdmiralGame {
         const unitConfig = this.config.unitTypes[type];
         const unit = new THREE.Group();
 
-        unit.position.set(this.toWorldCoord(x), this.getSurfaceYAtCell(x, z), this.toWorldCoord(z));
+        unit.position.set(this.toWorldCoord(x), this.getUnitYAtCell(x, z), this.toWorldCoord(z));
         unit.userData = {
             isUnitRoot: true,
             type,
@@ -3802,7 +3821,7 @@ class AdmiralGame {
             startY: unit.position.y,
             startZ: unit.position.z,
             endX: this.toWorldCoord(targetX),
-            endY: this.getSurfaceYAtCell(targetX, targetZ),
+            endY: this.getUnitYAtCell(targetX, targetZ),
             endZ: this.toWorldCoord(targetZ),
             startTime: performance.now(),
             duration: 350
