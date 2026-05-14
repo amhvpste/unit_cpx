@@ -202,6 +202,14 @@ class AdmiralGame {
             sniper: null
         };
         this.movementAnimations = [];
+        this.network = {
+            token: localStorage.getItem('unitCpxToken') || '',
+            user: null,
+            applyingRemoteState: false,
+            pollTimer: null,
+            lastRevision: 0,
+            pushTimer: null
+        };
         
         // Керування камерою
         this.cameraDistance = 80;
@@ -236,6 +244,8 @@ class AdmiralGame {
         
         // Початок анімації
         this.animate();
+
+        this.initNetworkClient();
     }
     
     loadConfig() {
@@ -269,6 +279,231 @@ class AdmiralGame {
                 // Оновлюємо UI з конфігурацією за замовчуванням
                 this.updateUI();
             });
+    }
+
+    initNetworkClient() {
+        const form = document.getElementById('networkLoginForm');
+        const logoutButton = document.getElementById('networkLogoutBtn');
+
+        if (form) {
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const username = document.getElementById('networkUsername').value;
+                const password = document.getElementById('networkPassword').value;
+                this.loginNetworkUser(username, password);
+            });
+        }
+
+        if (logoutButton) {
+            logoutButton.addEventListener('click', () => this.logoutNetworkUser());
+        }
+
+        if (this.network.token) {
+            this.networkRequest('/api/me')
+                .then((data) => {
+                    this.applyNetworkUser(data.user);
+                    this.applyRemoteSessionState(data.state);
+                    this.startNetworkPolling();
+                })
+                .catch(() => {
+                    localStorage.removeItem('unitCpxToken');
+                    this.network.token = '';
+                    this.updateNetworkChrome();
+                });
+        } else {
+            this.updateNetworkChrome();
+        }
+    }
+
+    loginNetworkUser(username, password) {
+        this.networkRequest('/api/login', {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+        }, false)
+            .then((data) => {
+                this.network.token = data.token;
+                localStorage.setItem('unitCpxToken', data.token);
+                this.applyNetworkUser(data.user);
+                this.applyRemoteSessionState(data.state);
+                this.startNetworkPolling();
+                this.pushNetworkState('login');
+            })
+            .catch(() => {
+                const errorBox = document.getElementById('networkLoginError');
+                if (errorBox) errorBox.textContent = 'Невірний логін або пароль';
+            });
+    }
+
+    logoutNetworkUser() {
+        this.networkRequest('/api/logout', { method: 'POST' }).catch(() => {});
+        localStorage.removeItem('unitCpxToken');
+        this.network.token = '';
+        this.network.user = null;
+        this.network.lastRevision = 0;
+        if (this.network.pollTimer) {
+            clearInterval(this.network.pollTimer);
+            this.network.pollTimer = null;
+        }
+        this.updateNetworkChrome();
+        this.updateUI();
+    }
+
+    networkRequest(path, options = {}, requireAuth = true) {
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+        };
+        if (requireAuth && this.network.token) {
+            headers.Authorization = `Bearer ${this.network.token}`;
+        }
+
+        return fetch(path, { ...options, headers })
+            .then((response) => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            });
+    }
+
+    applyNetworkUser(user) {
+        this.network.user = user;
+        const role = user.role === '1' || user.role === 1 ? 1 : (user.role === '2' || user.role === 2 ? 2 : 'instructor');
+        this.sessionOrder.ui.activeRole = role;
+        if (role === 1 || role === 2) {
+            this.sessionOrder.ui.activeSide = role;
+            this.sessionViewRole = role;
+        } else {
+            this.sessionViewRole = 'instructor';
+        }
+        this.updateNetworkChrome();
+        this.updateUI();
+    }
+
+    updateNetworkChrome() {
+        const overlay = document.getElementById('networkLoginOverlay');
+        const bar = document.getElementById('networkUserBar');
+        const username = document.getElementById('networkUsernameLabel');
+        const role = document.getElementById('networkUserRole');
+        const errorBox = document.getElementById('networkLoginError');
+
+        if (overlay) overlay.classList.toggle('hidden', Boolean(this.network.user));
+        if (bar) bar.classList.toggle('active', Boolean(this.network.user));
+        if (username) username.textContent = this.network.user ? this.network.user.username : '-';
+        if (role) role.textContent = this.network.user ? this.network.user.label : '-';
+        if (errorBox && this.network.user) errorBox.textContent = '';
+    }
+
+    startNetworkPolling() {
+        if (this.network.pollTimer) return;
+        this.network.pollTimer = setInterval(() => {
+            this.networkRequest('/api/session-state')
+                .then((state) => this.applyRemoteSessionState(state))
+                .catch(() => {});
+        }, 1500);
+    }
+
+    getLockedNetworkRole() {
+        if (!this.network.user) return null;
+        const role = this.network.user.role;
+        return role === '1' || role === 1 ? 1 : (role === '2' || role === 2 ? 2 : 'instructor');
+    }
+
+    isNetworkActionAllowedForCurrentRole() {
+        const role = this.getLockedNetworkRole();
+        if (!role || role === 'instructor') return true;
+        return this.currentPlayer === role || this.phase === 'order';
+    }
+
+    pushNetworkState(reason = 'state') {
+        if (!this.network.user || this.network.applyingRemoteState) return;
+        clearTimeout(this.network.pushTimer);
+        this.network.pushTimer = setTimeout(() => {
+            this.networkRequest('/api/session-state', {
+                method: 'POST',
+                body: JSON.stringify({ reason, payload: this.createNetworkSnapshot() })
+            })
+                .then((state) => {
+                    this.network.lastRevision = state.revision;
+                })
+                .catch(() => {});
+        }, 120);
+    }
+
+    createNetworkSnapshot() {
+        return {
+            phase: this.phase,
+            currentPlayer: this.currentPlayer,
+            sessionViewRole: this.sessionViewRole,
+            turnNumber: this.turnNumber,
+            playerMoves: this.playerMoves,
+            placementPhase: this.placementPhase,
+            losses: this.losses,
+            purchasedUnits: this.purchasedUnits,
+            sessionOrder: this.sessionOrder,
+            mapLayers: this.mapLayers,
+            units: this.units.map((unit) => ({
+                type: unit.userData.type,
+                player: unit.userData.player,
+                x: unit.userData.x,
+                z: unit.userData.z,
+                moved: unit.userData.moved,
+                hitpoints: unit.userData.hitpoints,
+                maxHitpoints: unit.userData.maxHitpoints,
+                strength: unit.userData.strength
+            }))
+        };
+    }
+
+    applyRemoteSessionState(state) {
+        if (!state || !state.payload || state.revision <= this.network.lastRevision) return;
+        if (!this.config || !this.config.unitTypes) {
+            setTimeout(() => this.applyRemoteSessionState(state), 300);
+            return;
+        }
+
+        const snapshot = state.payload;
+        this.network.applyingRemoteState = true;
+        this.clearDemoSceneUnits();
+        this.units = [];
+        this.occupiedCells.clear();
+        this.grid.forEach((row) => row.forEach((cell) => { cell.unit = null; }));
+
+        this.phase = snapshot.phase || this.phase;
+        this.currentPlayer = snapshot.currentPlayer || this.currentPlayer;
+        this.sessionViewRole = snapshot.sessionViewRole || this.sessionViewRole;
+        this.turnNumber = snapshot.turnNumber || this.turnNumber;
+        this.playerMoves = snapshot.playerMoves || this.playerMoves;
+        this.placementPhase = snapshot.placementPhase || this.placementPhase;
+        this.losses = snapshot.losses || this.losses;
+        this.purchasedUnits = snapshot.purchasedUnits || this.purchasedUnits;
+        this.sessionOrder = snapshot.sessionOrder || this.sessionOrder;
+        this.mapLayers = snapshot.mapLayers || this.mapLayers;
+
+        (snapshot.units || []).forEach((data) => {
+            if (!this.config.unitTypes[data.type]) return;
+            const unit = this.createUnit(data.type, data.x, data.z, data.player);
+            unit.userData.moved = Boolean(data.moved);
+            unit.userData.hitpoints = data.hitpoints;
+            unit.userData.maxHitpoints = data.maxHitpoints;
+            unit.userData.strength = data.strength;
+            this.getGridCell(data.x, data.z).unit = unit;
+            this.units.push(unit);
+        });
+
+        const lockedRole = this.getLockedNetworkRole();
+        if (lockedRole) {
+            this.sessionOrder.ui.activeRole = lockedRole;
+            if (lockedRole === 1 || lockedRole === 2) {
+                this.sessionOrder.ui.activeSide = lockedRole;
+                this.sessionViewRole = lockedRole;
+            } else {
+                this.sessionViewRole = 'instructor';
+            }
+        }
+
+        this.network.lastRevision = state.revision;
+        this.network.applyingRemoteState = false;
+        this.applyMapLayerVisibility();
+        this.updateUI();
     }
     
     loadReferenceModelUnits() {
@@ -827,6 +1062,10 @@ class AdmiralGame {
     
     placeUnit(x, z) {
         if (this.phase !== 'placement') return;
+        if (!this.isNetworkActionAllowedForCurrentRole()) {
+            this.addLog('Цей користувач не керує поточною стороною.', 'combat-log');
+            return;
+        }
         
         // Перевірка чи клітинка вільна
         if (this.getGridCell(x, z).unit !== null) {
@@ -866,6 +1105,7 @@ class AdmiralGame {
         this.addLog(`Гравець ${this.currentPlayer} розмістив ${unplacedUnit.config.name} на (${x}, ${z})`, 'place-log');
         
         this.updateUI();
+        this.pushNetworkState('place-unit');
     }
     
     createUnit(type, x, z, player) {
@@ -1175,6 +1415,7 @@ class AdmiralGame {
         
         this.addLog('Сесію скинуто. Сформуйте бойовий наказ і склад сторін.', 'place-log');
         this.updateUI();
+        this.pushNetworkState('reset');
     }
     
     getBoardCenterOffset() {
@@ -1257,6 +1498,15 @@ class AdmiralGame {
 
     setSessionViewRole(role) {
         const normalizedRole = role === '1' || role === 1 ? 1 : (role === '2' || role === 2 ? 2 : 'instructor');
+        const lockedRole = this.getLockedNetworkRole();
+        if (lockedRole && lockedRole !== 'instructor' && normalizedRole !== lockedRole) {
+            this.addLog('Роль гравця зафіксована логіном мережевої сесії.', 'combat-log');
+            return;
+        }
+        if (lockedRole === 'instructor' && normalizedRole !== 'instructor') {
+            this.addLog('Інструктор працює в окремому режимі огляду сесії.', 'place-log');
+            return;
+        }
         this.sessionViewRole = normalizedRole;
         this.updateUI();
     }
@@ -1277,7 +1527,9 @@ class AdmiralGame {
         ];
         container.innerHTML = roles.map((role) => {
             const activeClass = String(this.sessionViewRole) === String(role.key) ? ' active' : '';
-            return `<button class="session-role-btn${activeClass}" onclick="game.setSessionViewRole('${role.key}')">${role.label}</button>`;
+            const lockedRole = this.getLockedNetworkRole();
+            const disabled = lockedRole && String(lockedRole) !== String(role.key) ? ' disabled' : '';
+            return `<button class="session-role-btn${activeClass}"${disabled} onclick="game.setSessionViewRole('${role.key}')">${role.label}</button>`;
         }).join('');
     }
 
@@ -1319,6 +1571,7 @@ class AdmiralGame {
             fog: 'туман війни'
         };
         this.addLog(`Шар "${labels[layer] || layer}": ${this.mapLayers[layer] ? 'показано' : 'приховано'}`, 'place-log');
+        this.pushNetworkState('map-layer');
     }
 
     applyMapLayerVisibility(layer = null) {
@@ -1594,7 +1847,9 @@ class AdmiralGame {
         roleSwitch.innerHTML = Object.entries(this.orderRoles).map(([role, config]) => {
             const activeClass = String(this.sessionOrder.ui.activeRole) === String(role) ? ' active' : '';
             const readyMark = role !== 'instructor' && this.sessionOrder.readinessByRole[role] ? ' ✓' : '';
-            return `<button class="order-role-btn${activeClass}" onclick="game.setOrderRole('${role}')">${config.label}${readyMark}</button>`;
+            const lockedRole = this.getLockedNetworkRole();
+            const disabled = lockedRole && String(lockedRole) !== String(role) ? ' disabled' : '';
+            return `<button class="order-role-btn${activeClass}"${disabled} onclick="game.setOrderRole('${role}')">${config.label}${readyMark}</button>`;
         }).join('');
 
         const p1 = this.sessionOrder.readinessByRole[1] ? 'С1 готова' : 'С1 не готова';
@@ -2531,6 +2786,11 @@ class AdmiralGame {
     setOrderRole(role) {
         const normalizedRole = role === '1' || role === 1 ? 1 : (role === '2' || role === 2 ? 2 : 'instructor');
         if (!this.orderRoles[normalizedRole]) return;
+        const lockedRole = this.getLockedNetworkRole();
+        if (lockedRole && String(lockedRole) !== String(normalizedRole)) {
+            this.addLog('Роль у бойовому наказі зафіксована логіном мережевої сесії.', 'combat-log');
+            return;
+        }
         this.sessionOrder.ui.activeRole = normalizedRole;
         if (normalizedRole === 1 || normalizedRole === 2) {
             this.sessionOrder.ui.activeSide = normalizedRole;
@@ -2609,6 +2869,7 @@ class AdmiralGame {
         this.renderOrderTaskMarkers();
         this.addLog(`Видалено завдання ${taskIndex + 1} сторони ${task.side}.`, 'place-log');
         this.updateUI();
+        this.pushNetworkState('delete-task');
     }
 
     setUnitEditorSelectedType(unitType) {
@@ -2864,6 +3125,7 @@ class AdmiralGame {
         this.renderOrderTaskMarkers();
         this.addLog(`Сторона ${side}: збережено завдання ${this.sessionOrder.tasks.length}`, 'place-log');
         this.updateUI();
+        this.pushNetworkState('task');
     }
 
     clearCurrentOrderTask() {
@@ -2970,6 +3232,7 @@ class AdmiralGame {
         this.renderOrderTaskMarkers();
         this.addLog(`Демо-сесію згенеровано: Сторона ${attacker} атакує, Сторона ${defender} обороняється.`, 'place-log');
         this.updateUI();
+        this.pushNetworkState('quick-demo');
     }
 
     createOrderTask(side, tag, geometry, cells) {
@@ -3137,6 +3400,11 @@ class AdmiralGame {
     
     assignUnitToOrder(unitType, player) {
         if (this.phase !== 'order') return;
+        const lockedRole = this.getLockedNetworkRole();
+        if (lockedRole && lockedRole !== 'instructor' && Number(player) !== lockedRole) {
+            this.addLog('Користувач може змінювати ORBAT тільки своєї сторони.', 'combat-log');
+            return;
+        }
 
         const unitConfig = this.config.unitTypes[unitType];
         this.purchasedUnits[player].push({
@@ -3153,6 +3421,7 @@ class AdmiralGame {
 
         this.addLog(`Сторона ${player}: додано ${unitConfig.name} до складу бойового наказу`, 'place-log');
         this.updateUI();
+        this.pushNetworkState('orbat');
     }
 
     updateButtonColors() {
@@ -3831,15 +4100,22 @@ class AdmiralGame {
         unit.userData.moved = true;
 
         this.deselectUnit(false);
+        this.pushNetworkState('move-unit');
     }
 
     endTurn() {
+        if (!this.isNetworkActionAllowedForCurrentRole()) {
+            this.addLog('Цей користувач не може завершити хід поточної сторони.', 'combat-log');
+            return;
+        }
+
         if (this.phase === 'order') {
             const role = this.sessionOrder.ui.activeRole;
             if (role === 1 || role === 2) {
                 this.sessionOrder.readinessByRole[role] = true;
                 this.addLog(`Сторона ${role} позначила бойовий наказ як готовий.`, 'place-log');
                 this.updateUI();
+                this.pushNetworkState('ready');
                 return;
             }
 
@@ -3854,6 +4130,7 @@ class AdmiralGame {
             this.sessionViewRole = 1;
             this.addLog('Інструктор стартує гру. Починається розміщення сторони 1.', 'place-log');
             this.startPlacement();
+            this.pushNetworkState('start-placement');
             return;
         }
 
@@ -3878,6 +4155,7 @@ class AdmiralGame {
             }
 
             this.updateUI();
+            this.pushNetworkState('end-placement');
             return;
         }
 
@@ -3899,6 +4177,7 @@ class AdmiralGame {
                 this.startBattleAnimations();
             }
             this.updateUI();
+            this.pushNetworkState('end-turn');
         }
     }
 
@@ -4037,6 +4316,14 @@ class AdmiralGame {
     }
 
     selectUnit(unit) {
+        const lockedRole = this.getLockedNetworkRole();
+        if (lockedRole && lockedRole !== 'instructor' && unit.userData.player !== lockedRole) {
+            this.inspectedUnit = unit;
+            this.selectedUnit = null;
+            this.showUnitInfo(unit);
+            this.addLog('У мережевій сесії гравець керує тільки своїми підрозділами.', 'combat-log');
+            return;
+        }
         this.selectedUnit = unit;
         this.selectedCell = null;
         this.showUnitInfo(unit);
@@ -4337,6 +4624,7 @@ class AdmiralGame {
         this.getGridCell(unit.userData.x, unit.userData.z).unit = null;
         this.scene.remove(unit);
         this.clearMovementHighlights();
+        this.pushNetworkState('remove-unit');
     }
 
     createExplosionAt(position, color) {

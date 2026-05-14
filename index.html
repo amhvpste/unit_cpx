@@ -883,6 +883,107 @@
             font-weight: bold;
         }
 
+        #networkLoginOverlay {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(25, 43, 55, 0.72);
+            backdrop-filter: blur(8px);
+            color: #f7fbff;
+        }
+
+        #networkLoginOverlay.hidden {
+            display: none;
+        }
+
+        .network-login-card {
+            width: min(420px, calc(100vw - 32px));
+            padding: 22px;
+            border-radius: 10px;
+            border: 1px solid rgba(214, 232, 243, 0.28);
+            background: linear-gradient(180deg, rgba(79, 108, 128, 0.9), rgba(42, 62, 78, 0.9));
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.32);
+        }
+
+        .network-login-card h2 {
+            margin: 0 0 8px 0;
+            color: #FFD700;
+            font-size: 22px;
+        }
+
+        .network-login-card label {
+            display: block;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #dcebf3;
+        }
+
+        .network-login-card input,
+        .network-login-card select {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 5px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            background: rgba(11, 29, 38, 0.55);
+            color: #f7fbff;
+            font-size: 15px;
+        }
+
+        .network-login-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .network-login-actions button {
+            flex: 1;
+        }
+
+        #networkLoginError {
+            min-height: 18px;
+            margin-top: 10px;
+            color: #ff8a80;
+            font-size: 13px;
+        }
+
+        #networkUserBar {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border: 1px solid rgba(214, 232, 243, 0.24);
+            border-radius: 8px;
+            background: rgba(42, 62, 78, 0.74);
+            backdrop-filter: blur(10px);
+            color: #f7fbff;
+            font-size: 13px;
+        }
+
+        #networkUserBar.active {
+            display: flex;
+        }
+
+        #networkUserRole {
+            color: #FFD700;
+            font-weight: 700;
+        }
+
+        #networkLogoutBtn {
+            padding: 6px 9px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
         @media (max-width: 900px) {
             #unitShop {
                 width: calc(100vw - 40px);
@@ -915,6 +1016,31 @@
 <body>
     <div id="gameContainer">
         <div id="gameCanvas"></div>
+
+        <div id="networkLoginOverlay">
+            <form class="network-login-card" id="networkLoginForm">
+                <h2>Вхід у мережеву сесію</h2>
+                <div class="unit-info">Базові користувачі: user1, user2, instructor. Пароль для всіх: units.</div>
+                <label for="networkUsername">Користувач</label>
+                <select id="networkUsername" autocomplete="username">
+                    <option value="user1">user1 - Сторона 1</option>
+                    <option value="user2">user2 - Сторона 2</option>
+                    <option value="instructor">instructor - Інструктор</option>
+                </select>
+                <label for="networkPassword">Пароль</label>
+                <input id="networkPassword" type="password" value="units" autocomplete="current-password">
+                <div class="network-login-actions">
+                    <button type="submit">Увійти</button>
+                </div>
+                <div id="networkLoginError"></div>
+            </form>
+        </div>
+
+        <div id="networkUserBar">
+            <span>Користувач: <strong id="networkUsernameLabel">-</strong></span>
+            <span>Роль: <span id="networkUserRole">-</span></span>
+            <button id="networkLogoutBtn" type="button" onclick="window.game.logoutNetworkUser()">Вийти</button>
+        </div>
 
         <div id="unitShop">
             <div id="shopHeader">
@@ -1011,7 +1137,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260513-quick-demo-visible-units"></script>
+    <script src="game.js?v=20260514-network-roles"></script>
 </body>
 
 </html>

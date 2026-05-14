@@ -1,6 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const root = process.cwd();
 const port = Number(process.env.PORT || 8000);
@@ -20,6 +21,133 @@ const types = {
   '.gltf': 'model/gltf+json',
   '.stl': 'model/stl'
 };
+
+const USERS = {
+  user1: { username: 'user1', password: 'units', role: 1, label: 'Сторона 1' },
+  user2: { username: 'user2', password: 'units', role: 2, label: 'Сторона 2' },
+  instructor: { username: 'instructor', password: 'units', role: 'instructor', label: 'Інструктор' }
+};
+
+const sessions = new Map();
+let sharedSessionState = {
+  revision: 0,
+  updatedAt: new Date().toISOString(),
+  updatedBy: null,
+  payload: null
+};
+
+function publicUser(user) {
+  return {
+    username: user.username,
+    role: user.role,
+    label: user.label
+  };
+}
+
+function sendJson(res, status, payload) {
+  res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(payload));
+}
+
+function readJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+      if (body.length > 2_000_000) {
+        req.destroy();
+        reject(new Error('Payload too large'));
+      }
+    });
+    req.on('end', () => {
+      if (!body) {
+        resolve({});
+        return;
+      }
+      try {
+        resolve(JSON.parse(body));
+      } catch (error) {
+        reject(error);
+      }
+    });
+    req.on('error', reject);
+  });
+}
+
+function getBearerToken(req) {
+  const header = req.headers.authorization || '';
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  return match ? match[1] : null;
+}
+
+function getSessionUser(req) {
+  const token = getBearerToken(req);
+  if (!token) return null;
+  return sessions.get(token) || null;
+}
+
+async function handleApi(req, res, url) {
+  if (url.pathname === '/api/login' && req.method === 'POST') {
+    const body = await readJsonBody(req);
+    const user = USERS[String(body.username || '').trim()];
+    if (!user || body.password !== user.password) {
+      sendJson(res, 401, { error: 'Invalid credentials' });
+      return true;
+    }
+
+    const token = crypto.randomBytes(24).toString('hex');
+    sessions.set(token, user);
+    sendJson(res, 200, { token, user: publicUser(user), state: sharedSessionState });
+    return true;
+  }
+
+  if (url.pathname === '/api/logout' && req.method === 'POST') {
+    const token = getBearerToken(req);
+    if (token) sessions.delete(token);
+    sendJson(res, 200, { ok: true });
+    return true;
+  }
+
+  if (url.pathname === '/api/me' && req.method === 'GET') {
+    const user = getSessionUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: 'Unauthorized' });
+      return true;
+    }
+    sendJson(res, 200, { user: publicUser(user), state: sharedSessionState });
+    return true;
+  }
+
+  if (url.pathname === '/api/session-state' && req.method === 'GET') {
+    const user = getSessionUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: 'Unauthorized' });
+      return true;
+    }
+    sendJson(res, 200, sharedSessionState);
+    return true;
+  }
+
+  if (url.pathname === '/api/session-state' && req.method === 'POST') {
+    const user = getSessionUser(req);
+    if (!user) {
+      sendJson(res, 401, { error: 'Unauthorized' });
+      return true;
+    }
+
+    const body = await readJsonBody(req);
+    sharedSessionState = {
+      revision: sharedSessionState.revision + 1,
+      updatedAt: new Date().toISOString(),
+      updatedBy: user.username,
+      payload: body.payload || null
+    };
+    sendJson(res, 200, sharedSessionState);
+    return true;
+  }
+
+  return false;
+}
 
 function listReferenceModels() {
   const glbRoot = path.join(root, 'content_glb');
@@ -138,6 +266,15 @@ const server = http.createServer((req, res) => {
   if (url.pathname === '/api/reference-models') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify(listReferenceModels()));
+    return;
+  }
+
+  if (url.pathname.startsWith('/api/')) {
+    handleApi(req, res, url).then((handled) => {
+      if (!handled) sendJson(res, 404, { error: 'Not found' });
+    }).catch((error) => {
+      sendJson(res, 400, { error: error.message || 'Bad request' });
+    });
     return;
   }
 
