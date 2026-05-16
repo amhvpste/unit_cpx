@@ -203,7 +203,7 @@ class AdmiralGame {
         };
         this.movementAnimations = [];
         this.network = {
-            token: localStorage.getItem('unitCpxToken') || '',
+            token: sessionStorage.getItem('unitCpxToken') || '',
             user: null,
             applyingRemoteState: false,
             pollTimer: null,
@@ -284,6 +284,7 @@ class AdmiralGame {
     initNetworkClient() {
         const form = document.getElementById('networkLoginForm');
         const logoutButton = document.getElementById('networkLogoutBtn');
+        const urlLogin = new URLSearchParams(window.location.search).get('login');
 
         if (form) {
             form.addEventListener('submit', (event) => {
@@ -298,6 +299,13 @@ class AdmiralGame {
             logoutButton.addEventListener('click', () => this.logoutNetworkUser());
         }
 
+        if (['user1', 'user2', 'instructor'].includes(urlLogin)) {
+            sessionStorage.removeItem('unitCpxToken');
+            this.network.token = '';
+            this.loginNetworkUser(urlLogin, 'units');
+            return;
+        }
+
         if (this.network.token) {
             this.networkRequest('/api/me')
                 .then((data) => {
@@ -306,7 +314,7 @@ class AdmiralGame {
                     this.startNetworkPolling();
                 })
                 .catch(() => {
-                    localStorage.removeItem('unitCpxToken');
+                    sessionStorage.removeItem('unitCpxToken');
                     this.network.token = '';
                     this.updateNetworkChrome();
                 });
@@ -322,7 +330,7 @@ class AdmiralGame {
         }, false)
             .then((data) => {
                 this.network.token = data.token;
-                localStorage.setItem('unitCpxToken', data.token);
+                sessionStorage.setItem('unitCpxToken', data.token);
                 this.applyNetworkUser(data.user);
                 this.applyRemoteSessionState(data.state);
                 this.startNetworkPolling();
@@ -336,7 +344,7 @@ class AdmiralGame {
 
     logoutNetworkUser() {
         this.networkRequest('/api/logout', { method: 'POST' }).catch(() => {});
-        localStorage.removeItem('unitCpxToken');
+        sessionStorage.removeItem('unitCpxToken');
         this.network.token = '';
         this.network.user = null;
         this.network.lastRevision = 0;
@@ -384,12 +392,16 @@ class AdmiralGame {
         const username = document.getElementById('networkUsernameLabel');
         const role = document.getElementById('networkUserRole');
         const errorBox = document.getElementById('networkLoginError');
+        const quickDemoButton = document.getElementById('networkQuickDemoBtn');
 
         if (overlay) overlay.classList.toggle('hidden', Boolean(this.network.user));
         if (bar) bar.classList.toggle('active', Boolean(this.network.user));
         if (username) username.textContent = this.network.user ? this.network.user.username : '-';
         if (role) role.textContent = this.network.user ? this.network.user.label : '-';
         if (errorBox && this.network.user) errorBox.textContent = '';
+        if (quickDemoButton) {
+            quickDemoButton.style.display = this.getLockedNetworkRole() === 'instructor' ? 'inline-block' : 'none';
+        }
     }
 
     startNetworkPolling() {
@@ -3136,6 +3148,11 @@ class AdmiralGame {
 
     generateQuickDemoSession() {
         if (!this.config || !this.config.unitTypes) return;
+        const lockedRole = this.getLockedNetworkRole();
+        if (lockedRole && lockedRole !== 'instructor') {
+            this.addLog('Швидку генерацію сесії запускає тільки інструктор.', 'combat-log');
+            return;
+        }
 
         this.clearMovementHighlights();
         this.clearDemoSceneUnits();

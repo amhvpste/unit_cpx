@@ -942,6 +942,15 @@
 
         .network-login-actions button {
             flex: 1;
+            min-height: 42px;
+            background: #FFD700;
+            color: #15212a;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .network-login-actions button:hover {
+            background: #f0c600;
         }
 
         #networkLoginError {
@@ -984,6 +993,15 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
+        #networkQuickDemoBtn {
+            display: none;
+            padding: 6px 10px;
+            font-size: 12px;
+            background: #FFD700;
+            color: #15212a;
+            font-weight: 700;
+        }
+
         @media (max-width: 900px) {
             #unitShop {
                 width: calc(100vw - 40px);
@@ -1020,7 +1038,7 @@
         <div id="networkLoginOverlay">
             <form class="network-login-card" id="networkLoginForm">
                 <h2>Вхід у мережеву сесію</h2>
-                <div class="unit-info">Базові користувачі: user1, user2, instructor. Пароль для всіх: units.</div>
+                <div class="unit-info">Базові користувачі: user1, user2, instructor. Пароль для всіх: units. Для тесту вкладок можна відкрити ?login=user1, ?login=user2 або ?login=instructor.</div>
                 <label for="networkUsername">Користувач</label>
                 <select id="networkUsername" autocomplete="username">
                     <option value="user1">user1 - Сторона 1</option>
@@ -1039,6 +1057,7 @@
         <div id="networkUserBar">
             <span>Користувач: <strong id="networkUsernameLabel">-</strong></span>
             <span>Роль: <span id="networkUserRole">-</span></span>
+            <button id="networkQuickDemoBtn" type="button" onclick="window.game.generateQuickDemoSession()">Згенерувати сесію</button>
             <button id="networkLogoutBtn" type="button" onclick="window.game.logoutNetworkUser()">Вийти</button>
         </div>
 
@@ -1137,7 +1156,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260514-network-roles"></script>
+    <script src="game.js?v=20260516-tab-sessions"></script>
 </body>
 
 </html>
