@@ -1623,13 +1623,9 @@ class AdmiralGame {
         unitDetailLeft.classList.remove('active');
 
         if (isOrder) {
-            player1Panel.innerHTML = this.renderSidePanel(1);
-            player2Panel.innerHTML = this.renderSidePanel(2);
-            player2Panel.style.display = 'block';
-            player1Panel.className = 'player-info player1';
-            player2Panel.className = 'player-info player2';
-            ui.style.display = this.isTaskMapEditorActive() ? 'none' : 'block';
-            ui2.style.display = this.isTaskMapEditorActive() ? 'none' : 'block';
+            ui.style.display = 'none';
+            ui2.style.display = 'none';
+            return;
         } else if (isInstructor) {
             player1Panel.innerHTML = this.renderInstructorSessionPanel();
             player1Panel.className = 'player-info active-player';
@@ -1751,7 +1747,15 @@ class AdmiralGame {
         
         const taskMapMode = this.isTaskMapEditorActive();
         document.getElementById('unitShop').style.display = this.phase === 'order' && !taskMapMode ? 'block' : 'none';
-        document.getElementById('centerInfo').style.display = taskMapMode ? 'none' : 'block';
+        document.getElementById('centerInfo').style.display = (this.phase === 'order' || taskMapMode) ? 'none' : 'block';
+        const statusPanel = document.getElementById('ui3');
+        if (statusPanel) {
+            statusPanel.style.display = (this.phase === 'order' || taskMapMode) ? 'none' : 'block';
+        }
+        const gameLog = document.getElementById('gameLog');
+        if (gameLog) {
+            gameLog.style.display = this.phase === 'order' ? 'none' : 'block';
+        }
         this.updateTaskMapEditor();
         this.updateSessionRoleSwitch();
         this.updateMapLayerControls();
