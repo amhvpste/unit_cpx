@@ -1616,7 +1616,7 @@ class AdmiralGame {
         const activeSide = this.sessionViewRole === 2 ? 2 : 1;
 
         ui.style.display = 'block';
-        ui2.style.display = 'block';
+        ui2.style.display = 'none';
         player1Panel.style.display = 'block';
         player2Panel.style.display = 'none';
         unitDetailRight.classList.remove('active');
@@ -1634,6 +1634,7 @@ class AdmiralGame {
             player1Panel.innerHTML = this.renderSidePanel(activeSide, `Сторона ${activeSide}`);
             player1Panel.className = `player-info player${activeSide} active-player`;
             player1Panel.style.borderColor = activeSide === 1 ? '#4CAF50' : '#FF9800';
+            ui2.style.display = 'block';
             unitDetailRight.classList.add('active');
         }
 
@@ -3239,6 +3240,9 @@ class AdmiralGame {
         this.phase = 'battle';
         this.currentPlayer = attacker;
         this.sessionViewRole = attacker;
+        if (lockedRole) {
+            this.sessionViewRole = lockedRole;
+        }
         this.placementPhase = { 1: false, 2: false };
         this.turnNumber = 1;
         this.playerMoves = { 1: 3, 2: 3 };
@@ -4009,20 +4013,52 @@ class AdmiralGame {
         const group = new THREE.Group();
 
         const shadow = new THREE.Mesh(
-            new THREE.CircleGeometry(0.46, 32),
+            new THREE.CircleGeometry(0.5, 32),
             new THREE.MeshBasicMaterial({
-                color: palette.dark,
+                color: 0x07151b,
                 transparent: true,
-                opacity: 0.18,
+                opacity: 0.22,
                 depthWrite: false
             })
         );
         shadow.rotation.x = -Math.PI / 2;
-        shadow.position.y = 0.018;
+        shadow.position.y = 0.012;
+        shadow.renderOrder = 27;
         group.add(shadow);
 
+        const plate = new THREE.Mesh(
+            new THREE.CircleGeometry(0.43, 32),
+            new THREE.MeshBasicMaterial({
+                color: palette.dark,
+                transparent: true,
+                opacity: 0.72,
+                depthTest: false,
+                depthWrite: false,
+                side: THREE.DoubleSide
+            })
+        );
+        plate.rotation.x = -Math.PI / 2;
+        plate.position.y = 0.04;
+        plate.renderOrder = 28;
+        group.add(plate);
+
+        const rim = new THREE.Mesh(
+            new THREE.TorusGeometry(0.435, 0.018, 8, 40),
+            new THREE.MeshBasicMaterial({
+                color: palette.frame,
+                transparent: true,
+                opacity: 0.82,
+                depthTest: false,
+                depthWrite: false
+            })
+        );
+        rim.rotation.x = -Math.PI / 2;
+        rim.position.y = 0.052;
+        rim.renderOrder = 29;
+        group.add(rim);
+
         const symbol = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.86, 0.86),
+            new THREE.PlaneGeometry(0.74, 0.74),
             new THREE.MeshBasicMaterial({
                 map: this.createUnitSymbolTexture(type, player, unitConfig),
                 transparent: false,
@@ -4032,7 +4068,7 @@ class AdmiralGame {
             })
         );
         symbol.rotation.x = -Math.PI / 2;
-        symbol.position.y = 0.09;
+        symbol.position.y = 0.095;
         symbol.renderOrder = 30;
         symbol.userData.isNatoSymbol = true;
         group.add(symbol);
