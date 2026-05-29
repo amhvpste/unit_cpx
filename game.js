@@ -393,6 +393,7 @@ class AdmiralGame {
         const role = document.getElementById('networkUserRole');
         const errorBox = document.getElementById('networkLoginError');
         const quickDemoButton = document.getElementById('networkQuickDemoBtn');
+        const resetSessionButton = document.getElementById('networkResetSessionBtn');
 
         if (overlay) overlay.classList.toggle('hidden', Boolean(this.network.user));
         if (bar) bar.classList.toggle('active', Boolean(this.network.user));
@@ -401,6 +402,9 @@ class AdmiralGame {
         if (errorBox && this.network.user) errorBox.textContent = '';
         if (quickDemoButton) {
             quickDemoButton.style.display = this.getLockedNetworkRole() === 'instructor' ? 'inline-block' : 'none';
+        }
+        if (resetSessionButton) {
+            resetSessionButton.style.display = this.getLockedNetworkRole() === 'instructor' ? 'inline-block' : 'none';
         }
     }
 
@@ -4013,52 +4017,37 @@ class AdmiralGame {
         const group = new THREE.Group();
 
         const shadow = new THREE.Mesh(
-            new THREE.CircleGeometry(0.5, 32),
+            new THREE.CircleGeometry(0.42, 32),
             new THREE.MeshBasicMaterial({
                 color: 0x07151b,
                 transparent: true,
-                opacity: 0.22,
+                opacity: 0.16,
+                depthTest: true,
                 depthWrite: false
             })
         );
         shadow.rotation.x = -Math.PI / 2;
         shadow.position.y = 0.012;
-        shadow.renderOrder = 27;
+        shadow.renderOrder = 24;
         group.add(shadow);
 
-        const plate = new THREE.Mesh(
-            new THREE.CircleGeometry(0.43, 32),
-            new THREE.MeshBasicMaterial({
-                color: palette.dark,
-                transparent: true,
-                opacity: 0.72,
-                depthTest: false,
-                depthWrite: false,
-                side: THREE.DoubleSide
-            })
-        );
-        plate.rotation.x = -Math.PI / 2;
-        plate.position.y = 0.04;
-        plate.renderOrder = 28;
-        group.add(plate);
-
         const rim = new THREE.Mesh(
-            new THREE.TorusGeometry(0.435, 0.018, 8, 40),
+            new THREE.TorusGeometry(0.425, 0.012, 8, 40),
             new THREE.MeshBasicMaterial({
                 color: palette.frame,
                 transparent: true,
-                opacity: 0.82,
+                opacity: 0.62,
                 depthTest: false,
                 depthWrite: false
             })
         );
         rim.rotation.x = -Math.PI / 2;
-        rim.position.y = 0.052;
-        rim.renderOrder = 29;
+        rim.position.y = 0.055;
+        rim.renderOrder = 25;
         group.add(rim);
 
         const symbol = new THREE.Mesh(
-            new THREE.PlaneGeometry(0.74, 0.74),
+            new THREE.PlaneGeometry(0.86, 0.86),
             new THREE.MeshBasicMaterial({
                 map: this.createUnitSymbolTexture(type, player, unitConfig),
                 transparent: false,
@@ -4068,7 +4057,7 @@ class AdmiralGame {
             })
         );
         symbol.rotation.x = -Math.PI / 2;
-        symbol.position.y = 0.095;
+        symbol.position.y = 0.105;
         symbol.renderOrder = 30;
         symbol.userData.isNatoSymbol = true;
         group.add(symbol);
