@@ -4,7 +4,8 @@ Last updated: 2026-05-06 23:38 +03:00
 
 ## Current Branch
 
-- Active work branch: `codex/nato-order-ui`
+- Active deploy branch: `air-version`
+- Feature source branch: `codex/nato-order-ui`
 - Checkpoint branch with physical 3D model prototype: `codex/physical-models-checkpoint`
 - Checkpoint commit: `6501d46` (`Checkpoint physical model prototype`)
 - Do not push unless explicitly requested.
@@ -246,6 +247,21 @@ Task object target:
   - end-state toggles work;
   - support controls work;
   - no console errors.
+- [x] Add global role switch for order setup:
+  - `Сторона 1`;
+  - `Сторона 2`;
+  - `Інструктор`.
+- [x] Remove side selection controls from lower task/end-state panels.
+- [x] Add side readiness flow:
+  - side 1 marks ready;
+  - side 2 marks ready;
+  - instructor starts the game after both are ready.
+- [x] Scope player editing by active global role.
+- [x] Keep instructor-only setup for situation and enemy information visibility.
+- [x] Split instructor interface from commander interface:
+  - instructor sees `Обстановка`, `Сценарій`, `Інформація`, `Контроль`;
+  - commanders see `ORBAT`, `Завдання`, `Кінцевий стан`, `Забезпечення`;
+  - instructor no longer has unit-add / commander task panels in the main order flow.
 
 ## Event Log
 
@@ -257,6 +273,20 @@ Task object target:
 - 2026-05-06 23:55 +03:00 - Moved NATO / APP-6 unit cards into ORBAT and moved PCC into Support / Readiness.
 - 2026-05-06 23:55 +03:00 - Added enemy information percent sliders, end-state tags, support controls, and geometry-aware task data.
 - 2026-05-06 23:55 +03:00 - Verified `npm.cmd run check` and browser flow: tabs render, ORBAT visible, `Маршрут` task assigns to map, situation area assigns to map, support tab renders, no console errors.
+- 2026-05-07 - Added global role switch in the battle order header: `Сторона 1`, `Сторона 2`, `Інструктор`.
+- 2026-05-07 - Removed lower side selector rendering from task/end-state tabs; tasks now use the active global side role.
+- 2026-05-07 - Added readiness flow: sides press `Готовий`; instructor can press `Стартувати гру` only after both sides are ready.
+- 2026-05-07 - Browser-verified role flow: role buttons render, no lower side handlers render, both sides can mark ready, instructor start button enables, no console errors.
+- 2026-05-07 - Separated instructor battle-order controls from commander controls: instructor now manages scenario frame, enemy information, and readiness control instead of acting as a third unit-owning side.
+- 2026-05-07 - Changed task authoring to draft-and-save: map clicks build one current task, `Зберегти завдання` commits task 1/2/3, saved tasks render numbered labels on the map.
+- 2026-05-07 - Started active-session UI refactor: side view shows only the active side panel plus selected-unit detail panel; instructor view sees both side panels. Instructor delete/move tools are explicitly backlog.
+- 2026-05-07 - Corrected active-session UI: there is now one side panel whose content/color changes by active side; instructor mode uses one overview panel instead of two player panels.
+- 2026-05-07 - Fixed grid picking on relief: map clicks now raycast against the actual terrain mesh before falling back to the flat plane, reducing cell-offset placement on raised terrain.
+- 2026-05-07 - Added active-session map layer controls: grid and task layers can be shown/hidden; support, communications, and fog controls are present as UI anchors for upcoming mechanics.
+- 2026-05-09 - Added instructor unit catalog editor: edit unit name, combat parameters, symbol, description, card image, and add a new unit for the current prototype session.
+- 2026-05-09 - Reworked task authoring into a map-first mode: the large order panel hides, a compact bottom task editor appears, and area tasks use two-click rectangular zones.
+- 2026-05-09 - Added saved-task control: select a task to highlight it on the map, return it to draft for editing, or delete it from the order.
+- 2026-05-13 - Added quick demo session generation: random attacker/defender scenario, auto ORBAT, auto placement on map, tasks/end states, and side-panel task briefing for active play.
 
 ## Resume Point
 
@@ -264,10 +294,42 @@ The tabbed battle order editor is implemented and verified at a basic level.
 
 Next concrete coding step:
 
-1. Make geometry assignment real:
+1. Finish task authoring workflow:
+   - clicks in `Завдання` build a draft task;
+   - `Зберегти завдання` commits it as task 1, 2, 3;
+   - saved tasks render their number on the map.
+2. Define `Кінцевий стан` as victory assessment, not just another task:
+   - percent of required area captured;
+   - enemy forces suppressed/destroyed;
+   - scenario decision on who receives victory.
+3. Finish map layer mechanics behind the controls:
+   - support layer needs real base radius geometry;
+   - communications layer needs real radio radius geometry;
+   - fog-of-war layer needs real side-limited visibility, not only visual fog.
+4. Add future supply mechanic:
+   - bases provide supply in a configured radius;
+   - radius is configured in the battle order;
+   - units inside base radius receive supply.
+5. Add future communications mechanic:
+   - radio-equipped units project a command/control radius;
+   - units outside communication radius lose control;
+   - control returns when another radio unit moves into range.
+6. Add future fog-of-war mechanic:
+   - visible area depends on own unit observation radius;
+   - enemy and map information outside visible area is hidden or degraded.
+7. Replace opponent side panel during active play with selected-unit information:
+   - selected unit type, side, status, movement, combat stats;
+   - no permanent display of the other player panel during a side turn.
+8. Add instructor session console backlog:
+   - instructor view sees both player panels and all activity on the map;
+   - future instructor tools can delete units;
+   - future instructor tools can move units for scenario correction.
+9. Make geometry assignment real:
    - point: one click;
    - line: two or more cells;
    - area: rectangular or multi-cell area.
-2. Add named map objects inside `situation.objects`.
-3. Allow tasks and end states to bind to named objects, not only cells.
-4. Improve generated execution text so it reads like a battle-order fragment.
+10. Add named map objects inside `situation.objects`.
+11. Allow tasks and end states to bind to named objects, not only cells.
+12. Improve generated execution text so it reads like a battle-order fragment.
+13. Persist edited unit catalog to config/backend instead of keeping it only in browser session state.
+14. Optionally use custom unit images as map tokens, not only as unit-card previews.

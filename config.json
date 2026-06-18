@@ -53,6 +53,26 @@
       "movement": 1,
       "description": "Спеціаліст з далекобійної зброї",
       "model": "tetrahedron"
+    },
+    "droneScout": {
+      "name": "БПЛА розвідник",
+      "cost": 180,
+      "hitpoints": 2,
+      "strength": 1,
+      "movement": 3,
+      "description": "Повітряний розвідник для швидкого маневру на верхньому шарі",
+      "model": "drone",
+      "domain": "air"
+    },
+    "droneKamikaze": {
+      "name": "БПЛА камікадзе",
+      "cost": 220,
+      "hitpoints": 1,
+      "strength": 4,
+      "movement": 2,
+      "description": "Ударний дрон одноразової атаки у повітряному шарі",
+      "model": "drone-strike",
+      "domain": "air"
     }
   },
   "gameSettings": {

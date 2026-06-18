@@ -173,6 +173,79 @@
             max-width: 200px;
         }
 
+        .session-role-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .session-role-btn {
+            flex: 1;
+            min-width: 72px;
+            padding: 7px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            color: #f7fbff;
+        }
+
+        .session-role-btn.active {
+            border-color: #FFD700;
+            color: #FFD700;
+            background: rgba(255, 215, 0, 0.18);
+        }
+
+        .unit-detail-panel {
+            display: none;
+            padding: 8px;
+            border-radius: 5px;
+            border: 2px solid rgba(255, 255, 255, 0.18);
+            background: rgba(15, 31, 39, 0.34);
+        }
+
+        .unit-detail-panel.active {
+            display: block;
+        }
+
+        .unit-detail-title {
+            margin: 0 0 8px 0;
+            color: #FFD700;
+            font-size: 15px;
+        }
+
+        .map-layer-controls {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .map-layer-title {
+            color: #FFD700;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .map-layer-buttons {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+
+        .map-layer-btn {
+            padding: 7px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            color: #f7fbff;
+            text-align: left;
+        }
+
+        .map-layer-btn.active {
+            border-color: #52d273;
+            background: rgba(82, 210, 115, 0.18);
+            color: #dfffe4;
+        }
+
         .camera-controls {
             position: absolute;
             top: 20px;
@@ -216,6 +289,14 @@
             background: #e68900;
         }
 
+        .danger-btn {
+            background: #d94a4a;
+        }
+
+        .danger-btn:hover {
+            background: #b93a3a;
+        }
+
         .neutral-btn {
             background: #2196F3;
         }
@@ -227,6 +308,25 @@
         button:disabled {
             background: #666;
             cursor: not-allowed;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 5px;
+            background: rgba(12, 28, 36, 0.62);
+            color: #f7fbff;
+            padding: 7px 8px;
+            font: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 68px;
         }
 
         #gameLog {
@@ -281,6 +381,123 @@
             color: #f8fbff;
             box-sizing: border-box;
             display: none;
+        }
+
+        #taskMapEditor {
+            position: absolute;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%);
+            z-index: 5;
+            width: min(980px, calc(100vw - 260px));
+            display: none;
+            grid-template-columns: minmax(160px, 0.75fr) minmax(320px, 1.6fr) minmax(240px, 1fr);
+            gap: 10px;
+            align-items: stretch;
+            padding: 12px;
+            box-sizing: border-box;
+            color: #f8fbff;
+            background: linear-gradient(180deg, rgba(48, 70, 84, 0.86), rgba(31, 49, 61, 0.82));
+            border: 1px solid rgba(214, 232, 243, 0.24);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .task-map-section {
+            min-width: 0;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.12);
+        }
+
+        .task-map-title {
+            color: #FFD700;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .task-map-status {
+            font-size: 12px;
+            line-height: 1.35;
+            color: rgba(248, 251, 255, 0.86);
+        }
+
+        .task-map-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .task-map-actions button {
+            min-height: 34px;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .task-map-list {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.14);
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .task-list-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: stretch;
+            margin-top: 6px;
+            padding: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .task-list-item.active {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.13);
+        }
+
+        .task-list-main {
+            min-width: 0;
+            border: none;
+            background: transparent;
+            color: #f8fbff;
+            text-align: left;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        .task-list-main span {
+            display: block;
+            margin-top: 2px;
+            color: rgba(248, 251, 255, 0.72);
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .task-list-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .task-list-actions button {
+            min-width: 54px;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
         }
 
         #shopHeader {
@@ -398,6 +615,55 @@
             line-height: 1.35;
         }
 
+        .order-role-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0 10px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.12);
+        }
+
+        .order-role-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .order-role-btn {
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.08);
+            color: #f8fbff;
+            border-radius: 5px;
+            padding: 8px 11px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .order-role-btn.active {
+            border-color: #FFD700;
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+        }
+
+        .order-ready-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 28px;
+            padding: 4px 9px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #f8fbff;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
         .order-actions {
             display: flex;
             gap: 8px;
@@ -413,6 +679,11 @@
             cursor: pointer;
             font-size: 12px;
             font-weight: bold;
+        }
+
+        .order-actions button.quick-demo-btn {
+            background: #FFD700;
+            color: #15212a;
         }
 
         .order-planner {
@@ -575,6 +846,22 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
+        .side-task-item {
+            margin-top: 6px;
+            padding: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.12);
+            line-height: 1.25;
+        }
+
+        .side-task-item span {
+            display: block;
+            margin-top: 2px;
+            color: rgba(248, 251, 255, 0.72);
+            font-size: 11px;
+        }
+
         .shop-item.disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -602,6 +889,13 @@
                 max-height: 260px;
             }
 
+            #taskMapEditor {
+                width: calc(100vw - 24px);
+                grid-template-columns: 1fr;
+                max-height: 42vh;
+                overflow-y: auto;
+            }
+
             #ui,
             #ui2,
             #ui3 {
@@ -627,6 +921,10 @@
                 <h3>Бойовий наказ / налаштування сесії</h3>
                 <div class="unit-info" id="shopCurrentPlayer">Локальний прототип: гравці працюють по черзі з одного акаунту</div>
                 <div class="unit-info" id="shopMoneyInfo">Сформуйте склад сторін і затвердьте наказ перед розміщенням</div>
+                <div class="order-role-bar">
+                    <div class="order-role-buttons" id="orderRoleSwitch"></div>
+                    <div class="order-ready-pill" id="orderReadyStatus">Очікування налаштувань</div>
+                </div>
                 <div class="order-summary">
                     <div class="order-field"><strong>Обстановка</strong><br><span id="orderSituationSummary">Зони ще не задані</span></div>
                     <div class="order-field"><strong>Завдання</strong><br><span id="orderTasksSummary">Задачі ще не призначені</span></div>
@@ -636,6 +934,8 @@
             </div>
             <div id="shopContent"></div>
         </div>
+
+        <div id="taskMapEditor"></div>
 
         <div id="ui">
             <div id="logoContainer" style="text-align: center; margin-bottom: 15px;">
@@ -655,6 +955,10 @@
                     <div class="units-list-title">Склад / ORBAT</div>
                     <div id="player1PurchasedList" class="units-list-empty">Склад ще не визначено</div>
                 </div>
+            </div>
+            <div id="unitDetailPanelLeft" class="unit-detail-panel">
+                <h4 class="unit-detail-title">Юніт не вибрано</h4>
+                <div class="unit-info">Оберіть підрозділ на карті, щоб бачити його стан.</div>
             </div>
         </div>
 
@@ -682,12 +986,21 @@
                     <div id="player2PurchasedList" class="units-list-empty">Склад ще не визначено</div>
                 </div>
             </div>
+            <div id="unitDetailPanel" class="unit-detail-panel">
+                <h4 class="unit-detail-title">Юніт не вибрано</h4>
+                <div class="unit-info">Оберіть підрозділ на карті, щоб бачити його стан.</div>
+            </div>
         </div>
 
         <div id="ui3">
             <div id="gameStatus">
                 <h4 style="margin: 0 0 5px 0;">Стан сесії:</h4>
                 <div class="unit-info" id="currentPhase">Розміщення фішок</div>
+                <div class="session-role-buttons" id="sessionRoleSwitch"></div>
+                <div class="map-layer-controls" id="mapLayerControls">
+                    <div class="map-layer-title">Шари карти</div>
+                    <div class="map-layer-buttons" id="mapLayerButtons"></div>
+                </div>
             </div>
         </div>
 
@@ -698,7 +1011,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="game.js?v=20260506-order-tabs"></script>
+    <script src="game.js?v=20260513-quick-demo-visible-units"></script>
 </body>
 
 </html>

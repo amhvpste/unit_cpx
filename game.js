@@ -28,10 +28,20 @@ class AdmiralGame {
         this.orderTaskMarkerMeshes = [];
         this.units = [];
         this.selectedUnit = null;
+        this.inspectedUnit = null;
         this.selectedCell = null;
+        this.gridHelper = null;
+        this.mapLayers = {
+            grid: true,
+            tasks: true,
+            support: false,
+            comms: false,
+            fog: false
+        };
         
         // Стани гри
         this.currentPlayer = 1;
+        this.sessionViewRole = 1;
         this.phase = 'order'; // 'order', 'placement', 'battle', 'gameOver'
         this.playerMoney = { 1: 1000, 2: 1000 };
         this.playerMoves = { 1: 3, 2: 3 };
@@ -59,12 +69,26 @@ class AdmiralGame {
             readiness: {},
             ui: {
                 activeTab: 'situation',
+                activeRole: 'instructor',
                 activeSide: 1,
                 activeTaskTag: 'seize',
-                activeGeometry: 'point',
+                activeGeometry: 'area',
                 activeSituationTool: 'areaOfInterest',
-                activeEndStateTag: 'areaControlled'
+                activeEndStateTag: 'areaControlled',
+                draftTask: null,
+                activeTaskId: null
+            },
+            readinessByRole: {
+                1: false,
+                2: false,
+                instructor: false
             }
+        };
+
+        this.orderRoles = {
+            1: { label: 'Сторона 1', shortLabel: 'С1', color: '#4CAF50' },
+            2: { label: 'Сторона 2', shortLabel: 'С2', color: '#FF9800' },
+            instructor: { label: 'Інструктор', shortLabel: 'ІНСТР', color: '#FFD700' }
         };
 
         this.orderTabs = [
@@ -72,7 +96,10 @@ class AdmiralGame {
             { key: 'orbat', label: 'ORBAT' },
             { key: 'tasks', label: 'Завдання' },
             { key: 'endState', label: 'Кінцевий стан' },
-            { key: 'support', label: 'Забезпечення' }
+            { key: 'support', label: 'Забезпечення' },
+            { key: 'scenario', label: 'Сценарій' },
+            { key: 'intelligence', label: 'Інформація' },
+            { key: 'control', label: 'Контроль' }
         ];
 
         this.orderGeometryTypes = {
@@ -153,6 +180,7 @@ class AdmiralGame {
         this.gltfModelCache = {};
         this.unitPreviewCache = {};
         this.unitPreviewLoading = new Set();
+        this.unitEditorSelectedType = null;
         this.referenceModelUnitsLoaded = false;
         this.referenceModelUnitsLoading = false;
         this.referenceTaskModels = [];
@@ -1115,6 +1143,7 @@ class AdmiralGame {
         
         // Скидання станів гри
         this.currentPlayer = 1;
+        this.sessionViewRole = 1;
         this.phase = 'order';
         this.playerMoney = { 1: 1000, 2: 1000 };
         this.playerMoves = { 1: 3, 2: 3 };
@@ -1132,7 +1161,11 @@ class AdmiralGame {
         this.sessionOrder.orbat = { 1: [], 2: [] };
         this.sessionOrder.readiness = {};
         this.sessionOrder.ui.activeTab = 'situation';
+        this.sessionOrder.ui.activeRole = 'instructor';
         this.sessionOrder.ui.activeSide = 1;
+        this.sessionOrder.ui.draftTask = null;
+        this.sessionOrder.ui.activeTaskId = null;
+        this.sessionOrder.readinessByRole = { 1: false, 2: false, instructor: false };
         this.renderOrderTaskMarkers();
         this.selectedUnit = null;
         this.selectedCell = null;
@@ -1177,44 +1210,253 @@ class AdmiralGame {
     }
     
     showUnitInfo(unit) {
-        const unitType = unit.userData.type;
-        const unitConfig = this.config.unitTypes[unitType];
-        const isOwnUnit = unit.userData.player === this.currentPlayer;
-        
-        let infoText = `
-            <div style="background: rgba(0,0,0,0.9); color: white; padding: 10px; border-radius: 5px; 
-                        border: 2px solid ${isOwnUnit ? '#4CAF50' : '#ff6b6b'}; 
-                        position: absolute; top: 10px; left: 50%; transform: translateX(-50%); 
-                        z-index: 1000; min-width: 200px;">
-                <h4 style="margin: 0 0 10px 0; color: ${isOwnUnit ? '#4CAF50' : '#ff6b6b'};">
-                    ${unitConfig.name} ${isOwnUnit ? '(Ваша)' : '(Ворожа)'}
-                </h4>
-                <div><strong>Гравець:</strong> ${unit.userData.player}</div>
-                <div><strong>Хітпоінти:</strong> ${unitConfig.hitpoints}</div>
-                <div><strong>Сила:</strong> ${unitConfig.strength}</div>
-                <div><strong>Швидкість:</strong> ${unitConfig.movement} клітинок</div>
-                <div><strong>Опис:</strong> ${unitConfig.description}</div>
-                ${isOwnUnit && unit.userData.moved ? '<div style="color: #ff9800;"><strong>Статус:</strong> Уже ходив</div>' : ''}
-            </div>
-        `;
-        
-        // Створюємо або оновлюємо елемент інформації
-        let infoElement = document.getElementById('unitInfoTooltip');
-        if (!infoElement) {
-            infoElement = document.createElement('div');
-            infoElement.id = 'unitInfoTooltip';
-            document.body.appendChild(infoElement);
-        }
-        
-        infoElement.innerHTML = infoText;
-        infoElement.style.display = 'block';
+        this.inspectedUnit = unit;
+        this.updateUnitDetailPanel();
     }
     
     hideUnitInfo() {
-        const infoElement = document.getElementById('unitInfoTooltip');
-        if (infoElement) {
-            infoElement.style.display = 'none';
+        this.inspectedUnit = null;
+        this.updateUnitDetailPanel();
+    }
+
+    updateUnitDetailPanel() {
+        const panels = [document.getElementById('unitDetailPanel'), document.getElementById('unitDetailPanelLeft')].filter(Boolean);
+        if (panels.length === 0) return;
+
+        if (!this.inspectedUnit || !this.config) {
+            const emptyHtml = `
+                <h4 class="unit-detail-title">Юніт не вибрано</h4>
+                <div class="unit-info">Оберіть підрозділ на карті, щоб бачити його стан.</div>
+            `;
+            panels.forEach((panel) => {
+                panel.style.borderColor = 'rgba(255, 255, 255, 0.18)';
+                panel.innerHTML = emptyHtml;
+            });
+            return;
         }
+
+        const unit = this.inspectedUnit;
+        const unitConfig = this.config.unitTypes[unit.userData.type];
+        const palette = this.getUnitPalette(unit.userData.player);
+        const relation = unit.userData.player === this.currentPlayer ? 'поточна сторона' : 'інша сторона';
+        const detailHtml = `
+            <h4 class="unit-detail-title" style="color:${palette.accent}">${this.escapeHtml(unitConfig.name)}</h4>
+            <div class="unit-info"><strong>Сторона:</strong> ${unit.userData.player} (${relation})</div>
+            <div class="unit-info"><strong>Клітинка:</strong> (${unit.userData.x}, ${unit.userData.z})</div>
+            <div class="unit-info"><strong>Живучість:</strong> ${unitConfig.hitpoints}</div>
+            <div class="unit-info"><strong>Вогнева потужність:</strong> ${unitConfig.strength}</div>
+            <div class="unit-info"><strong>Маневреність:</strong> ${unitConfig.movement} кл.</div>
+            <div class="unit-info"><strong>Статус:</strong> ${unit.userData.moved ? 'хід використано' : 'готовий до дії'}</div>
+            <div class="unit-info">${this.escapeHtml(unitConfig.description)}</div>
+        `;
+        panels.forEach((panel) => {
+            panel.style.borderColor = unit.userData.player === 1 ? '#4CAF50' : '#FF9800';
+            panel.innerHTML = detailHtml;
+        });
+    }
+
+    setSessionViewRole(role) {
+        const normalizedRole = role === '1' || role === 1 ? 1 : (role === '2' || role === 2 ? 2 : 'instructor');
+        this.sessionViewRole = normalizedRole;
+        this.updateUI();
+    }
+
+    updateSessionRoleSwitch() {
+        const container = document.getElementById('sessionRoleSwitch');
+        if (!container) return;
+
+        if (this.phase === 'order') {
+            container.innerHTML = '';
+            return;
+        }
+
+        const roles = [
+            { key: 1, label: 'Сторона 1' },
+            { key: 2, label: 'Сторона 2' },
+            { key: 'instructor', label: 'Інструктор' }
+        ];
+        container.innerHTML = roles.map((role) => {
+            const activeClass = String(this.sessionViewRole) === String(role.key) ? ' active' : '';
+            return `<button class="session-role-btn${activeClass}" onclick="game.setSessionViewRole('${role.key}')">${role.label}</button>`;
+        }).join('');
+    }
+
+    updateMapLayerControls() {
+        const wrapper = document.getElementById('mapLayerControls');
+        const container = document.getElementById('mapLayerButtons');
+        if (!wrapper || !container) return;
+
+        wrapper.style.display = this.phase === 'order' ? 'none' : 'block';
+        if (this.phase === 'order') {
+            container.innerHTML = '';
+            return;
+        }
+
+        const layers = [
+            { key: 'grid', label: 'Сітка' },
+            { key: 'tasks', label: 'Завдання' },
+            { key: 'support', label: 'Забезпечення' },
+            { key: 'comms', label: 'Зв’язок' },
+            { key: 'fog', label: 'Туман війни' }
+        ];
+
+        container.innerHTML = layers.map((layer) => {
+            const activeClass = this.mapLayers[layer.key] ? ' active' : '';
+            return `<button class="map-layer-btn${activeClass}" onclick="game.toggleMapLayer('${layer.key}')">${this.mapLayers[layer.key] ? '✓' : '○'} ${layer.label}</button>`;
+        }).join('');
+    }
+
+    toggleMapLayer(layer) {
+        if (!Object.prototype.hasOwnProperty.call(this.mapLayers, layer)) return;
+        this.mapLayers[layer] = !this.mapLayers[layer];
+        this.applyMapLayerVisibility(layer);
+        this.updateMapLayerControls();
+        const labels = {
+            grid: 'сітка',
+            tasks: 'завдання',
+            support: 'забезпечення',
+            comms: 'зв’язок',
+            fog: 'туман війни'
+        };
+        this.addLog(`Шар "${labels[layer] || layer}": ${this.mapLayers[layer] ? 'показано' : 'приховано'}`, 'place-log');
+    }
+
+    applyMapLayerVisibility(layer = null) {
+        if (!layer || layer === 'grid') {
+            if (this.gridHelper) {
+                this.gridHelper.visible = this.mapLayers.grid;
+            }
+        }
+
+        if (!layer || layer === 'tasks') {
+            this.renderOrderTaskMarkers();
+        }
+
+        if (!layer || layer === 'fog') {
+            this.scene.fog = this.mapLayers.fog ? new THREE.FogExp2(0x718ea1, 0.018) : null;
+        }
+    }
+
+    updatePlayPanels() {
+        const player1Panel = document.getElementById('player1Info');
+        const player2Panel = document.getElementById('player2Info');
+        const unitDetailRight = document.getElementById('unitDetailPanel');
+        const unitDetailLeft = document.getElementById('unitDetailPanelLeft');
+        const ui = document.getElementById('ui');
+        const ui2 = document.getElementById('ui2');
+        if (!player1Panel || !player2Panel || !unitDetailRight || !unitDetailLeft || !ui || !ui2) return;
+
+        const isOrder = this.phase === 'order';
+        const isInstructor = this.sessionViewRole === 'instructor';
+        const activeSide = this.sessionViewRole === 2 ? 2 : 1;
+
+        ui.style.display = 'block';
+        ui2.style.display = 'block';
+        player1Panel.style.display = 'block';
+        player2Panel.style.display = 'none';
+        unitDetailRight.classList.remove('active');
+        unitDetailLeft.classList.remove('active');
+
+        if (isOrder) {
+            player1Panel.innerHTML = this.renderSidePanel(1);
+            player2Panel.innerHTML = this.renderSidePanel(2);
+            player2Panel.style.display = 'block';
+            player1Panel.className = 'player-info player1';
+            player2Panel.className = 'player-info player2';
+            ui.style.display = this.isTaskMapEditorActive() ? 'none' : 'block';
+            ui2.style.display = this.isTaskMapEditorActive() ? 'none' : 'block';
+        } else if (isInstructor) {
+            player1Panel.innerHTML = this.renderInstructorSessionPanel();
+            player1Panel.className = 'player-info active-player';
+            player1Panel.style.borderColor = '#FFD700';
+        } else {
+            player1Panel.innerHTML = this.renderSidePanel(activeSide, `Сторона ${activeSide}`);
+            player1Panel.className = `player-info player${activeSide} active-player`;
+            player1Panel.style.borderColor = activeSide === 1 ? '#4CAF50' : '#FF9800';
+            unitDetailRight.classList.add('active');
+        }
+
+        if (isOrder) {
+            player1Panel.classList.toggle('active-player', false);
+            player2Panel.classList.toggle('active-player', false);
+            player1Panel.style.borderColor = '';
+            player2Panel.style.borderColor = '';
+        }
+    }
+
+    renderSidePanel(side, title = `Гравець ${side}`) {
+        return `
+            <h4 style="margin: 0 0 5px 0;">${title}</h4>
+            <div class="unit-info">Ресурс штабу: <span id="player${side}Money">базовий</span></div>
+            <div class="unit-info">Підрозділів на карті: <span id="player${side}Units">${this.units.filter((unit) => unit.userData.player === side).length}</span></div>
+            <div class="unit-info">Рухів: <span id="player${side}Moves">${this.playerMoves[side]}</span></div>
+            <div class="loss-info" id="player${side}Losses">Втрати: ${this.losses[side]}</div>
+            <div class="units-list">
+                <div class="units-list-title">Склад / ORBAT</div>
+                <div id="player${side}PurchasedList" class="units-list-empty">Склад ще не визначено</div>
+            </div>
+            ${this.renderSideTaskBrief(side)}
+        `;
+    }
+
+    renderSideTaskBrief(side) {
+        if (this.phase === 'order') {
+            return '';
+        }
+        const tasks = this.sessionOrder.tasks.filter((task) => task.side === side);
+        if (tasks.length === 0) {
+            return `
+                <div class="units-list">
+                    <div class="units-list-title">Завдання</div>
+                    <div class="units-list-empty">Завдання ще не призначені</div>
+                </div>
+            `;
+        }
+
+        const rows = tasks.map((task, index) => {
+            const tag = this.orderTaskTags[task.tag] || { label: task.tag };
+            const geometry = this.orderGeometryTypes[task.geometry] || { label: task.geometry };
+            return `
+                <div class="side-task-item">
+                    <strong>${index + 1}. ${this.escapeHtml(tag.label)}</strong>
+                    <span>${this.escapeHtml(geometry.label)}: ${this.escapeHtml(this.formatTaskBriefCells(task))}</span>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="units-list">
+                <div class="units-list-title">Завдання</div>
+                ${rows}
+            </div>
+        `;
+    }
+
+    renderInstructorSessionPanel() {
+        const taskCount = this.sessionOrder.tasks.length;
+        const endStateCount = this.sessionOrder.endState.length;
+        const rows = [1, 2].map((side) => {
+            const units = this.units.filter((unit) => unit.userData.player === side);
+            const ready = this.sessionOrder.readinessByRole[side] ? 'наказ готовий' : 'наказ не готовий';
+            return `
+                <div class="order-field">
+                    <strong>Сторона ${side}</strong><br>
+                    ${ready}<br>
+                    На карті: ${units.length}<br>
+                    Втрати: ${this.losses[side]}<br>
+                    Рухів: ${this.playerMoves[side]}
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <h4 style="margin: 0 0 5px 0; color: #FFD700;">Інструктор</h4>
+            <div class="unit-info">Огляд сесії без туману війни</div>
+            <div class="unit-info">Поточний хід: Сторона ${this.currentPlayer}</div>
+            <div class="unit-info">Номер ходу: ${this.turnNumber}</div>
+            <div class="unit-info">Завдань: ${taskCount}; кінцевих станів: ${endStateCount}</div>
+            <div class="order-grid-two" style="grid-template-columns: 1fr; margin-top: 8px;">${rows}</div>
+        `;
     }
     
     updateUI() {
@@ -1226,45 +1468,30 @@ class AdmiralGame {
         const player1Units = this.units.filter(u => u.userData.player === 1).length;
         const player2Units = this.units.filter(u => u.userData.player === 2).length;
         
-        document.getElementById('player1Units').textContent = player1Units;
-        document.getElementById('player2Units').textContent = player2Units;
-        document.getElementById('player1Moves').textContent = this.playerMoves[1];
-        document.getElementById('player2Moves').textContent = this.playerMoves[2];
-        document.getElementById('player1Losses').textContent = `Втрати: ${this.losses[1]}`;
-        document.getElementById('player2Losses').textContent = `Втрати: ${this.losses[2]}`;
+        const setText = (id, text) => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = text;
+        };
+
+        setText('player1Units', player1Units);
+        setText('player2Units', player2Units);
+        setText('player1Moves', this.playerMoves[1]);
+        setText('player2Moves', this.playerMoves[2]);
+        setText('player1Losses', `Втрати: ${this.losses[1]}`);
+        setText('player2Losses', `Втрати: ${this.losses[2]}`);
         
         // Оновлення ресурсного стану сторін
-        document.getElementById('player1Money').textContent = 'базовий';
-        document.getElementById('player2Money').textContent = 'базовий';
+        setText('player1Money', 'базовий');
+        setText('player2Money', 'базовий');
         
-        // Показуємо/ховаємо панелі залежно від фази
-        if (this.phase === 'order') {
-            document.getElementById('player1Info').style.display = 'block';
-            document.getElementById('player2Info').style.display = 'block';
-            document.getElementById('unitShop').style.display = 'block';
-            document.getElementById('centerInfo').style.display = 'block';
-        } else if (this.phase === 'placement') {
-            document.getElementById('player1Info').style.display = 'block';
-            document.getElementById('player2Info').style.display = 'block';
-            document.getElementById('unitShop').style.display = 'none';
-            document.getElementById('centerInfo').style.display = 'block';
-        } else if (this.phase === 'battle') {
-            document.getElementById('player1Info').style.display = 'block';
-            document.getElementById('player2Info').style.display = 'block';
-            document.getElementById('unitShop').style.display = 'none';
-            document.getElementById('centerInfo').style.display = 'block';
-        } else {
-            document.getElementById('player1Info').style.display = 'block';
-            document.getElementById('player2Info').style.display = 'block';
-            document.getElementById('unitShop').style.display = 'none';
-            document.getElementById('centerInfo').style.display = 'block';
-        }
-        
-        // Оновлення активного гравця (тільки візуальне підсвічування)
-        if (this.phase !== 'order') {
-            document.getElementById('player1Info').classList.toggle('active-player', this.currentPlayer === 1);
-            document.getElementById('player2Info').classList.toggle('active-player', this.currentPlayer === 2);
-        }
+        const taskMapMode = this.isTaskMapEditorActive();
+        document.getElementById('unitShop').style.display = this.phase === 'order' && !taskMapMode ? 'block' : 'none';
+        document.getElementById('centerInfo').style.display = taskMapMode ? 'none' : 'block';
+        this.updateTaskMapEditor();
+        this.updateSessionRoleSwitch();
+        this.updateMapLayerControls();
+        this.updateUnitDetailPanel();
+        this.updatePlayPanels();
         
         // Оновлення стану гри
         const phaseText = this.phase === 'order' ? 'Бойовий наказ' : 
@@ -1296,14 +1523,16 @@ class AdmiralGame {
             currentTurnElement.textContent = 'Налаштування сесії: бойовий наказ';
             currentTurnElement.style.color = '#FFD700';
             if (shopCurrentPlayer) {
-                shopCurrentPlayer.textContent = 'Локальний прототип: гравці працюють по черзі з одного акаунту';
+                const activeRole = this.orderRoles[this.sessionOrder.ui.activeRole];
+                shopCurrentPlayer.textContent = `Локальний прототип: активна роль - ${activeRole ? activeRole.label : 'Інструктор'}`;
             }
             if (shopMoneyInfo) {
-                shopMoneyInfo.textContent = 'Сформуйте склад сторін і затвердьте наказ перед розміщенням';
+                shopMoneyInfo.textContent = 'Сторони налаштовують свої блоки і натискають "Готовий"; інструктор стартує гру.';
             }
         }
 
         this.updateShopUI();
+        this.updateOrderRoleHeader();
         this.updateOrderSummaryHeader();
         
         // Оновлення доступних фішок
@@ -1316,7 +1545,13 @@ class AdmiralGame {
         const endTurnBtn = document.getElementById('endTurnBtn');
         if (this.phase === 'order') {
             endTurnBtn.disabled = false;
-            endTurnBtn.textContent = 'Затвердити наказ і перейти до розміщення';
+            if (this.sessionOrder.ui.activeRole === 'instructor') {
+                endTurnBtn.textContent = 'Стартувати гру';
+                endTurnBtn.disabled = !(this.sessionOrder.readinessByRole[1] && this.sessionOrder.readinessByRole[2]);
+            } else {
+                const role = this.sessionOrder.ui.activeRole;
+                endTurnBtn.textContent = this.sessionOrder.readinessByRole[role] ? `Сторона ${role}: готово` : `Сторона ${role}: готовий`;
+            }
         } else if (this.phase === 'placement') {
             // В фазі розміщення кнопка активна тільки для поточного гравця
             endTurnBtn.disabled = false;
@@ -1337,12 +1572,62 @@ class AdmiralGame {
         // Відновлюємо підсвітку якщо є вибрана фішка
         if (this.phase === 'order') {
             endTurnBtn.disabled = false;
-            endTurnBtn.textContent = 'Затвердити наказ і перейти до розміщення';
+            if (this.sessionOrder.ui.activeRole === 'instructor') {
+                endTurnBtn.textContent = 'Стартувати гру';
+                endTurnBtn.disabled = !(this.sessionOrder.readinessByRole[1] && this.sessionOrder.readinessByRole[2]);
+            } else {
+                const role = this.sessionOrder.ui.activeRole;
+                endTurnBtn.textContent = this.sessionOrder.readinessByRole[role] ? `Сторона ${role}: готово` : `Сторона ${role}: готовий`;
+            }
         }
 
         if (this.selectedUnit) {
             this.showMovementHighlights(this.selectedUnit);
         }
+    }
+
+    updateOrderRoleHeader() {
+        const roleSwitch = document.getElementById('orderRoleSwitch');
+        const readyStatus = document.getElementById('orderReadyStatus');
+        if (!roleSwitch || !readyStatus) return;
+
+        roleSwitch.innerHTML = Object.entries(this.orderRoles).map(([role, config]) => {
+            const activeClass = String(this.sessionOrder.ui.activeRole) === String(role) ? ' active' : '';
+            const readyMark = role !== 'instructor' && this.sessionOrder.readinessByRole[role] ? ' ✓' : '';
+            return `<button class="order-role-btn${activeClass}" onclick="game.setOrderRole('${role}')">${config.label}${readyMark}</button>`;
+        }).join('');
+
+        const p1 = this.sessionOrder.readinessByRole[1] ? 'С1 готова' : 'С1 не готова';
+        const p2 = this.sessionOrder.readinessByRole[2] ? 'С2 готова' : 'С2 не готова';
+        const activeRole = this.orderRoles[this.sessionOrder.ui.activeRole];
+        readyStatus.textContent = `${activeRole ? activeRole.label : 'Інструктор'} | ${p1}; ${p2}`;
+    }
+
+    getVisibleOrderTabs() {
+        if (this.isInstructorRole()) {
+            return [
+                { key: 'situation', label: 'Обстановка' },
+                { key: 'scenario', label: 'Сценарій' },
+                { key: 'intelligence', label: 'Інформація' },
+                { key: 'control', label: 'Контроль' },
+                { key: 'unitEditor', label: 'Юніти' }
+            ];
+        }
+
+        return [
+            { key: 'orbat', label: 'ORBAT' },
+            { key: 'tasks', label: 'Завдання' },
+            { key: 'endState', label: 'Кінцевий стан' },
+            { key: 'support', label: 'Забезпечення' }
+        ];
+    }
+
+    ensureActiveOrderTab() {
+        const visibleTabs = this.getVisibleOrderTabs();
+        if (!visibleTabs.some((tab) => tab.key === this.sessionOrder.ui.activeTab)) {
+            this.sessionOrder.ui.activeTab = visibleTabs[0].key;
+        }
+        return visibleTabs;
     }
     
     updateOrderSummaryHeader() {
@@ -1353,11 +1638,12 @@ class AdmiralGame {
         if (!situationSummary || !tasksSummary || !supportSummary || !commandSummary) return;
 
         const situation = this.sessionOrder.situation;
-        const activeTab = this.orderTabs.find((tab) => tab.key === this.sessionOrder.ui.activeTab);
+        const activeTab = this.getVisibleOrderTabs().find((tab) => tab.key === this.sessionOrder.ui.activeTab);
+        const activeRole = this.orderRoles[this.sessionOrder.ui.activeRole];
         situationSummary.textContent = `ЗІ: ${this.formatOrderPoint(situation.areaOfInterest)}; РВЗ: ${this.formatOrderPoint(situation.executionArea)}`;
         tasksSummary.textContent = `Задач: ${this.sessionOrder.tasks.length}; кінцевих станів: ${this.sessionOrder.endState.length}`;
         supportSummary.textContent = `С1 БК: ${this.sessionOrder.support[1].ammo}; С2 БК: ${this.sessionOrder.support[2].ammo}`;
-        commandSummary.textContent = `Активна вкладка: ${activeTab ? activeTab.label : 'Обстановка'}`;
+        commandSummary.textContent = `${activeRole ? activeRole.label : 'Інструктор'}; вкладка: ${activeTab ? activeTab.label : 'Обстановка'}`;
     }
 
     updateShopUI() {
@@ -1367,13 +1653,18 @@ class AdmiralGame {
             return;
         }
 
+        const visibleTabs = this.ensureActiveOrderTab();
         const activeTab = this.sessionOrder.ui.activeTab;
-        const tabButtons = this.orderTabs.map((tab) => {
+        const tabButtons = visibleTabs.map((tab) => {
             const activeClass = activeTab === tab.key ? ' active' : '';
             return `<button class="order-tab${activeClass}" onclick="game.setOrderTab('${tab.key}')">${tab.label}</button>`;
         }).join('');
         const tabRenderers = {
             situation: () => this.renderSituationTab(),
+            scenario: () => this.renderInstructorScenarioTab(),
+            intelligence: () => this.renderInstructorIntelligenceTab(),
+            control: () => this.renderInstructorControlTab(),
+            unitEditor: () => this.renderUnitEditorTab(),
             orbat: () => this.renderOrbatTab(),
             tasks: () => this.renderTasksTab(),
             endState: () => this.renderEndStateTab(),
@@ -1387,6 +1678,74 @@ class AdmiralGame {
         this.setupUnitCardPreviews();
     }
 
+    isTaskMapEditorActive() {
+        return this.phase === 'order' && this.sessionOrder.ui.activeTab === 'tasks' && !this.isInstructorRole();
+    }
+
+    updateTaskMapEditor() {
+        const editor = document.getElementById('taskMapEditor');
+        if (!editor) return;
+
+        if (this.phase !== 'order' || !this.isTaskMapEditorActive()) {
+            editor.style.display = 'none';
+            editor.innerHTML = '';
+            return;
+        }
+
+        editor.style.display = 'grid';
+        editor.innerHTML = this.renderTaskMapEditor();
+    }
+
+    renderTaskMapEditor() {
+        const activeSide = this.getActiveOrderSide();
+        const draftTask = this.sessionOrder.ui.draftTask;
+        const tagButtons = Object.entries(this.orderTaskTags).map(([tag, config]) => {
+            const activeClass = this.sessionOrder.ui.activeTaskTag === tag ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setOrderTaskTag('${tag}')">${config.label}</button>`;
+        }).join('');
+        const geometryButtons = Object.entries(this.orderGeometryTypes).map(([geometry, config]) => {
+            const activeClass = this.sessionOrder.ui.activeGeometry === geometry ? ' active' : '';
+            return `<button class="order-tag${activeClass}" onclick="game.setOrderGeometry('${geometry}')">${config.label}</button>`;
+        }).join('');
+        const sideButtons = [1, 2].map((side) => {
+            const activeClass = activeSide === side ? ' active' : '';
+            return `<button class="order-role-btn${activeClass}" onclick="game.setOrderRole('${side}')">Сторона ${side}</button>`;
+        }).join('');
+        const saveDisabled = !draftTask || !draftTask.cells || draftTask.cells.length === 0 ? ' disabled' : '';
+        const sideClass = activeSide === 1 ? 'player1-btn' : 'player2-btn';
+        const taskList = this.renderTaskEditorList();
+
+        return `
+            <div class="task-map-section">
+                <div class="task-map-title">Режим завдань</div>
+                <div class="order-role-buttons">${sideButtons}</div>
+                <div class="task-map-status" style="margin-top:8px;">Карта відкрита для вибору клітинок. Для району: перший клік - перший кут, другий клік - протилежний кут.</div>
+                <div class="task-map-actions">
+                    <button class="neutral-btn" onclick="game.setOrderTab('orbat')">До наказу</button>
+                    <button class="neutral-btn" onclick="game.clearCurrentOrderTask()">Очистити</button>
+                </div>
+            </div>
+            <div class="task-map-section">
+                <div class="task-map-title">Дія</div>
+                <div class="order-tags">${tagButtons}</div>
+                <div class="task-map-title" style="margin-top:10px;">Геометрія</div>
+                <div class="order-tags">${geometryButtons}</div>
+            </div>
+            <div class="task-map-section">
+                <div class="task-map-title">Поточне завдання</div>
+                <div class="task-map-status">${this.getDraftTaskText()}</div>
+                <div class="task-map-actions">
+                    <button class="${sideClass}"${saveDisabled} onclick="game.saveCurrentOrderTask()">Зберегти завдання</button>
+                    <button class="neutral-btn" onclick="game.setOrderTab('endState')">Кінцевий стан</button>
+                </div>
+                <div class="task-map-list">
+                    <div class="task-map-title">Збережені завдання</div>
+                    ${taskList}
+                </div>
+            </div>
+        `;
+    }
+
     renderSideButtons() {
         return [1, 2].map((side) => {
             const activeClass = this.sessionOrder.ui.activeSide === side ? ' active' : '';
@@ -1396,7 +1755,7 @@ class AdmiralGame {
 
     renderSituationTab() {
         const situation = this.sessionOrder.situation;
-        const enemyInfo = situation.enemyInfoPercentBySide;
+        const instructorMode = this.isInstructorRole();
         const toolButtons = [
             { key: 'areaOfInterest', label: 'Зона інтересу' },
             { key: 'executionArea', label: 'Район виконання' }
@@ -1412,20 +1771,16 @@ class AdmiralGame {
             <div class="shop-item order-planner">
                 <h5>Обстановка</h5>
                 <div class="details">
-                    <div class="order-note">Клік по мапі в цій вкладці задає зону інтересу або район виконання.</div>
-                    <div class="order-tags">${toolButtons}</div>
+                    <div class="order-note">${instructorMode ? 'Клік по мапі в цій вкладці задає зону інтересу або район виконання.' : 'Сторони переглядають обстановку. Зону інтересу, район виконання і обсяг даних про противника задає інструктор.'}</div>
+                    ${instructorMode ? `
+                        <div class="order-actions">
+                            <button class="quick-demo-btn" onclick="event.stopPropagation(); game.generateQuickDemoSession()">Згенерувати демо-сесію</button>
+                        </div>
+                        <div class="order-tags">${toolButtons}</div>
+                    ` : ''}
                     <div class="order-grid-two">
                         <div class="order-field"><strong>Зона інтересу</strong><br>${this.formatOrderPoint(situation.areaOfInterest)}</div>
                         <div class="order-field"><strong>Район виконання</strong><br>${this.formatOrderPoint(situation.executionArea)}</div>
-                    </div>
-                    <div class="order-grid-two">
-                        ${[1, 2].map((side) => `
-                            <label class="order-field">
-                                <strong>Інформація про противника для сторони ${side}</strong><br>
-                                <input class="order-range" type="range" min="0" max="100" value="${enemyInfo[side]}" oninput="game.setEnemyInfoPercent(${side}, this.value)">
-                                <span>${enemyInfo[side]}%</span>
-                            </label>
-                        `).join('')}
                     </div>
                     <div class="units-list">
                         <div class="units-list-title">Об’єкти району виконання</div>
@@ -1436,9 +1791,198 @@ class AdmiralGame {
         `;
     }
 
+    renderInstructorScenarioTab() {
+        const sideSummaries = [1, 2].map((side) => {
+            const units = this.purchasedUnits[side] || [];
+            const taskCount = this.sessionOrder.tasks.filter((task) => task.side === side).length;
+            const endStateCount = this.sessionOrder.endState.filter((item) => item.side === side).length;
+            return `
+                <div class="order-field">
+                    <strong>Сторона ${side}</strong><br>
+                    ORBAT: ${units.length}<br>
+                    Завдань: ${taskCount}<br>
+                    Кінцевих станів: ${endStateCount}
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Сценарій інструктора</h5>
+                <div class="details">
+                    <div class="order-note">Інструктор задає рамку заняття і контролює повноту наказів. Війська виставляють тільки сторони.</div>
+                    <div class="order-actions">
+                        <button class="quick-demo-btn" onclick="event.stopPropagation(); game.generateQuickDemoSession()">Згенерувати демо-сесію</button>
+                    </div>
+                    <div class="order-grid-two">
+                        <div class="order-field"><strong>Зона інтересу</strong><br>${this.formatOrderPoint(this.sessionOrder.situation.areaOfInterest)}</div>
+                        <div class="order-field"><strong>Район виконання</strong><br>${this.formatOrderPoint(this.sessionOrder.situation.executionArea)}</div>
+                    </div>
+                    <div class="order-grid-two">${sideSummaries}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderInstructorIntelligenceTab() {
+        const enemyInfo = this.sessionOrder.situation.enemyInfoPercentBySide;
+        const ranges = [1, 2].map((side) => `
+            <label class="order-field">
+                <strong>Інформація про противника для сторони ${side}</strong><br>
+                <input class="order-range" type="range" min="0" max="100" value="${enemyInfo[side]}" oninput="game.setEnemyInfoPercent(${side}, this.value)">
+                <span>${enemyInfo[side]}%</span>
+            </label>
+        `).join('');
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Інформація про противника</h5>
+                <div class="details">
+                    <div class="order-note">Це інструкторський шар: різним сторонам можна дати різний обсяг відомостей про противника.</div>
+                    <div class="order-grid-two">${ranges}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderInstructorControlTab() {
+        const readiness = this.sessionOrder.readinessByRole;
+        const rows = [1, 2].map((side) => {
+            const units = this.purchasedUnits[side] || [];
+            const placedUnits = units.filter((unit) => unit.placed).length;
+            return `
+                <div class="order-field">
+                    <strong>Сторона ${side}</strong><br>
+                    Статус наказу: ${readiness[side] ? 'готово' : 'не готово'}<br>
+                    Підрозділів: ${units.length}<br>
+                    Розміщено: ${placedUnits}
+                </div>
+            `;
+        }).join('');
+        const canStart = readiness[1] && readiness[2];
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Контроль готовності</h5>
+                <div class="details">
+                    <div class="order-note">${canStart ? 'Обидві сторони готові. Інструктор може стартувати гру нижньою кнопкою.' : 'Старт гри відкривається після готовності обох сторін.'}</div>
+                    <div class="order-grid-two">${rows}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderUnitEditorTab() {
+        const unitEntries = Object.entries(this.config.unitTypes);
+        if (unitEntries.length === 0) {
+            return '<div class="shop-item order-planner"><h5>Редактор юнітів</h5><div class="details">Юнітів ще немає.</div></div>';
+        }
+
+        if (!this.unitEditorSelectedType || !this.config.unitTypes[this.unitEditorSelectedType]) {
+            this.unitEditorSelectedType = unitEntries[0][0];
+        }
+
+        const selectedType = this.unitEditorSelectedType;
+        const selectedConfig = this.config.unitTypes[selectedType];
+        const symbolKinds = [
+            ['infantry', 'Піхота'],
+            ['armor', 'Бронетехніка'],
+            ['artillery', 'Артилерія'],
+            ['command', 'Командування'],
+            ['scout', 'Розвідка'],
+            ['sniper', 'Снайпер'],
+            ['antitank', 'ПТРК'],
+            ['mortar', 'Міномет'],
+            ['medical', 'Медичний'],
+            ['vehicle', 'Транспорт'],
+            ['support', 'Забезпечення']
+        ];
+
+        const unitButtons = unitEntries.map(([unitType, unitConfig]) => {
+            const activeClass = unitType === selectedType ? ' active' : '';
+            return `<button class="order-check${activeClass}" onclick="game.setUnitEditorSelectedType('${this.escapeAttribute(unitType)}')">${this.escapeHtml(unitConfig.name)}</button>`;
+        }).join('');
+
+        const symbolOptions = symbolKinds.map(([value, label]) => {
+            const selected = this.getUnitSymbolKind(selectedType, selectedConfig) === value ? ' selected' : '';
+            return `<option value="${value}"${selected}>${label}</option>`;
+        }).join('');
+
+        const currentImage = selectedConfig.imageDataUrl
+            ? `<img alt="Unit custom preview" src="${this.escapeHtml(selectedConfig.imageDataUrl)}">`
+            : `<img alt="Unit symbol preview" src="${this.createUnitSymbolDataUrl(selectedType, 1, selectedConfig)}">`;
+
+        return `
+            <div class="shop-item order-planner">
+                <h5>Редактор юнітів</h5>
+                <div class="details">
+                    <div class="order-note">Редагування діє в межах поточної сесії прототипу. Збереження в файл/бекенд винесено наступним кроком.</div>
+                    <div class="order-actions">
+                        <button class="neutral-btn" onclick="event.stopPropagation(); game.addCustomUnit()">Додати нового юніта</button>
+                    </div>
+                    <div class="order-grid-two">
+                        <div class="order-check-group">
+                            <div class="order-check-title">Наявні юніти</div>
+                            <div class="order-tags">${unitButtons}</div>
+                        </div>
+                        <div class="order-check-group">
+                            <div class="order-check-title">Картка / символ</div>
+                            <div class="unit-model-preview" style="width: 160px; height: 116px;">${currentImage}</div>
+                        </div>
+                    </div>
+                    <div class="order-grid-two">
+                        ${this.renderUnitEditorTextField(selectedType, 'name', 'Назва', selectedConfig.name)}
+                        ${this.renderUnitEditorNumberField(selectedType, 'cost', 'Вартість', selectedConfig.cost)}
+                        ${this.renderUnitEditorNumberField(selectedType, 'hitpoints', 'Живучість', selectedConfig.hitpoints)}
+                        ${this.renderUnitEditorNumberField(selectedType, 'strength', 'Вогнева потужність', selectedConfig.strength)}
+                        ${this.renderUnitEditorNumberField(selectedType, 'movement', 'Маневреність', selectedConfig.movement)}
+                        <label class="order-field">
+                            <strong>Тип символу</strong><br>
+                            <select onchange="game.updateUnitConfigField('${this.escapeAttribute(selectedType)}', 'symbolKind', this.value)">
+                                ${symbolOptions}
+                            </select>
+                        </label>
+                        ${this.renderUnitEditorTextField(selectedType, 'symbolLabel', 'Підпис на символі', selectedConfig.symbolLabel || this.getUnitSymbolLabel(selectedType, selectedConfig))}
+                        ${this.renderUnitEditorTextField(selectedType, 'model', 'Модель / тип', selectedConfig.model)}
+                    </div>
+                    <label class="order-field">
+                        <strong>Опис</strong><br>
+                        <textarea rows="3" onchange="game.updateUnitConfigField('${this.escapeAttribute(selectedType)}', 'description', this.value)">${this.escapeHtml(selectedConfig.description || '')}</textarea>
+                    </label>
+                    <div class="order-grid-two">
+                        <label class="order-field">
+                            <strong>Картинка картки</strong><br>
+                            <input type="file" accept="image/*" onchange="game.handleUnitImageUpload('${this.escapeAttribute(selectedType)}', this)">
+                        </label>
+                        ${this.renderUnitEditorTextField(selectedType, 'imageDataUrl', 'URL / data URL картинки', selectedConfig.imageDataUrl || '')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderUnitEditorTextField(unitType, field, label, value = '') {
+        return `
+            <label class="order-field">
+                <strong>${label}</strong><br>
+                <input type="text" value="${this.escapeHtml(value || '')}" onchange="game.updateUnitConfigField('${this.escapeAttribute(unitType)}', '${field}', this.value)">
+            </label>
+        `;
+    }
+
+    renderUnitEditorNumberField(unitType, field, label, value = 0) {
+        return `
+            <label class="order-field">
+                <strong>${label}</strong><br>
+                <input type="number" min="0" step="1" value="${Number(value) || 0}" onchange="game.updateUnitConfigField('${this.escapeAttribute(unitType)}', '${field}', this.value)">
+            </label>
+        `;
+    }
+
     renderOrbatTab() {
         const unitCards = Object.entries(this.config.unitTypes).map(([unitType, unitConfig]) => this.renderOrbatUnitCard(unitType, unitConfig)).join('');
-        const sideSummaries = [1, 2].map((side) => {
+        const visibleSides = this.isInstructorRole() ? [1, 2] : [this.getActiveOrderSide()];
+        const sideSummaries = visibleSides.map((side) => {
             const units = this.purchasedUnits[side] || [];
             return `
                 <div class="order-field">
@@ -1453,7 +1997,7 @@ class AdmiralGame {
             <div class="shop-item order-planner">
                 <h5>ORBAT / склад бойових засобів</h5>
                 <div class="details">
-                    <div class="order-note">Це не магазин: тут формується склад сторін перед розміщенням на мапі.</div>
+                    <div class="order-note">${this.isInstructorRole() ? 'Інструктор переглядає склад обох сторін. Додавання підрозділів виконується в ролі конкретної сторони.' : `Формується склад сторони ${this.getActiveOrderSide()} перед розміщенням на мапі.`}</div>
                     <div class="order-grid-two">${sideSummaries}</div>
                 </div>
             </div>
@@ -1464,6 +2008,10 @@ class AdmiralGame {
     renderOrbatUnitCard(unitType, unitConfig) {
         const symbolKind = this.getUnitSymbolKind(unitType, unitConfig);
         const symbolLabel = this.getUnitSymbolLabel(unitType, unitConfig);
+        const activeSide = this.getActiveOrderSide();
+        const addButtons = this.isInstructorRole()
+            ? '<div class="order-note">Перемкніться на сторону зверху, щоб додавати підрозділи до її ORBAT.</div>'
+            : `<button class="${activeSide === 1 ? 'player1-btn' : 'player2-btn'}" onclick="event.stopPropagation(); game.assignUnitToOrder('${unitType}', ${activeSide})">Додати до сторони ${activeSide}</button>`;
         return `
             <div class="shop-item">
                 <h5>${unitConfig.name}</h5>
@@ -1481,8 +2029,7 @@ class AdmiralGame {
                     <div>Маневреність: ${unitConfig.movement} кл.</div>
                     <div>${unitConfig.description}</div>
                     <div class="order-actions">
-                        <button class="player1-btn" onclick="event.stopPropagation(); game.assignUnitToOrder('${unitType}', 1)">Додати стороні 1</button>
-                        <button class="player2-btn" onclick="event.stopPropagation(); game.assignUnitToOrder('${unitType}', 2)">Додати стороні 2</button>
+                        ${addButtons}
                     </div>
                 </div>
             </div>
@@ -1490,7 +2037,11 @@ class AdmiralGame {
     }
 
     renderTasksTab() {
-        const sideButtons = this.renderSideButtons();
+        const activeSide = this.sessionOrder.ui.activeSide;
+        const draftTask = this.sessionOrder.ui.draftTask;
+        const roleNotice = this.isInstructorRole()
+            ? 'Інструктор бачить задачі, але бойові задачі сторін задаються в ролі Сторона 1 або Сторона 2.'
+            : `Зараз налаштовується сторона ${activeSide}.`;
         const tagButtons = Object.entries(this.orderTaskTags).map(([tag, config]) => {
             const activeClass = this.sessionOrder.ui.activeTaskTag === tag ? ' active' : '';
             return `<button class="order-tag${activeClass}" onclick="game.setOrderTaskTag('${tag}')">${config.label}</button>`;
@@ -1504,18 +2055,27 @@ class AdmiralGame {
             : this.sessionOrder.tasks.map((task, index) => `
                 <span class="unit-badge">${index + 1}. Сторона ${task.side}: ${this.orderTaskTags[task.tag].label}, ${this.orderGeometryTypes[task.geometry].label}: ${this.formatTaskCells(task)}</span>
             `).join('');
+        const draftText = this.getDraftTaskText();
+        const saveDisabled = !draftTask || draftTask.cells.length === 0 ? ' disabled' : '';
 
         return `
             <div class="shop-item order-planner">
                 <h5>Завдання</h5>
                 <div class="details">
-                    <div class="order-note">Завдання формуються через теги і прив’язуються до точки, лінії або району на мапі.</div>
-                    <div class="units-list-title">Сторона</div>
-                    <div class="order-tags">${sideButtons}</div>
+                    <div class="order-note">Кліки по карті збирають геометрію одного поточного завдання. Новий номер створюється тільки після кнопки "Зберегти завдання".</div>
+                    <div class="order-note">${roleNotice}</div>
                     <div class="units-list-title">Дія</div>
                     <div class="order-tags">${tagButtons}</div>
                     <div class="units-list-title">Геометрія</div>
                     <div class="order-tags">${geometryButtons}</div>
+                    <div class="order-field">
+                        <strong>Поточне завдання</strong><br>
+                        ${draftText}
+                        <div class="order-actions">
+                            <button class="${activeSide === 1 ? 'player1-btn' : 'player2-btn'}"${saveDisabled} onclick="event.stopPropagation(); game.saveCurrentOrderTask()">Зберегти завдання</button>
+                            <button class="neutral-btn" onclick="event.stopPropagation(); game.clearCurrentOrderTask()">Очистити чернетку</button>
+                        </div>
+                    </div>
                     <div class="units-list">
                         <div class="units-list-title">Прив’язані задачі</div>
                         <div>${taskList}</div>
@@ -1526,7 +2086,10 @@ class AdmiralGame {
     }
 
     renderEndStateTab() {
-        const sideButtons = this.renderSideButtons();
+        const activeSide = this.sessionOrder.ui.activeSide;
+        const roleNotice = this.isInstructorRole()
+            ? 'Інструктор переглядає кінцеві стани. Для редагування сторони перемкніться у глобальному перемикачі зверху.'
+            : `Зараз налаштовується кінцевий стан сторони ${activeSide}.`;
         const tagButtons = Object.entries(this.endStateTags).map(([tag, config]) => {
             const activeClass = this.sessionOrder.ui.activeEndStateTag === tag ? ' active' : '';
             return `<button class="order-tag${activeClass}" onclick="game.setEndStateTag('${tag}')">${config.label}</button>`;
@@ -1542,8 +2105,7 @@ class AdmiralGame {
                 <h5>Кінцевий стан</h5>
                 <div class="details">
                     <div class="order-note">Це майбутні умови успіху сценарію: що має бути правдою після виконання наказу.</div>
-                    <div class="units-list-title">Сторона</div>
-                    <div class="order-tags">${sideButtons}</div>
+                    <div class="order-note">${roleNotice}</div>
                     <div class="units-list-title">Стан</div>
                     <div class="order-tags">${tagButtons}</div>
                     <div class="units-list">
@@ -1557,12 +2119,13 @@ class AdmiralGame {
 
     renderSupportTab() {
         const readinessSections = this.renderReadinessSections();
-        const supportTables = [1, 2].map((side) => this.renderSupportSide(side)).join('');
+        const visibleSides = this.isInstructorRole() ? [1, 2] : [this.getActiveOrderSide()];
+        const supportTables = visibleSides.map((side) => this.renderSupportSide(side)).join('');
         return `
             <div class="shop-item order-planner">
                 <h5>Забезпечення</h5>
                 <div class="details">
-                    <div class="order-note">Параметри забезпечення задають обмеження сценарію, а PCC лишається допоміжною перевіркою готовності.</div>
+                    <div class="order-note">${this.isInstructorRole() ? 'Інструктор бачить забезпечення обох сторін і може коригувати сценарні обмеження.' : `Сторона ${this.getActiveOrderSide()} перевіряє власне забезпечення і готовність.`}</div>
                     <div class="order-support-grid">${supportTables}</div>
                 </div>
             </div>
@@ -1604,6 +2167,102 @@ class AdmiralGame {
     formatTaskCells(task) {
         const cells = task.cells || [{ x: task.x, z: task.z }];
         return cells.map((cell) => `(${cell.x}, ${cell.z})`).join(' - ');
+    }
+
+    formatTaskBriefCells(task) {
+        const cells = task.cells || [{ x: task.x, z: task.z }];
+        if (cells.length === 0) return 'не задано';
+        if (cells.length === 1) return `(${cells[0].x}, ${cells[0].z})`;
+        const minX = Math.min(...cells.map((cell) => cell.x));
+        const maxX = Math.max(...cells.map((cell) => cell.x));
+        const minZ = Math.min(...cells.map((cell) => cell.z));
+        const maxZ = Math.max(...cells.map((cell) => cell.z));
+        if (task.geometry === 'area') {
+            return `район (${minX}, ${minZ})-(${maxX}, ${maxZ})`;
+        }
+        return cells.map((cell) => `(${cell.x},${cell.z})`).join(' -> ');
+    }
+
+    renderTaskEditorList() {
+        if (this.sessionOrder.tasks.length === 0) {
+            return '<div class="units-list-empty">Ще немає збережених завдань.</div>';
+        }
+
+        return this.sessionOrder.tasks.map((task, index) => {
+            const tag = this.orderTaskTags[task.tag] || { label: task.tag };
+            const geometry = this.orderGeometryTypes[task.geometry] || { label: task.geometry };
+            const activeClass = this.sessionOrder.ui.activeTaskId === task.id ? ' active' : '';
+            return `
+                <div class="task-list-item${activeClass}">
+                    <button class="task-list-main" onclick="game.selectOrderTask('${this.escapeAttribute(task.id)}')">
+                        <strong>${index + 1}. Сторона ${task.side}: ${this.escapeHtml(tag.label)}</strong>
+                        <span>${this.escapeHtml(geometry.label)}: ${this.escapeHtml(this.formatTaskCells(task))}</span>
+                    </button>
+                    <div class="task-list-actions">
+                        <button class="neutral-btn" onclick="game.editOrderTask('${this.escapeAttribute(task.id)}')">Ред.</button>
+                        <button class="danger-btn" onclick="game.deleteOrderTask('${this.escapeAttribute(task.id)}')">Видалити</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    getDraftTaskText() {
+        const draftTask = this.sessionOrder.ui.draftTask;
+        if (!draftTask || !draftTask.cells || draftTask.cells.length === 0) {
+            const geometry = this.sessionOrder.ui.activeGeometry;
+            if (geometry === 'area') {
+                return 'Оберіть район: перший клік задає один кут, другий клік задає протилежний кут зони.';
+            }
+            if (geometry === 'line') {
+                return 'Оберіть лінію або маршрут: кліки додають точки по порядку; повторний клік по точці прибирає її.';
+            }
+            return 'Клікніть по карті, щоб задати точку поточного завдання.';
+        }
+
+        const tag = this.orderTaskTags[draftTask.tag] || { label: draftTask.tag };
+        const geometry = this.orderGeometryTypes[draftTask.geometry] || { label: draftTask.geometry };
+        const areaHint = draftTask.geometry === 'area' && draftTask.cells.length === 1
+            ? ' Натисніть другу клітинку, щоб розтягнути район.'
+            : '';
+        return `Чернетка завдання ${this.sessionOrder.tasks.length + 1}: ${tag.label}, ${geometry.label}: ${this.formatTaskCells(draftTask)}.${areaHint}`;
+    }
+
+    buildRectCells(start, end) {
+        const minX = Math.min(start.x, end.x);
+        const maxX = Math.max(start.x, end.x);
+        const minZ = Math.min(start.z, end.z);
+        const maxZ = Math.max(start.z, end.z);
+        const cells = [];
+        for (let x = minX; x <= maxX; x++) {
+            for (let z = minZ; z <= maxZ; z++) {
+                cells.push({ x, z });
+            }
+        }
+        return cells;
+    }
+
+    normalizeDraftTaskForGeometry(draftTask) {
+        if (!draftTask || !draftTask.cells) return;
+        if (draftTask.geometry === 'point' && draftTask.cells.length > 1) {
+            draftTask.cells = [draftTask.cells[0]];
+            delete draftTask.areaAnchor;
+        }
+        if (draftTask.geometry === 'area') {
+            const first = draftTask.cells[0];
+            const last = draftTask.cells[draftTask.cells.length - 1] || first;
+            if (first) {
+                draftTask.areaAnchor = draftTask.areaAnchor || { x: first.x, z: first.z };
+                draftTask.cells = this.buildRectCells(draftTask.areaAnchor, last);
+            }
+        }
+        if (draftTask.geometry !== 'area') {
+            delete draftTask.areaAnchor;
+        }
+        if (draftTask.cells.length > 0) {
+            draftTask.x = draftTask.cells[0].x;
+            draftTask.z = draftTask.cells[0].z;
+        }
     }
 
     renderReadinessSections() {
@@ -1669,7 +2328,13 @@ class AdmiralGame {
             return;
         }
 
-        const cacheKey = `symbol:${unitType}:${this.getUnitSymbolKind(unitType, unitConfig)}`;
+        if (unitConfig && unitConfig.imageDataUrl) {
+            element.innerHTML = `<img alt="Unit custom preview" src="${this.escapeHtml(unitConfig.imageDataUrl)}">`;
+            element.dataset.rendered = '1';
+            return;
+        }
+
+        const cacheKey = `symbol:${unitType}:${this.getUnitSymbolKind(unitType, unitConfig)}:${this.getUnitSymbolLabel(unitType, unitConfig)}`;
         if (this.unitPreviewCache[cacheKey]) {
             element.innerHTML = `<img alt="NATO symbol preview" src="${this.unitPreviewCache[cacheKey]}">`;
             element.dataset.rendered = '1';
@@ -1840,6 +2505,18 @@ class AdmiralGame {
         if (!this.orderTaskTags[tag]) return;
         this.sessionOrder.ui.activeTaskTag = tag;
         this.sessionOrder.ui.activeGeometry = this.orderTaskTags[tag].geometry || this.sessionOrder.ui.activeGeometry;
+        if (this.sessionOrder.ui.draftTask) {
+            this.sessionOrder.ui.draftTask.tag = tag;
+            this.sessionOrder.ui.draftTask.geometry = this.sessionOrder.ui.activeGeometry;
+            this.normalizeDraftTaskForGeometry(this.sessionOrder.ui.draftTask);
+            this.sessionOrder.ui.draftTask.generatedText = this.generateTaskText(
+                this.sessionOrder.ui.draftTask.side,
+                this.sessionOrder.ui.draftTask.tag,
+                this.sessionOrder.ui.draftTask.geometry,
+                this.sessionOrder.ui.draftTask.cells || []
+            );
+            this.renderOrderTaskMarkers();
+        }
         this.addLog(`Активний тег завдання: ${this.orderTaskTags[tag].label}`, 'place-log');
         this.updateUI();
     }
@@ -1851,15 +2528,173 @@ class AdmiralGame {
         this.updateUI();
     }
 
+    setOrderRole(role) {
+        const normalizedRole = role === '1' || role === 1 ? 1 : (role === '2' || role === 2 ? 2 : 'instructor');
+        if (!this.orderRoles[normalizedRole]) return;
+        this.sessionOrder.ui.activeRole = normalizedRole;
+        if (normalizedRole === 1 || normalizedRole === 2) {
+            this.sessionOrder.ui.activeSide = normalizedRole;
+        }
+        this.ensureActiveOrderTab();
+        this.addLog(`Активна роль налаштування: ${this.orderRoles[normalizedRole].label}`, 'place-log');
+        this.updateUI();
+    }
+
+    getActiveOrderSide() {
+        return this.sessionOrder.ui.activeRole === 2 ? 2 : 1;
+    }
+
+    isInstructorRole() {
+        return this.sessionOrder.ui.activeRole === 'instructor';
+    }
+
+    markOrderRoleDirty(role = this.sessionOrder.ui.activeRole) {
+        if (role === 1 || role === 2 || role === 'instructor') {
+            this.sessionOrder.readinessByRole[role] = false;
+        }
+    }
+
     setOrderTab(tab) {
-        if (!this.orderTabs.some((item) => item.key === tab)) return;
+        if (!this.getVisibleOrderTabs().some((item) => item.key === tab)) return;
         this.sessionOrder.ui.activeTab = tab;
         this.updateUI();
+    }
+
+    selectOrderTask(taskId) {
+        const task = this.sessionOrder.tasks.find((item) => item.id === taskId);
+        if (!task) return;
+        this.sessionOrder.ui.activeTaskId = this.sessionOrder.ui.activeTaskId === taskId ? null : taskId;
+        this.renderOrderTaskMarkers();
+        this.updateUI();
+    }
+
+    editOrderTask(taskId) {
+        const taskIndex = this.sessionOrder.tasks.findIndex((item) => item.id === taskId);
+        if (taskIndex < 0) return;
+
+        const task = this.sessionOrder.tasks[taskIndex];
+        this.sessionOrder.tasks.splice(taskIndex, 1);
+        this.sessionOrder.ui.activeTaskId = null;
+        this.sessionOrder.ui.activeRole = task.side;
+        this.sessionOrder.ui.activeSide = task.side;
+        this.sessionOrder.ui.activeTab = 'tasks';
+        this.sessionOrder.ui.activeTaskTag = task.tag;
+        this.sessionOrder.ui.activeGeometry = task.geometry;
+        this.sessionOrder.ui.draftTask = {
+            side: task.side,
+            tag: task.tag,
+            geometry: task.geometry,
+            cells: (task.cells || [{ x: task.x, z: task.z }]).map((cell) => ({ x: cell.x, z: cell.z })),
+            x: task.x,
+            z: task.z,
+            generatedText: task.generatedText || ''
+        };
+        if (task.geometry === 'area' && this.sessionOrder.ui.draftTask.cells.length > 0) {
+            this.sessionOrder.ui.draftTask.areaAnchor = { ...this.sessionOrder.ui.draftTask.cells[0] };
+        }
+        this.markOrderRoleDirty(task.side);
+        this.renderOrderTaskMarkers();
+        this.addLog(`Завдання ${taskIndex + 1} повернуто в чернетку для редагування.`, 'place-log');
+        this.updateUI();
+    }
+
+    deleteOrderTask(taskId) {
+        const taskIndex = this.sessionOrder.tasks.findIndex((item) => item.id === taskId);
+        if (taskIndex < 0) return;
+        const [task] = this.sessionOrder.tasks.splice(taskIndex, 1);
+        if (this.sessionOrder.ui.activeTaskId === taskId) {
+            this.sessionOrder.ui.activeTaskId = null;
+        }
+        this.markOrderRoleDirty(task.side);
+        this.renderOrderTaskMarkers();
+        this.addLog(`Видалено завдання ${taskIndex + 1} сторони ${task.side}.`, 'place-log');
+        this.updateUI();
+    }
+
+    setUnitEditorSelectedType(unitType) {
+        if (!this.config.unitTypes[unitType]) return;
+        this.unitEditorSelectedType = unitType;
+        this.updateUI();
+    }
+
+    updateUnitConfigField(unitType, field, value) {
+        const unitConfig = this.config.unitTypes[unitType];
+        if (!unitConfig) return;
+
+        const numericFields = new Set(['cost', 'hitpoints', 'strength', 'movement']);
+        unitConfig[field] = numericFields.has(field) ? Math.max(0, Number(value) || 0) : String(value ?? '');
+        if (field === 'imageDataUrl' && !unitConfig.imageDataUrl.trim()) {
+            delete unitConfig.imageDataUrl;
+        }
+        this.unitPreviewCache = {};
+        this.refreshPurchasedUnitConfigs(unitType);
+        this.markOrderRoleDirty('instructor');
+        this.updateUI();
+    }
+
+    addCustomUnit() {
+        const id = `custom_${Date.now()}`;
+        this.config.unitTypes[id] = {
+            name: 'Новий юніт',
+            cost: 100,
+            hitpoints: 2,
+            strength: 2,
+            movement: 1,
+            description: 'Опис нового підрозділу',
+            model: 'custom',
+            symbolKind: 'infantry',
+            symbolLabel: 'Н'
+        };
+        this.unitModelPaths[id] = null;
+        this.unitEditorSelectedType = id;
+        this.unitPreviewCache = {};
+        this.markOrderRoleDirty('instructor');
+        this.updateUI();
+    }
+
+    handleUnitImageUpload(unitType, input) {
+        const file = input && input.files ? input.files[0] : null;
+        if (!file || !this.config.unitTypes[unitType]) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            this.config.unitTypes[unitType].imageDataUrl = String(reader.result || '');
+            this.unitPreviewCache = {};
+            this.markOrderRoleDirty('instructor');
+            this.updateUI();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    refreshPurchasedUnitConfigs(unitType) {
+        [1, 2].forEach((side) => {
+            (this.purchasedUnits[side] || []).forEach((unit) => {
+                if (unit.type === unitType) {
+                    unit.config = this.config.unitTypes[unitType];
+                }
+            });
+            this.sessionOrder.orbat[side] = (this.purchasedUnits[side] || []).map((unit) => ({
+                type: unit.type,
+                name: unit.config.name,
+                placed: unit.placed
+            }));
+        });
     }
 
     setOrderGeometry(geometry) {
         if (!this.orderGeometryTypes[geometry]) return;
         this.sessionOrder.ui.activeGeometry = geometry;
+        if (this.sessionOrder.ui.draftTask) {
+            this.sessionOrder.ui.draftTask.geometry = geometry;
+            this.normalizeDraftTaskForGeometry(this.sessionOrder.ui.draftTask);
+            this.sessionOrder.ui.draftTask.generatedText = this.generateTaskText(
+                this.sessionOrder.ui.draftTask.side,
+                this.sessionOrder.ui.draftTask.tag,
+                this.sessionOrder.ui.draftTask.geometry,
+                this.sessionOrder.ui.draftTask.cells || []
+            );
+            this.renderOrderTaskMarkers();
+        }
         this.updateUI();
     }
 
@@ -1872,6 +2707,7 @@ class AdmiralGame {
     setEnemyInfoPercent(side, value) {
         const percent = Math.max(0, Math.min(100, Number(value) || 0));
         this.sessionOrder.situation.enemyInfoPercentBySide[side] = percent;
+        this.markOrderRoleDirty('instructor');
         this.updateUI();
     }
 
@@ -1884,6 +2720,7 @@ class AdmiralGame {
     setSupportValue(side, field, value) {
         if (!this.supportFields[field] || !this.sessionOrder.support[side]) return;
         this.sessionOrder.support[side][field] = value;
+        this.markOrderRoleDirty(side);
         this.updateUI();
     }
 
@@ -1901,6 +2738,7 @@ class AdmiralGame {
             selected.push(item);
         }
 
+        this.markOrderRoleDirty();
         this.updateUI();
     }
 
@@ -1908,8 +2746,13 @@ class AdmiralGame {
         if (this.phase !== 'order') return;
 
         if (this.sessionOrder.ui.activeTab === 'situation') {
+            if (!this.isInstructorRole()) {
+                this.addLog('Обстановку на карті задає інструктор.', 'place-log');
+                return;
+            }
             const tool = this.sessionOrder.ui.activeSituationTool;
             this.sessionOrder.situation[tool] = { x, z };
+            this.markOrderRoleDirty('instructor');
             this.renderOrderTaskMarkers();
             this.addLog(`${tool === 'areaOfInterest' ? 'Зону інтересу' : 'Район виконання'} задано: (${x}, ${z})`, 'place-log');
             this.updateUI();
@@ -1917,7 +2760,11 @@ class AdmiralGame {
         }
 
         if (this.sessionOrder.ui.activeTab === 'endState') {
-            const side = this.sessionOrder.ui.activeSide;
+            if (this.isInstructorRole()) {
+                this.addLog('Кінцевий стан сторони редагується в ролі Сторона 1 або Сторона 2.', 'place-log');
+                return;
+            }
+            const side = this.getActiveOrderSide();
             const tag = this.sessionOrder.ui.activeEndStateTag;
             const existing = this.sessionOrder.endState.find((item) => item.x === x && item.z === z && item.side === side);
             if (existing) {
@@ -1925,6 +2772,7 @@ class AdmiralGame {
             } else {
                 this.sessionOrder.endState.push({ id: `end-${Date.now()}-${this.sessionOrder.endState.length}`, side, tag, x, z });
             }
+            this.markOrderRoleDirty(side);
             this.renderOrderTaskMarkers();
             this.addLog(`Сторона ${side}: кінцевий стан "${this.endStateTags[tag].label}" прив'язано до (${x}, ${z})`, 'place-log');
             this.updateUI();
@@ -1932,33 +2780,294 @@ class AdmiralGame {
         }
 
         const tag = this.sessionOrder.ui.activeTaskTag;
-        const side = this.sessionOrder.ui.activeSide;
+        if (this.isInstructorRole()) {
+            this.addLog('Бойові задачі сторін редагуються в ролі Сторона 1 або Сторона 2.', 'place-log');
+            return;
+        }
+        const side = this.getActiveOrderSide();
         const geometry = this.sessionOrder.ui.activeGeometry;
         const taskConfig = this.orderTaskTags[tag];
-        const existingTask = this.sessionOrder.tasks.find((task) => task.x === x && task.z === z && task.side === side);
-        if (existingTask) {
-            existingTask.tag = tag;
-            existingTask.geometry = geometry;
-            existingTask.cells = [{ x, z }];
-            existingTask.generatedText = this.generateTaskText(side, tag, geometry, [{ x, z }]);
-        } else {
-            const cells = [{ x, z }];
-            this.sessionOrder.tasks.push({
-                id: `task-${Date.now()}-${this.sessionOrder.tasks.length}`,
+        let draftTask = this.sessionOrder.ui.draftTask;
+        if (!draftTask || draftTask.side !== side) {
+            draftTask = {
                 side,
                 tag,
                 geometry,
-                cells,
-                x,
-                z,
-                objectId: null,
-                generatedText: this.generateTaskText(side, tag, geometry, cells)
-            });
+                cells: []
+            };
+            this.sessionOrder.ui.draftTask = draftTask;
+        }
+        draftTask.tag = tag;
+        draftTask.geometry = geometry;
+
+        if (geometry === 'point') {
+            draftTask.cells = [{ x, z }];
+            delete draftTask.areaAnchor;
+        } else if (geometry === 'area') {
+            if (!draftTask.areaAnchor || draftTask.cells.length === 0) {
+                draftTask.areaAnchor = { x, z };
+                draftTask.cells = [{ x, z }];
+            } else {
+                draftTask.cells = this.buildRectCells(draftTask.areaAnchor, { x, z });
+            }
+        } else {
+            delete draftTask.areaAnchor;
+            const existingIndex = draftTask.cells.findIndex((cell) => cell.x === x && cell.z === z);
+            if (existingIndex >= 0) {
+                draftTask.cells.splice(existingIndex, 1);
+            } else {
+                draftTask.cells.push({ x, z });
+            }
+        }
+        if (draftTask.cells.length === 0) {
+            delete draftTask.x;
+            delete draftTask.z;
+            draftTask.generatedText = '';
+            this.renderOrderTaskMarkers();
+            this.updateUI();
+            return;
+        }
+        draftTask.x = draftTask.cells[0].x;
+        draftTask.z = draftTask.cells[0].z;
+        draftTask.generatedText = this.generateTaskText(side, tag, geometry, draftTask.cells);
+
+        this.markOrderRoleDirty(side);
+        this.renderOrderTaskMarkers();
+        this.addLog(`Сторона ${side}: додано точку до чернетки "${taskConfig.label}" (${x}, ${z})`, 'place-log');
+        this.updateUI();
+    }
+
+    saveCurrentOrderTask() {
+        const draftTask = this.sessionOrder.ui.draftTask;
+        if (!draftTask || !draftTask.cells || draftTask.cells.length === 0) {
+            this.addLog('Немає чернетки завдання для збереження.', 'place-log');
+            return;
         }
 
+        const side = draftTask.side;
+        const savedCells = draftTask.cells.map((cell) => ({ x: cell.x, z: cell.z }));
+        const savedTask = {
+            id: `task-${Date.now()}-${this.sessionOrder.tasks.length}`,
+            side,
+            tag: draftTask.tag,
+            geometry: draftTask.geometry,
+            cells: savedCells,
+            x: savedCells[0].x,
+            z: savedCells[0].z,
+            objectId: null,
+            generatedText: this.generateTaskText(side, draftTask.tag, draftTask.geometry, savedCells)
+        };
+        this.sessionOrder.tasks.push(savedTask);
+        this.sessionOrder.ui.draftTask = null;
+        this.sessionOrder.ui.activeTaskId = savedTask.id;
+        this.markOrderRoleDirty(side);
         this.renderOrderTaskMarkers();
-        this.addLog(`Сторона ${side}: ${taskConfig.label} прив'язано до (${x}, ${z})`, 'place-log');
+        this.addLog(`Сторона ${side}: збережено завдання ${this.sessionOrder.tasks.length}`, 'place-log');
         this.updateUI();
+    }
+
+    clearCurrentOrderTask() {
+        this.sessionOrder.ui.draftTask = null;
+        this.renderOrderTaskMarkers();
+        this.updateUI();
+    }
+
+    generateQuickDemoSession() {
+        if (!this.config || !this.config.unitTypes) return;
+
+        this.clearMovementHighlights();
+        this.clearDemoSceneUnits();
+        this.units = [];
+        this.occupiedCells.clear();
+        this.selectedUnit = null;
+        this.inspectedUnit = null;
+        this.selectedCell = null;
+        this.purchasedUnits = { 1: [], 2: [] };
+        this.losses = { 1: 0, 2: 0 };
+
+        const attacker = Math.random() > 0.5 ? 1 : 2;
+        const defender = attacker === 1 ? 2 : 1;
+        const objective = {
+            x: this.randomInt(43, 57),
+            z: this.randomInt(43, 57)
+        };
+        const objectiveStart = {
+            x: this.clampCell(objective.x - 5),
+            z: this.clampCell(objective.z - 5)
+        };
+        const objectiveEnd = {
+            x: this.clampCell(objective.x + 5),
+            z: this.clampCell(objective.z + 5)
+        };
+        const objectiveCells = this.buildRectCells(objectiveStart, objectiveEnd);
+        const attackAxis = Math.random() > 0.5 ? 1 : -1;
+        const attackerHome = {
+            x: this.clampCell(objective.x + this.randomInt(-8, 8)),
+            z: this.clampCell(objective.z + attackAxis * this.randomInt(16, 22))
+        };
+        const defenderRear = {
+            x: this.clampCell(objective.x + this.randomInt(-5, 5)),
+            z: this.clampCell(objective.z - attackAxis * this.randomInt(5, 9))
+        };
+
+        this.sessionOrder.situation.areaOfInterest = { ...objective };
+        this.sessionOrder.situation.executionArea = { ...objective };
+        this.sessionOrder.situation.objects = [
+            { id: `obj-${Date.now()}-settlement`, label: 'Опорний пункт', x: objective.x, z: objective.z },
+            { id: `obj-${Date.now()}-road`, label: 'Маршрут висування', x: objective.x, z: Math.round((objective.z + attackerHome.z) / 2) }
+        ];
+        this.sessionOrder.situation.enemyInfoPercentBySide = { 1: 65, 2: 65 };
+
+        const attackTypes = this.pickExistingUnitTypes(['infantry', 'infantry', 'armor', 'scout', 'artillery', 'command', 'droneScout', 'droneKamikaze']);
+        const defenseTypes = this.pickExistingUnitTypes(['infantry', 'infantry', 'infantry', 'armor', 'artillery', 'command', 'scout', 'sniper']);
+        this.placeDemoForce(attacker, attackTypes, attackerHome, 9, -attackAxis);
+        this.placeDemoForce(defender, defenseTypes, defenderRear, 7, attackAxis);
+
+        const routeCells = [
+            { x: attackerHome.x, z: attackerHome.z },
+            { x: this.clampCell(objective.x + this.randomInt(-8, 8)), z: this.clampCell(Math.round((attackerHome.z + objective.z) / 2)) },
+            { x: objective.x, z: objective.z }
+        ];
+        const blockLineZ = this.clampCell(objective.z - attackAxis * 7);
+        const blockCells = [
+            { x: this.clampCell(objective.x - 8), z: blockLineZ },
+            { x: this.clampCell(objective.x + 8), z: blockLineZ }
+        ];
+
+        this.sessionOrder.tasks = [
+            this.createOrderTask(attacker, 'seize', 'area', objectiveCells),
+            this.createOrderTask(attacker, 'move', 'line', routeCells),
+            this.createOrderTask(defender, 'hold', 'area', objectiveCells),
+            this.createOrderTask(defender, 'block', 'line', blockCells)
+        ];
+        this.sessionOrder.endState = [
+            { id: `end-${Date.now()}-atk`, side: attacker, tag: 'areaControlled', x: objective.x, z: objective.z },
+            { id: `end-${Date.now()}-def`, side: defender, tag: 'lineHeld', x: objective.x, z: blockLineZ }
+        ];
+        this.sessionOrder.ui.draftTask = null;
+        this.sessionOrder.ui.activeTaskId = this.sessionOrder.tasks[0].id;
+        this.sessionOrder.ui.activeRole = attacker;
+        this.sessionOrder.ui.activeSide = attacker;
+        this.sessionOrder.ui.activeTab = 'tasks';
+        this.sessionOrder.readinessByRole = { 1: true, 2: true, instructor: true };
+        this.syncOrderOrbat(1);
+        this.syncOrderOrbat(2);
+
+        this.phase = 'battle';
+        this.currentPlayer = attacker;
+        this.sessionViewRole = attacker;
+        this.placementPhase = { 1: false, 2: false };
+        this.turnNumber = 1;
+        this.playerMoves = { 1: 3, 2: 3 };
+        this.mapLayers.tasks = true;
+        this.cameraDistance = 58;
+        this.cameraHeight = 72;
+        this.cameraAngle = attackAxis > 0 ? -0.55 : 0.55;
+        this.updateCameraPosition();
+        this.units.forEach((unit) => {
+            unit.userData.moved = false;
+        });
+        this.renderOrderTaskMarkers();
+        this.addLog(`Демо-сесію згенеровано: Сторона ${attacker} атакує, Сторона ${defender} обороняється.`, 'place-log');
+        this.updateUI();
+    }
+
+    createOrderTask(side, tag, geometry, cells) {
+        const savedCells = cells.map((cell) => ({ x: cell.x, z: cell.z }));
+        return {
+            id: `task-${Date.now()}-${side}-${tag}-${Math.random().toString(16).slice(2)}`,
+            side,
+            tag,
+            geometry,
+            cells: savedCells,
+            x: savedCells[0].x,
+            z: savedCells[0].z,
+            objectId: null,
+            generatedText: this.generateTaskText(side, tag, geometry, savedCells)
+        };
+    }
+
+    pickExistingUnitTypes(preferredTypes) {
+        const available = Object.keys(this.config.unitTypes);
+        const picked = preferredTypes.filter((type) => this.config.unitTypes[type]);
+        while (picked.length < preferredTypes.length && available.length > 0) {
+            picked.push(available[this.randomInt(0, available.length - 1)]);
+        }
+        return picked;
+    }
+
+    placeDemoForce(side, unitTypes, anchor, spread, direction) {
+        unitTypes.forEach((type, index) => {
+            const row = Math.floor(index / 4);
+            const col = index % 4;
+            const x = this.clampCell(anchor.x + (col - 1.5) * 3 + this.randomInt(-1, 1));
+            const z = this.clampCell(anchor.z + direction * row * 3 + this.randomInt(-1, 1));
+            this.addPlacedOrderUnit(side, type, x, z, spread);
+        });
+    }
+
+    addPlacedOrderUnit(side, type, x, z, searchRadius = 6) {
+        const unitConfig = this.config.unitTypes[type];
+        if (!unitConfig) return;
+        const cell = this.findOpenCellNear(x, z, searchRadius);
+        if (!cell) return;
+        const orderUnit = { type, config: unitConfig, placed: true };
+        this.purchasedUnits[side].push(orderUnit);
+        const unit = this.createUnit(type, cell.x, cell.z, side);
+        unit.scale.setScalar(1.45);
+        unit.userData.demoGenerated = true;
+        this.getGridCell(cell.x, cell.z).unit = unit;
+        this.units.push(unit);
+    }
+
+    clearDemoSceneUnits() {
+        this.units.forEach((unit) => {
+            this.scene.remove(unit);
+            unit.traverse((child) => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) {
+                    const materials = Array.isArray(child.material) ? child.material : [child.material];
+                    materials.forEach((material) => {
+                        if (material.map) material.map.dispose();
+                        material.dispose();
+                    });
+                }
+            });
+        });
+    }
+
+    findOpenCellNear(x, z, radius = 6) {
+        const startX = this.clampCell(Math.round(x));
+        const startZ = this.clampCell(Math.round(z));
+        for (let r = 0; r <= radius; r++) {
+            for (let dx = -r; dx <= r; dx++) {
+                for (let dz = -r; dz <= r; dz++) {
+                    if (Math.abs(dx) !== r && Math.abs(dz) !== r) continue;
+                    const cellX = this.clampCell(startX + dx);
+                    const cellZ = this.clampCell(startZ + dz);
+                    if (!this.getGridCell(cellX, cellZ).unit) {
+                        return { x: cellX, z: cellZ };
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    syncOrderOrbat(side) {
+        this.sessionOrder.orbat[side] = this.purchasedUnits[side].map((unit) => ({
+            type: unit.type,
+            name: unit.config.name,
+            placed: unit.placed
+        }));
+    }
+
+    randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    clampCell(value) {
+        return Math.max(0, Math.min(this.gridSize - 1, Math.round(value)));
     }
 
     generateTaskText(side, tag, geometry, cells) {
@@ -1982,21 +3091,47 @@ class AdmiralGame {
             this.orderTaskMarkerMeshes.push(marker);
         });
 
-        this.sessionOrder.tasks.forEach((task) => {
+        if (!this.mapLayers.tasks) {
+            return;
+        }
+
+        const activeTaskId = this.sessionOrder.ui.activeTaskId;
+        this.sessionOrder.tasks.forEach((task, index) => {
             const color = (this.orderTaskTags[task.tag] && this.orderTaskTags[task.tag].color) || this.getUnitPalette(task.side).base;
             const cells = task.cells || [{ x: task.x, z: task.z }];
+            const isActive = activeTaskId === task.id;
+            const hasActive = Boolean(activeTaskId);
+            const opacity = isActive ? 0.76 : (hasActive ? 0.2 : 0.48);
+            const size = isActive ? 5.8 : (hasActive ? 4.5 : 5);
             cells.forEach((cell) => {
-                const marker = this.addCellHighlight(cell.x, cell.z, color, 0.48, 5, false);
+                const marker = this.addCellHighlight(cell.x, cell.z, color, opacity, size, false);
                 marker.userData.orderTask = task;
                 this.orderTaskMarkerMeshes.push(marker);
             });
+            const labelCell = cells[Math.floor(cells.length / 2)] || cells[0];
+            if (labelCell) {
+                this.orderTaskMarkerMeshes.push(this.addMapTextLabel(labelCell.x, labelCell.z, `${isActive ? '>> ' : ''}Завд. ${index + 1}`, color, isActive ? 1.0 : 0.72));
+            }
         });
 
-        this.sessionOrder.endState.forEach((item) => {
+        const draftTask = this.sessionOrder.ui.draftTask;
+        if (draftTask && draftTask.cells && draftTask.cells.length > 0) {
+            const color = (this.orderTaskTags[draftTask.tag] && this.orderTaskTags[draftTask.tag].color) || this.getUnitPalette(draftTask.side).base;
+            draftTask.cells.forEach((cell) => {
+                const marker = this.addCellHighlight(cell.x, cell.z, color, 0.32, 4.3, false);
+                marker.userData.draftTask = draftTask;
+                this.orderTaskMarkerMeshes.push(marker);
+            });
+            const labelCell = draftTask.cells[Math.floor(draftTask.cells.length / 2)] || draftTask.cells[0];
+            this.orderTaskMarkerMeshes.push(this.addMapTextLabel(labelCell.x, labelCell.z, `Чернетка ${this.sessionOrder.tasks.length + 1}`, color, 0.72));
+        }
+
+        this.sessionOrder.endState.forEach((item, index) => {
             const color = (this.endStateTags[item.tag] && this.endStateTags[item.tag].color) || this.getUnitPalette(item.side).base;
             const marker = this.addCellHighlight(item.x, item.z, color, 0.62, 6, false);
             marker.userData.endState = item;
             this.orderTaskMarkerMeshes.push(marker);
+            this.orderTaskMarkerMeshes.push(this.addMapTextLabel(item.x, item.z, `КС ${index + 1}`, color, 1.0));
         });
     }
     
@@ -2014,6 +3149,7 @@ class AdmiralGame {
             name: unit.config.name,
             placed: unit.placed
         }));
+        this.markOrderRoleDirty(player);
 
         this.addLog(`Сторона ${player}: додано ${unitConfig.name} до складу бойового наказу`, 'place-log');
         this.updateUI();
@@ -2024,7 +3160,11 @@ class AdmiralGame {
         const resetBtn = document.getElementById('resetBtn');
         
         // Кольори кнопок в залежності від гравця
-        endTurnBtn.className = this.currentPlayer === 1 ? 'player1-btn' : 'player2-btn';
+        if (this.phase === 'order') {
+            endTurnBtn.className = this.sessionOrder.ui.activeRole === 2 ? 'player2-btn' : (this.sessionOrder.ui.activeRole === 1 ? 'player1-btn' : 'neutral-btn');
+        } else {
+            endTurnBtn.className = this.currentPlayer === 1 ? 'player1-btn' : 'player2-btn';
+        }
         resetBtn.className = 'neutral-btn';
     }
     
@@ -2295,9 +3435,13 @@ class AdmiralGame {
         return this.getTerrainHeightAtWorld(this.toWorldCoord(x), this.toWorldCoord(z)) + 0.03;
     }
 
+    getUnitYAtCell(x, z) {
+        return this.getSurfaceYAtCell(x, z) + 0.12;
+    }
+
     reseatMapObjects() {
         this.units.forEach((unit) => {
-            unit.position.y = this.getSurfaceYAtCell(unit.userData.x, unit.userData.z);
+            unit.position.y = this.getUnitYAtCell(unit.userData.x, unit.userData.z);
         });
         this.renderOrderTaskMarkers();
         if (this.selectedUnit) {
@@ -2311,6 +3455,9 @@ class AdmiralGame {
 
         const boardSize = this.gridSize * this.cellSize;
         this.cellPickPlane = null;
+        if (this.gridHelper) {
+            this.scene.remove(this.gridHelper);
+        }
 
         const gridHelper = new THREE.GridHelper(boardSize, this.gridSize, 0x1f3a45, 0x355866);
         gridHelper.position.set(this.getBoardCenterOffset(), 0.04, this.getBoardCenterOffset());
@@ -2322,6 +3469,8 @@ class AdmiralGame {
             material.depthTest = false;
         });
         gridHelper.renderOrder = 3;
+        gridHelper.visible = this.mapLayers.grid;
+        this.gridHelper = gridHelper;
         this.scene.add(gridHelper);
     }
 
@@ -2349,6 +3498,7 @@ class AdmiralGame {
 
     getUnitSymbolKind(type, unitConfig = null) {
         const config = unitConfig || (this.config && this.config.unitTypes ? this.config.unitTypes[type] : null) || {};
+        if (config.symbolKind) return config.symbolKind;
         const key = `${type} ${config.name || ''} ${config.description || ''} ${config.referencePath || ''}`.toLowerCase();
 
         if (/armor|tank|btr|bmp|брон|танк|бтр|бмп/.test(key)) return 'armor';
@@ -2366,6 +3516,7 @@ class AdmiralGame {
 
     getUnitSymbolLabel(type, unitConfig = null) {
         const config = unitConfig || (this.config && this.config.unitTypes ? this.config.unitTypes[type] : null) || {};
+        if (config.symbolLabel) return config.symbolLabel;
         const kind = this.getUnitSymbolKind(type, config);
         const labels = {
             infantry: 'ПХ',
@@ -2585,12 +3736,14 @@ class AdmiralGame {
             new THREE.MeshBasicMaterial({
                 map: this.createUnitSymbolTexture(type, player, unitConfig),
                 transparent: false,
-                side: THREE.DoubleSide
+                side: THREE.DoubleSide,
+                depthTest: false,
+                depthWrite: false
             })
         );
         symbol.rotation.x = -Math.PI / 2;
-        symbol.position.y = 0.05;
-        symbol.renderOrder = 8;
+        symbol.position.y = 0.09;
+        symbol.renderOrder = 30;
         symbol.userData.isNatoSymbol = true;
         group.add(symbol);
 
@@ -2634,7 +3787,7 @@ class AdmiralGame {
         const unitConfig = this.config.unitTypes[type];
         const unit = new THREE.Group();
 
-        unit.position.set(this.toWorldCoord(x), this.getSurfaceYAtCell(x, z), this.toWorldCoord(z));
+        unit.position.set(this.toWorldCoord(x), this.getUnitYAtCell(x, z), this.toWorldCoord(z));
         unit.userData = {
             isUnitRoot: true,
             type,
@@ -2668,7 +3821,7 @@ class AdmiralGame {
             startY: unit.position.y,
             startZ: unit.position.z,
             endX: this.toWorldCoord(targetX),
-            endY: this.getSurfaceYAtCell(targetX, targetZ),
+            endY: this.getUnitYAtCell(targetX, targetZ),
             endZ: this.toWorldCoord(targetZ),
             startTime: performance.now(),
             duration: 350
@@ -2682,7 +3835,24 @@ class AdmiralGame {
 
     endTurn() {
         if (this.phase === 'order') {
+            const role = this.sessionOrder.ui.activeRole;
+            if (role === 1 || role === 2) {
+                this.sessionOrder.readinessByRole[role] = true;
+                this.addLog(`Сторона ${role} позначила бойовий наказ як готовий.`, 'place-log');
+                this.updateUI();
+                return;
+            }
+
+            if (!(this.sessionOrder.readinessByRole[1] && this.sessionOrder.readinessByRole[2])) {
+                this.addLog('Інструктор може стартувати гру після готовності сторони 1 і сторони 2.', 'combat-log');
+                this.updateUI();
+                return;
+            }
+
+            this.sessionOrder.readinessByRole.instructor = true;
             this.currentPlayer = 1;
+            this.sessionViewRole = 1;
+            this.addLog('Інструктор стартує гру. Починається розміщення сторони 1.', 'place-log');
             this.startPlacement();
             return;
         }
@@ -2693,12 +3863,14 @@ class AdmiralGame {
 
             if (this.currentPlayer === 1) {
                 this.currentPlayer = 2;
+                this.sessionViewRole = 2;
                 this.phase = 'placement';
                 this.placementPhase[2] = true;
                 this.addLog('Player 2 starts placement from the approved battle order.', 'place-log');
             } else {
                 this.phase = 'battle';
                 this.currentPlayer = 1;
+                this.sessionViewRole = 1;
                 this.units.forEach((unit) => {
                     unit.userData.moved = false;
                 });
@@ -2714,6 +3886,7 @@ class AdmiralGame {
             this.addLog(`Player ${finishedPlayer} finished the turn.`, 'move-log');
             if (finishedPlayer === 1) {
                 this.currentPlayer = 2;
+                this.sessionViewRole = 2;
                 this.units
                     .filter((unit) => unit.userData.player === 2)
                     .forEach((unit) => {
@@ -2722,6 +3895,7 @@ class AdmiralGame {
             } else {
                 this.turnNumber += 1;
                 this.currentPlayer = 1;
+                this.sessionViewRole = 1;
                 this.startBattleAnimations();
             }
             this.updateUI();
@@ -2780,28 +3954,30 @@ class AdmiralGame {
             return { kind: 'unit', object: this.getUnitRoot(unitHits[0].object) };
         }
 
-        const point = new THREE.Vector3();
-        if (this.raycaster.ray.intersectPlane(this.mapPlane, point)) {
-            const coords = this.worldPointToCell(point);
-            if (coords) {
-                return {
-                    kind: 'cell',
-                    object: {
-                        userData: {
-                            type: 'cell',
-                            x: coords.x,
-                            z: coords.z
-                        }
-                    }
-                };
-            }
-        }
-
         if (this.groundMesh) {
             const groundHits = this.raycaster.intersectObject(this.groundMesh, false);
             if (groundHits.length > 0) {
                 const coords = this.worldPointToCell(groundHits[0].point);
-                if (!coords) return null;
+                if (coords) {
+                    return {
+                        kind: 'cell',
+                        object: {
+                            userData: {
+                                type: 'cell',
+                                x: coords.x,
+                                z: coords.z
+                            }
+                        }
+                    };
+                }
+                return null;
+            }
+        }
+
+        const point = new THREE.Vector3();
+        if (this.raycaster.ray.intersectPlane(this.mapPlane, point)) {
+            const coords = this.worldPointToCell(point);
+            if (coords) {
                 return {
                     kind: 'cell',
                     object: {
@@ -2820,8 +3996,9 @@ class AdmiralGame {
 
     worldPointToCell(point) {
         const half = (this.gridSize * this.cellSize) / 2;
-        const x = Math.floor((point.x + half) / this.cellSize);
-        const z = Math.floor((point.z + half) / this.cellSize);
+        const epsilon = 1e-6;
+        const x = Math.floor((point.x + half + epsilon) / this.cellSize);
+        const z = Math.floor((point.z + half + epsilon) / this.cellSize);
         if (x < 0 || z < 0 || x >= this.gridSize || z >= this.gridSize) {
             return null;
         }
@@ -2862,6 +4039,7 @@ class AdmiralGame {
     selectUnit(unit) {
         this.selectedUnit = unit;
         this.selectedCell = null;
+        this.showUnitInfo(unit);
         this.showMovementHighlights(unit);
         this.addLog(`Вибрано: ${this.config.unitTypes[unit.userData.type].name}`, 'move-log');
     }
@@ -2910,6 +4088,56 @@ class AdmiralGame {
         return mesh;
     }
 
+    addMapTextLabel(x, z, text, color, yOffset = 0.75) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 96;
+        const ctx = canvas.getContext('2d');
+        const cssColor = `#${new THREE.Color(color).getHexString()}`;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(10, 24, 30, 0.82)';
+        ctx.strokeStyle = cssColor;
+        ctx.lineWidth = 5;
+        this.roundRect(ctx, 10, 16, 236, 64, 12);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#f7fbff';
+        ctx.font = 'bold 28px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, 128, 49);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.needsUpdate = true;
+        const material = new THREE.SpriteMaterial({
+            map: texture,
+            transparent: true,
+            depthWrite: false,
+            depthTest: false
+        });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(2.6, 0.95, 1);
+        sprite.position.set(this.toWorldCoord(x), this.getSurfaceYAtCell(x, z) + yOffset, this.toWorldCoord(z));
+        sprite.renderOrder = 20;
+        this.scene.add(sprite);
+        return sprite;
+    }
+
+    roundRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+    }
+
     onMouseMove(event) {
         this.updateMouseFromEvent(event);
 
@@ -2951,6 +4179,12 @@ class AdmiralGame {
     handleUnitClick(unit) {
         if (this.phase === 'placement') {
             this.addLog('Під час розміщення потрібно клікати по клітинці.', 'combat-log');
+            return;
+        }
+
+        if (this.sessionViewRole === 'instructor') {
+            this.showUnitInfo(unit);
+            this.addLog(`Інструктор переглядає: ${this.config.unitTypes[unit.userData.type].name}`, 'move-log');
             return;
         }
 
@@ -3030,6 +4264,7 @@ class AdmiralGame {
         if (this.battleAnimations.length === 0) {
             this.isAnimatingBattles = false;
             this.currentPlayer = 1;
+            this.sessionViewRole = 1;
             this.units.forEach((unit) => {
                 unit.userData.moved = false;
             });
@@ -3167,4 +4402,5 @@ class AdmiralGame {
 let game;
 window.addEventListener('DOMContentLoaded', () => {
     game = new AdmiralGame();
+    window.game = game;
 });
